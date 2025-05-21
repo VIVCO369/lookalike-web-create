@@ -1,14 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
-  LayoutDashboard, 
-  Calendar, 
-  BookOpen, 
-  Users,
-  BarChart3,
-  Settings,
-  Bell,
-  UserCircle,
   Plus,
   Clock,
   ChevronRight
@@ -17,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/components/ui/use-toast";
 import Sidebar from "../components/Sidebar";
 import StatsCard from "../components/StatsCard";
 import TradingRules from "../components/TradingRules";
@@ -25,9 +18,79 @@ import { Link } from "react-router-dom";
 
 const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [balance, setBalance] = useState(10.00);
+  const [isSettingBalance, setIsSettingBalance] = useState(false);
+  const [isAddingProfit, setIsAddingProfit] = useState(false);
+  const [newBalance, setNewBalance] = useState("");
+  const [newProfit, setNewProfit] = useState("");
+  const { toast } = useToast();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+  
+  // Update the current date and time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+    
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+  
+  const formatDate = (date) => {
+    const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+  };
+  
+  const formatTime = (date) => {
+    const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+    return date.toLocaleTimeString('en-US', options);
+  };
+  
+  const handleSetBalance = () => {
+    const parsedBalance = parseFloat(newBalance);
+    if (isNaN(parsedBalance)) {
+      toast({
+        title: "Invalid amount",
+        description: "Please enter a valid number",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setBalance(parsedBalance);
+    setIsSettingBalance(false);
+    setNewBalance("");
+    
+    toast({
+      title: "Balance updated",
+      description: `Your balance has been set to $${parsedBalance.toFixed(2)}`,
+    });
+  };
+  
+  const handleAddProfit = () => {
+    const parsedProfit = parseFloat(newProfit);
+    if (isNaN(parsedProfit)) {
+      toast({
+        title: "Invalid amount",
+        description: "Please enter a valid number",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setBalance(prev => prev + parsedProfit);
+    setIsAddingProfit(false);
+    setNewProfit("");
+    
+    toast({
+      title: "Profit added",
+      description: `$${parsedProfit.toFixed(2)} has been added to your balance`,
+    });
   };
 
   return (
@@ -38,12 +101,16 @@ const Index = () => {
         {/* Header */}
         <header className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10">
           <div>
-            <p className="text-gray-600 text-sm">Wednesday, May 21, 2025</p>
-            <p className="text-gray-500 text-xs">04:51:25 PM</p>
+            <p className="text-gray-600 text-sm">{formatDate(currentDateTime)}</p>
+            <p className="text-gray-500 text-xs">{formatTime(currentDateTime)}</p>
           </div>
           <div className="flex items-center space-x-4">
-            <Bell className="h-5 w-5 text-gray-500" />
-            <UserCircle className="h-6 w-6 text-gray-500" />
+            <Button variant="ghost" className="rounded-full p-2">
+              <Clock className="h-5 w-5 text-gray-500" />
+            </Button>
+            <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+              <span className="text-sm font-medium">VS</span>
+            </div>
           </div>
         </header>
 
@@ -53,19 +120,80 @@ const Index = () => {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-medium text-gray-700">Your Highlights</h2>
               <div className="flex gap-2">
-                <Button variant="outline" className="bg-blue-500 hover:bg-blue-600 text-white">
-                  <Plus className="h-4 w-4 mr-1" /> Set Balance
-                </Button>
-                <Button variant="outline" className="bg-green-500 hover:bg-green-600 text-white">
-                  <Plus className="h-4 w-4 mr-1" /> Add Profit
-                </Button>
+                {isSettingBalance ? (
+                  <div className="flex gap-2 items-center">
+                    <input 
+                      type="number" 
+                      value={newBalance}
+                      onChange={(e) => setNewBalance(e.target.value)}
+                      placeholder="Enter new balance" 
+                      className="border p-1 rounded text-sm" 
+                    />
+                    <Button 
+                      size="sm" 
+                      onClick={handleSetBalance}
+                      className="bg-blue-500 hover:bg-blue-600 text-white"
+                    >
+                      Set
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setIsSettingBalance(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    className="bg-blue-500 hover:bg-blue-600 text-white"
+                    onClick={() => setIsSettingBalance(true)}
+                  >
+                    <Plus className="h-4 w-4 mr-1" /> Set Balance
+                  </Button>
+                )}
+                
+                {isAddingProfit ? (
+                  <div className="flex gap-2 items-center">
+                    <input 
+                      type="number" 
+                      value={newProfit}
+                      onChange={(e) => setNewProfit(e.target.value)}
+                      placeholder="Enter profit amount" 
+                      className="border p-1 rounded text-sm" 
+                    />
+                    <Button 
+                      size="sm" 
+                      onClick={handleAddProfit}
+                      className="bg-green-500 hover:bg-green-600 text-white"
+                    >
+                      Add
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setIsAddingProfit(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    className="bg-green-500 hover:bg-green-600 text-white"
+                    onClick={() => setIsAddingProfit(true)}
+                  >
+                    <Plus className="h-4 w-4 mr-1" /> Add Profit
+                  </Button>
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               <StatsCard 
                 title="Balance" 
-                value="$10.00" 
+                value={`$${balance.toFixed(2)}`} 
                 color="text-green-500" 
                 borderColor="border-green-500" 
               />
@@ -136,7 +264,7 @@ const Index = () => {
                   View all <ChevronRight className="h-4 w-4" />
                 </Link>
               </div>
-              <TradingRules />
+              <TradingRules hideAddButton={true} />
             </div>
             <div className="md:col-span-1">
               <Card>
@@ -144,9 +272,9 @@ const Index = () => {
                   <h3 className="text-lg font-medium text-center mb-6">Signal Progress</h3>
                   <div className="flex justify-center mb-4">
                     <div className="relative h-32 w-32">
-                      <Progress value={0} className="h-full w-full rounded-full" />
+                      <Progress value={50} className="h-full w-full rounded-full" />
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-2xl font-bold">0%</span>
+                        <span className="text-2xl font-bold">50%</span>
                       </div>
                     </div>
                   </div>
@@ -164,7 +292,7 @@ const Index = () => {
                   View all <ChevronRight className="h-4 w-4" />
                 </Link>
               </div>
-              <ScheduleList />
+              <ScheduleList hideAddButton={true} />
               <div className="mt-4 flex justify-end">
                 <Link to="/trades">
                   <Button className="bg-teal-600 hover:bg-teal-700 text-white">

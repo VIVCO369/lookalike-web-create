@@ -14,6 +14,10 @@ interface ScheduleItem {
   color: string;
 }
 
+interface ScheduleListProps {
+  hideAddButton?: boolean;
+}
+
 const colorOptions = [
   { label: "Yellow", value: "yellow", bgColor: "bg-yellow-100 border-l-4 border-yellow-400" },
   { label: "Blue", value: "blue", bgColor: "bg-blue-50 border-l-4 border-blue-400" },
@@ -21,7 +25,7 @@ const colorOptions = [
   { label: "Purple", value: "purple", bgColor: "bg-purple-50 border-l-4 border-purple-400" }
 ];
 
-const ScheduleList = () => {
+const ScheduleList = ({ hideAddButton = false }: ScheduleListProps) => {
   const [addingSchedule, setAddingSchedule] = useState(false);
   const [newTime, setNewTime] = useState("");
   const [newTitle, setNewTitle] = useState("");
@@ -102,9 +106,11 @@ const ScheduleList = () => {
             <Calendar className="h-5 w-5 text-gray-600" />
             <h3 className="text-lg font-medium">Today's Schedule</h3>
           </div>
-          <Button className="bg-green-500 hover:bg-green-600" onClick={() => setAddingSchedule(true)}>
-            <Plus className="h-4 w-4 mr-1" /> Add Schedule
-          </Button>
+          {!hideAddButton && (
+            <Button className="bg-green-500 hover:bg-green-600" onClick={() => setAddingSchedule(true)}>
+              <Plus className="h-4 w-4 mr-1" /> Add Schedule
+            </Button>
+          )}
         </div>
 
         {addingSchedule && (

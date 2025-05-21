@@ -47,6 +47,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
         isOpen ? "w-64" : "w-20",
         mounted ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}
+      style={{ minHeight: "100vh", height: "auto" }}
     >
       <div className="flex items-center justify-between p-4 border-b border-teal-800 bg-teal-800">
         {isOpen ? (
@@ -79,7 +80,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
           </Link>
         ))}
       </nav>
-      <div className="p-4 border-t border-teal-800 text-center text-xs text-teal-300">
+      <div className="p-4 border-t border-teal-800 text-center text-xs text-teal-300 mt-auto">
         {isOpen ? (
           <div>
             <p>10 / 10 Trades Used</p>

@@ -21,7 +21,11 @@ interface Rule {
   completed?: boolean;
 }
 
-const TradingRules = () => {
+interface TradingRulesProps {
+  hideAddButton?: boolean;
+}
+
+const TradingRules = ({ hideAddButton = false }: TradingRulesProps) => {
   const [addingRule, setAddingRule] = useState(false);
   const [newRuleName, setNewRuleName] = useState("");
   const [selectedStrategy, setSelectedStrategy] = useState("");
@@ -34,6 +38,8 @@ const TradingRules = () => {
     { id: "A1", name: "Rule A1", strategy: "Strategy A" },
     { id: "A2", name: "Rule A2", strategy: "Strategy A" },
     { id: "A3", name: "Rule A3", strategy: "Strategy A", completed: true },
+    { id: "B1", name: "Rule B1", strategy: "Strategy B" },
+    { id: "B2", name: "Rule B2", strategy: "Strategy B" },
   ]);
 
   const strategies = ["General Rules", "Strategy A", "Strategy B", "Strategy C"];
@@ -115,9 +121,11 @@ const TradingRules = () => {
             <BookOpen className="h-5 w-5 text-gray-600" />
             <h3 className="text-lg font-medium">Trading Rules</h3>
           </div>
-          <Button className="bg-green-500 hover:bg-green-600" onClick={() => setAddingRule(true)}>
-            <Plus className="h-4 w-4 mr-1" /> Add Strategy
-          </Button>
+          {!hideAddButton && (
+            <Button className="bg-green-500 hover:bg-green-600" onClick={() => setAddingRule(true)}>
+              <Plus className="h-4 w-4 mr-1" /> Add Strategy
+            </Button>
+          )}
         </div>
 
         {addingRule && (
