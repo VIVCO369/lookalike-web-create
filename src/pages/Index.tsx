@@ -10,7 +10,8 @@ import {
   Bell,
   UserCircle,
   Plus,
-  Clock
+  Clock,
+  ChevronRight
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import Sidebar from "../components/Sidebar";
 import StatsCard from "../components/StatsCard";
 import TradingRules from "../components/TradingRules";
 import ScheduleList from "../components/ScheduleList";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -128,6 +130,12 @@ const Index = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-1">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium">Trading Rules</h3>
+                <Link to="/trading-rules" className="text-blue-500 text-sm flex items-center hover:underline">
+                  View all <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
               <TradingRules />
             </div>
             <div className="md:col-span-1">
@@ -150,7 +158,20 @@ const Index = () => {
               </Card>
             </div>
             <div className="md:col-span-1">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium">Today's Schedule</h3>
+                <Link to="/schedule" className="text-blue-500 text-sm flex items-center hover:underline">
+                  View all <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
               <ScheduleList />
+              <div className="mt-4 flex justify-end">
+                <Link to="/trades">
+                  <Button className="bg-teal-600 hover:bg-teal-700 text-white">
+                    View Trades <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </main>
