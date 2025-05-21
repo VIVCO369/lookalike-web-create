@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Link, useLocation } from "react-router-dom";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -17,13 +18,16 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
+  const location = useLocation();
+  const currentPath = location.pathname;
+
   const navItems = [
-    { icon: LayoutDashboard, label: "Dashboard", active: true },
-    { icon: Calendar, label: "Schedule", active: false },
-    { icon: BookOpen, label: "Trade Rules", active: false },
-    { icon: Users, label: "Users", active: false },
-    { icon: BarChart3, label: "Analytics", active: false },
-    { icon: Settings, label: "Settings", active: false },
+    { icon: LayoutDashboard, label: "Dashboard", path: "/" },
+    { icon: Calendar, label: "Schedule", path: "/schedule" },
+    { icon: BookOpen, label: "Trade Rules", path: "/trading-rules" },
+    { icon: Users, label: "Users", path: "/users" },
+    { icon: BarChart3, label: "Analytics", path: "/analytics" },
+    { icon: Settings, label: "Settings", path: "/settings" },
   ];
 
   return (
@@ -46,17 +50,17 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
       </div>
       <nav className="flex-1 pt-6">
         {navItems.map((item, index) => (
-          <a
+          <Link
             key={index}
-            href="#"
+            to={item.path}
             className={cn(
               "flex items-center px-4 py-3 text-gray-200 hover:bg-teal-800 transition-colors",
-              item.active && "bg-teal-800"
+              currentPath === item.path && "bg-teal-800"
             )}
           >
             <item.icon className="h-5 w-5" />
             {isOpen && <span className="ml-4">{item.label}</span>}
-          </a>
+          </Link>
         ))}
       </nav>
     </div>
