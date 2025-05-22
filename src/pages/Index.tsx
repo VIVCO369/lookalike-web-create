@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import {
   Plus,
@@ -112,7 +111,7 @@ const Index = () => {
         {/* Header */}
         <header className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10">
           <div>
-            <p className="text-green-500 text-sm font-medium">{formatDate(currentDateTime)}</p>
+            <p className="text-black text-sm font-bold">{formatDate(currentDateTime)}</p>
             <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
           <div className="flex items-center space-x-4">
@@ -301,21 +300,21 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Detailed Data Section - Styled like the Trades page */}
+          {/* Detailed Data Section - Updated to match the image */}
           <div className="mt-8">
             <h2 className="text-xl font-medium text-gray-700 mb-4">Detailed Data</h2>
 
             <div className="flex mb-4 gap-2">
-              <Button variant="outline" size="sm" className="bg-red-500 text-white hover:bg-red-600">1M</Button>
+              <Button variant="outline" size="sm" className="bg-green-500 text-white hover:bg-green-600">1M</Button>
               <Button variant="outline" size="sm" className="bg-red-500 text-white hover:bg-red-600">5M</Button>
-              <Button variant="outline" size="sm" className="bg-red-500 text-white hover:bg-red-600">15M</Button>
-              <Button variant="outline" size="sm" className="bg-red-500 text-white hover:bg-red-600">1H</Button>
-              <Button variant="outline" size="sm" className="bg-red-500 text-white hover:bg-red-600">4H</Button>
-              <Button variant="outline" size="sm" className="bg-red-500 text-white hover:bg-red-600">1D</Button>
+              <Button variant="outline" size="sm" className="bg-green-500 text-white hover:bg-green-600">15M</Button>
+              <Button variant="outline" size="sm" className="bg-green-500 text-white hover:bg-green-600">1H</Button>
+              <Button variant="outline" size="sm" className="bg-green-500 text-white hover:bg-green-600">4H</Button>
+              <Button variant="outline" size="sm" className="bg-green-500 text-white hover:bg-green-600">1D</Button>
             </div>
 
             <div className="mb-4">
-              <p className="text-red-500">Trend: Down Trend</p>
+              <p className="text-green-500">Trend: Up Trend</p>
             </div>
 
             <div className="flex items-center gap-2 mb-4">
@@ -325,7 +324,7 @@ const Index = () => {
               </span>
             </div>
 
-            {/* Trades Table */}
+            {/* Trades Table - Updated to match the image */}
             <div className="bg-white rounded-md shadow overflow-x-auto">
               <Table>
                 <TableHeader>

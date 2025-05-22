@@ -1,3 +1,4 @@
+
 import {
   LayoutDashboard,
   Calendar,
@@ -33,7 +34,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     { icon: LayoutDashboard, label: "Dashboard", path: "/" },
     { icon: Calendar, label: "Schedule", path: "/schedule" },
     { icon: BookOpen, label: "Trade Rules", path: "/trading-rules" },
-    { icon: BarChart3, label: "Trades", path: "/trades" },
+    { icon: BarChart3, label: "Trade Demo", path: "/trades" },
     { icon: Users, label: "Users", path: "/users" },
     { icon: BarChart3, label: "Analytics", path: "/analytics" },
     { icon: Settings, label: "Settings", path: "/settings" },
