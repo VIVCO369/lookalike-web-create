@@ -1,4 +1,3 @@
-
 import {
   LayoutDashboard,
   Calendar,
@@ -43,7 +42,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   return (
     <div
       className={cn(
-        "bg-teal-900 text-white h-full flex flex-col transition-all duration-300 ease-in-out fixed lg:relative z-20 shadow-lg",
+        "bg-teal-900 text-white h-full flex flex-col transition-all duration-300 ease-in-out fixed z-20 shadow-lg", // Removed lg:relative
         isOpen ? "w-64" : "w-20",
         mounted ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}
@@ -55,10 +54,10 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
         ) : (
           <h1 className="font-medium text-lg">VTS</h1>
         )}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={toggleSidebar} 
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleSidebar}
           className="text-white hover:bg-teal-700 transition-colors"
         >
           {isOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}

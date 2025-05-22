@@ -1,9 +1,9 @@
-
 import { LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Sidebar from "../components/Sidebar";
 import TradingRules from "../components/TradingRules";
 import { useState } from "react";
+import { cn } from "@/lib/utils"; // Import cn utility
 
 const TradingRulesPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -15,8 +15,8 @@ const TradingRulesPage = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-      
-      <div className="flex-1 flex flex-col">
+
+      <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}> {/* Added dynamic padding */}
         {/* Header */}
         <header className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10">
           <div className="flex items-center gap-2">
@@ -25,7 +25,7 @@ const TradingRulesPage = () => {
           </div>
           <div>
             <p className="text-gray-600 text-sm">Wednesday, May 21, 2025</p>
-            <p className="text-gray-500 text-xs">04:51:25 PM</p>
+            <p className="text-500 text-xs">04:51:25 PM</p>
           </div>
         </header>
 

@@ -1,4 +1,3 @@
-
 import { Eye, Trash2, Edit, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Sidebar from "../components/Sidebar";
@@ -8,6 +7,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils"; // Import cn utility
 
 const TradesPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -33,8 +33,8 @@ const TradesPage = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-      
-      <div className="flex-1 flex flex-col">
+
+      <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}> {/* Added dynamic padding */}
         {/* Header */}
         <header className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10">
           <div>

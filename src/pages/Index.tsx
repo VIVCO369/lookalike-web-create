@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { 
+import {
   Plus,
   Clock,
 } from "lucide-react";
@@ -13,6 +12,7 @@ import StatsCard from "../components/StatsCard";
 import TradingRules from "../components/TradingRules";
 import ScheduleList from "../components/ScheduleList";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils"; // Import cn utility
 
 const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -36,28 +36,28 @@ const Index = () => {
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
-  
+
   // Update the current date and time every second
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentDateTime(new Date());
     }, 1000);
-    
+
     return () => {
       clearInterval(timer);
     };
   }, []);
-  
+
   const formatDate = (date) => {
     const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
     return date.toLocaleDateString('en-US', options);
   };
-  
+
   const formatTime = (date) => {
     const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
     return date.toLocaleTimeString('en-US', options);
   };
-  
+
   const handleSetBalance = () => {
     const parsedBalance = parseFloat(newBalance);
     if (isNaN(parsedBalance)) {
@@ -68,17 +68,17 @@ const Index = () => {
       });
       return;
     }
-    
+
     setBalance(parsedBalance);
     setIsSettingBalance(false);
     setNewBalance("");
-    
+
     toast({
       title: "Balance updated",
       description: `Your balance has been set to $${parsedBalance.toFixed(2)}`,
     });
   };
-  
+
   const handleAddProfit = () => {
     const parsedProfit = parseFloat(newProfit);
     if (isNaN(parsedProfit)) {
@@ -89,11 +89,11 @@ const Index = () => {
       });
       return;
     }
-    
+
     setBalance(prev => prev + parsedProfit);
     setIsAddingProfit(false);
     setNewProfit("");
-    
+
     toast({
       title: "Profit added",
       description: `$${parsedProfit.toFixed(2)} has been added to your balance`,
@@ -103,8 +103,8 @@ const Index = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-      
-      <div className="flex-1 flex flex-col">
+
+      <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}> {/* Added dynamic padding */}
         {/* Header */}
         <header className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10">
           <div>
@@ -129,22 +129,22 @@ const Index = () => {
               <div className="flex gap-2">
                 {isSettingBalance ? (
                   <div className="flex gap-2 items-center">
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={newBalance}
                       onChange={(e) => setNewBalance(e.target.value)}
-                      placeholder="Enter new balance" 
-                      className="border p-1 rounded text-sm" 
+                      placeholder="Enter new balance"
+                      className="border p-1 rounded text-sm"
                     />
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       onClick={handleSetBalance}
                       className="bg-blue-500 hover:bg-blue-600 text-white"
                     >
                       Set
                     </Button>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       onClick={() => setIsSettingBalance(false)}
                     >
@@ -152,33 +152,33 @@ const Index = () => {
                     </Button>
                   </div>
                 ) : (
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="bg-blue-500 hover:bg-blue-600 text-white"
                     onClick={() => setIsSettingBalance(true)}
                   >
                     <Plus className="h-4 w-4 mr-1" /> Set Balance
                   </Button>
                 )}
-                
+
                 {isAddingProfit ? (
                   <div className="flex gap-2 items-center">
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={newProfit}
                       onChange={(e) => setNewProfit(e.target.value)}
-                      placeholder="Enter profit amount" 
-                      className="border p-1 rounded text-sm" 
+                      placeholder="Enter profit amount"
+                      className="border p-1 rounded text-sm"
                     />
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       onClick={handleAddProfit}
                       className="bg-green-500 hover:bg-green-600 text-white"
                     >
                       Add
                     </Button>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       onClick={() => setIsAddingProfit(false)}
                     >
@@ -186,8 +186,8 @@ const Index = () => {
                     </Button>
                   </div>
                 ) : (
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="bg-green-500 hover:bg-green-600 text-white"
                     onClick={() => setIsAddingProfit(true)}
                   >
@@ -198,66 +198,66 @@ const Index = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              <StatsCard 
-                title="Balance" 
-                value={`$${balance.toFixed(2)}`} 
-                color="text-green-500" 
-                borderColor="border-green-500" 
-              />
-              <StatsCard 
-                title="Net Profit" 
-                value="$-216.84" 
-                color="text-red-500"
-                borderColor="border-red-500" 
-              />
-              <StatsCard 
-                title="Win Rate" 
-                value="0%" 
-                color="text-gray-700"
-                borderColor="border-gray-200" 
-              />
-              <StatsCard 
-                title="Best Trade" 
-                value="+$0" 
+              <StatsCard
+                title="Balance"
+                value={`$${balance.toFixed(2)}`}
                 color="text-green-500"
-                borderColor="border-green-500" 
+                borderColor="border-green-500"
               />
-              <StatsCard 
-                title="Worst Trade" 
-                value="$-23.11" 
+              <StatsCard
+                title="Net Profit"
+                value="$-216.84"
                 color="text-red-500"
-                borderColor="border-red-500" 
+                borderColor="border-red-500"
+              />
+              <StatsCard
+                title="Win Rate"
+                value="0%"
+                color="text-gray-700"
+                borderColor="border-gray-200"
+              />
+              <StatsCard
+                title="Best Trade"
+                value="+$0"
+                color="text-green-500"
+                borderColor="border-green-500"
+              />
+              <StatsCard
+                title="Worst Trade"
+                value="$-23.11"
+                color="text-red-500"
+                borderColor="border-red-500"
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-              <StatsCard 
-                title="Total Trades" 
-                value="10" 
+              <StatsCard
+                title="Total Trades"
+                value="10"
                 labelPosition="below"
-                borderColor="border-gray-200" 
+                borderColor="border-gray-200"
               />
-              <StatsCard 
-                title="Avg. Duration" 
-                value="13h 09m 09s" 
+              <StatsCard
+                title="Avg. Duration"
+                value="13h 09m 09s"
                 labelPosition="below"
-                borderColor="border-gray-200" 
+                borderColor="border-gray-200"
               />
-              <StatsCard 
-                title="Profit Factor" 
-                value="0.00" 
+              <StatsCard
+                title="Profit Factor"
+                value="0.00"
                 labelPosition="below"
-                borderColor="border-gray-200" 
+                borderColor="border-gray-200"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
               <div className="lg:col-start-3">
-                <StatsCard 
-                  title="Daily Profit" 
-                  value="+$0.00" 
+                <StatsCard
+                  title="Daily Profit"
+                  value="+$0.00"
                   color="text-green-500"
                   labelPosition="below"
-                  borderColor="border-gray-200" 
+                  borderColor="border-gray-200"
                 />
               </div>
             </div>
@@ -296,11 +296,11 @@ const Index = () => {
               <ScheduleList hideAddButton={true} />
             </div>
           </div>
-          
+
           {/* Detailed Data Section */}
           <div className="mt-8">
             <h2 className="text-xl font-medium text-gray-700 mb-4">Detailed Data</h2>
-            
+
             <div className="flex mb-4 gap-2">
               <Button variant="outline" size="sm" className="bg-red-500 text-white hover:bg-red-600">1M</Button>
               <Button variant="outline" size="sm" className="bg-red-500 text-white hover:bg-red-600">5M</Button>
@@ -309,11 +309,11 @@ const Index = () => {
               <Button variant="outline" size="sm" className="bg-red-500 text-white hover:bg-red-600">4H</Button>
               <Button variant="outline" size="sm" className="bg-red-500 text-white hover:bg-red-600">1D</Button>
             </div>
-            
+
             <div className="mb-4">
               <p className="text-red-500">Trend: Down Trend</p>
             </div>
-            
+
             <div className="flex items-center gap-2 mb-4">
               <span className="text-green-500 flex items-center gap-1">
                 <span className="h-2 w-2 rounded-full bg-green-500"></span>
