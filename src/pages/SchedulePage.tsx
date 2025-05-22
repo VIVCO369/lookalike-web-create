@@ -24,8 +24,8 @@ const SchedulePage = () => {
             <h1 className="text-xl font-medium text-gray-700">Today's Schedule</h1>
           </div>
           <div>
-            <p className="text-gray-600 text-sm">Wednesday, May 21, 2025</p>
-            <p className="text-gray-500 text-xs">04:51:25 PM</p>
+            <p className="text-black text-sm">Wednesday, May 21, 2025</p>
+            <p className="text-green-500 text-xs font-bold">04:51:25 PM</p>
           </div>
         </header>
 

@@ -108,8 +108,8 @@ const Index = () => {
         {/* Header */}
         <header className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10">
           <div>
-            <p className="text-green-500 text-sm font-medium">{formatDate(currentDateTime)}</p>
-            <p className="text-green-500 text-xs font-medium">{formatTime(currentDateTime)}</p>
+            <p className="text-black text-sm font-medium">{formatDate(currentDateTime)}</p>
+            <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
           <div className="flex items-center space-x-4">
             <Button variant="ghost" className="rounded-full p-2">
