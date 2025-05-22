@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, Clock, Eye, Edit, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,6 +21,9 @@ const Index = () => {
   const [newBalance, setNewBalance] = useState("");
   const [newProfit, setNewProfit] = useState("");
   const { toast } = useToast();
+
+  const [selectedTimeframes, setSelectedTimeframes] = useState<string[]>(["1M", "15M", "1H", "4H", "1D"]);
+  const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
 
   // Sample trade data
   const trades = [
@@ -96,6 +98,18 @@ const Index = () => {
     });
   };
 
+  const toggleTimeframe = (timeframe: string) => {
+    if (selectedTimeframes.includes(timeframe)) {
+      setSelectedTimeframes(selectedTimeframes.filter(t => t !== timeframe));
+    } else {
+      setSelectedTimeframes([...selectedTimeframes, timeframe]);
+    }
+  };
+
+  const trend = selectedTimeframes.length >= 3 ? "Up Trend" : "Down Trend";
+  const trendColor = selectedTimeframes.length >= 3 ? "text-green-500" : "text-red-500";
+
+
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: "#F8F5F0" }}>
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
@@ -107,12 +121,26 @@ const Index = () => {
             <p className="text-black text-sm font-bold">{formatDate(currentDateTime)}</p>
             <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" className="rounded-full p-2">
-              <Clock className="h-5 w-5 text-gray-500" />
-            </Button>
-            <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-              <span className="text-sm font-medium">VS</span>
+          <div className="flex items-center gap-4"> {/* Adjusted gap */}
+            <div>
+              <p className={trendColor}>Trend: {trend}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              {timeframes.map((timeframe) => (
+                <Button
+                  key={timeframe}
+                  variant="outline"
+                  size="sm"
+                  className={`${
+                    selectedTimeframes.includes(timeframe) ? "bg-green-500" : "bg-red-500"
+                  } text-white hover:${
+                    selectedTimeframes.includes(timeframe) ? "bg-green-600" : "bg-red-600"
+                  }`}
+                  onClick={() => toggleTimeframe(timeframe)}
+                >
+                  {timeframe}
+                </Button>
+              ))}
             </div>
           </div>
         </header>
@@ -261,9 +289,7 @@ const Index = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-1">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium">Trading Rules</h3>
-              </div>
+              {/* Removed duplicate headline */}
               <TradingRules hideAddButton={true} />
             </div>
             <div className="md:col-span-1">
@@ -286,9 +312,7 @@ const Index = () => {
               </Card>
             </div>
             <div className="md:col-span-1">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium">Today's Schedule</h3>
-              </div>
+              {/* Removed duplicate headline */}
               <ScheduleList hideAddButton={true} />
             </div>
           </div>
@@ -298,6 +322,7 @@ const Index = () => {
 
           {/* Trades Table - Updated to match the image */}
           <div className="bg-white rounded-md shadow overflow-x-auto mt-4">
+            {/* Removed the h2 headline from here */}
             <Table>
               <TableHeader>
                 <TableRow>

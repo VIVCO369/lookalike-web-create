@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -8,25 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface DetailedDataProps {
   showAddTrade?: boolean;
-  initialSelectedTimeframes?: string[];
 }
 
-const DetailedData = ({ showAddTrade = false, initialSelectedTimeframes = ["1M", "15M", "1H", "4H", "1D"] }: DetailedDataProps) => {
-  const [selectedTimeframes, setSelectedTimeframes] = useState<string[]>(initialSelectedTimeframes);
+const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
   const [showTradeForm, setShowTradeForm] = useState(false);
-
-  const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
-
-  const toggleTimeframe = (timeframe: string) => {
-    if (selectedTimeframes.includes(timeframe)) {
-      setSelectedTimeframes(selectedTimeframes.filter(t => t !== timeframe));
-    } else {
-      setSelectedTimeframes([...selectedTimeframes, timeframe]);
-    }
-  };
-
-  const trend = selectedTimeframes.length >= 3 ? "Up Trend" : "Down Trend";
-  const trendColor = selectedTimeframes.length >= 3 ? "text-green-500" : "text-red-500";
 
   const toggleTradeForm = () => {
     setShowTradeForm(!showTradeForm);
@@ -34,37 +18,14 @@ const DetailedData = ({ showAddTrade = false, initialSelectedTimeframes = ["1M",
 
   return (
     <div className="mt-8">
-      <h2 className="text-xl font-medium text-gray-700 mb-4">Detailed Data</h2>
-
-      <div className="flex mb-4 gap-2">
-        {timeframes.map((timeframe) => (
-          <Button
-            key={timeframe}
-            variant="outline"
-            size="sm"
-            className={`${
-              selectedTimeframes.includes(timeframe) ? "bg-green-500" : "bg-red-500"
-            } text-white hover:${
-              selectedTimeframes.includes(timeframe) ? "bg-green-600" : "bg-red-600"
-            }`}
-            onClick={() => toggleTimeframe(timeframe)}
-          >
-            {timeframe}
-          </Button>
-        ))}
-      </div>
-
-      <div className="mb-4">
-        <p className={trendColor}>Trend: {trend}</p>
-      </div>
-
+      {/* Styled this span to match "Your Highlights" */}
       <div className="flex items-center justify-between mb-4">
-        <span className="text-green-500 flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-green-500"></span>
-          Trades
+        <span className="text-xl font-medium text-gray-700 flex items-center gap-1">
+          {/* Removed the green dot span */}
+          Trading Detail
         </span>
         {showAddTrade && (
-          <Button 
+          <Button
             onClick={toggleTradeForm}
             className="bg-green-500 hover:bg-green-600 text-white"
           >

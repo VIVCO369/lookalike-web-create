@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BookOpen, X, Plus, Check, Pencil, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Pagination, 
-  PaginationContent, 
-  PaginationItem, 
-  PaginationLink, 
-  PaginationNext, 
-  PaginationPrevious 
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
 } from "@/components/ui/pagination";
 
 interface Rule {
@@ -27,7 +27,8 @@ interface TradingRulesProps {
 const TradingRules = ({ hideAddButton = false }: TradingRulesProps) => {
   const [addingRule, setAddingRule] = useState(false);
   const [newRuleName, setNewRuleName] = useState("");
-  const [selectedStrategy, setSelectedStrategy] = useState("");
+  // Changed from selectedStrategy to newStrategyName for input field
+  const [newStrategyName, setNewStrategyName] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rules, setRules] = useState<Rule[]>([
     { id: "G1", name: "Morning Meditation", strategy: "General Rules" },
@@ -41,15 +42,23 @@ const TradingRules = ({ hideAddButton = false }: TradingRulesProps) => {
     { id: "B2", name: "Rule B2", strategy: "Strategy B" },
   ]);
 
-  const strategies = ["General Rules", "Strategy A", "Strategy B", "Strategy C"];
+  // Removed the predefined strategies array
+  // const strategies = ["General Rules", "Strategy A", "Strategy B", "Strategy C"];
   const itemsPerPage = 7;
 
   const handleAddRule = () => {
-    if (newRuleName.trim() === "" || selectedStrategy === "") return;
-    
-    const id = `${selectedStrategy.charAt(0)}${rules.filter(r => r.strategy === selectedStrategy).length + 1}`;
-    setRules([...rules, { id, name: newRuleName, strategy: selectedStrategy }]);
+    // Updated validation to check newStrategyName
+    if (newRuleName.trim() === "" || newStrategyName.trim() === "") return;
+
+    // Generate ID based on the entered strategy name
+    const strategyPrefix = newStrategyName.trim().charAt(0).toUpperCase();
+    const countForStrategy = rules.filter(r => r.strategy === newStrategyName.trim()).length;
+    const id = `${strategyPrefix}${countForStrategy + 1}`;
+
+    // Added newStrategyName to the new rule object
+    setRules([...rules, { id, name: newRuleName.trim(), strategy: newStrategyName.trim() }]);
     setNewRuleName("");
+    setNewStrategyName(""); // Clear the new strategy name input
     setAddingRule(false);
   };
 
@@ -59,7 +68,7 @@ const TradingRules = ({ hideAddButton = false }: TradingRulesProps) => {
 
   const handleToggleComplete = (id: string) => {
     setRules(
-      rules.map(rule => 
+      rules.map(rule =>
         rule.id === id ? { ...rule, completed: !rule.completed } : rule
       )
     );
@@ -70,7 +79,7 @@ const TradingRules = ({ hideAddButton = false }: TradingRulesProps) => {
 
   const displayRulesByStrategy = () => {
     const grouped: { [key: string]: Rule[] } = {};
-    
+
     paginatedRules.forEach(rule => {
       const strategy = rule.strategy || "Uncategorized";
       if (!grouped[strategy]) {
@@ -89,7 +98,7 @@ const TradingRules = ({ hideAddButton = false }: TradingRulesProps) => {
                 <span className="text-gray-700">{rule.name}</span>
               </div>
               <div className="flex items-center gap-1">
-                <button 
+                <button
                   className={`text-gray-400 p-1 rounded-full hover:bg-gray-100 ${rule.completed ? 'bg-green-100' : ''}`}
                   onClick={() => handleToggleComplete(rule.id)}
                 >
@@ -98,7 +107,7 @@ const TradingRules = ({ hideAddButton = false }: TradingRulesProps) => {
                 <button className="text-gray-400 p-1 rounded-full hover:bg-gray-100">
                   <Pencil className="h-4 w-4" />
                 </button>
-                <button 
+                <button
                   className="text-gray-400 p-1 rounded-full hover:bg-gray-100"
                   onClick={() => handleRemoveRule(rule.id)}
                 >
@@ -130,10 +139,10 @@ const TradingRules = ({ hideAddButton = false }: TradingRulesProps) => {
         {addingRule && (
           <div className="border rounded-md p-4 mb-6 bg-gray-50">
             <h4 className="font-medium mb-4">Add New Trading Rule</h4>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <p className="text-sm text-gray-500 mb-1">Trading Rules</p>
+                <p className="text-sm text-gray-500 mb-1">Trading Rule Name</p>
                 <Input
                   placeholder="Enter rule name"
                   value={newRuleName}
@@ -141,22 +150,16 @@ const TradingRules = ({ hideAddButton = false }: TradingRulesProps) => {
                 />
               </div>
               <div>
-                <p className="text-sm text-gray-500 mb-1">Trading Strategy</p>
-                <Select onValueChange={setSelectedStrategy} value={selectedStrategy}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select strategy" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {strategies.map(strategy => (
-                      <SelectItem key={strategy} value={strategy}>
-                        {strategy}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <p className="text-sm text-gray-500 mb-1">Trading Strategy Name</p>
+                {/* Replaced Select with Input */}
+                <Input
+                  placeholder="Enter strategy name"
+                  value={newStrategyName}
+                  onChange={(e) => setNewStrategyName(e.target.value)}
+                />
               </div>
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setAddingRule(false)}>
                 Cancel
@@ -178,7 +181,7 @@ const TradingRules = ({ hideAddButton = false }: TradingRulesProps) => {
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious 
+                  <PaginationPrevious
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                     className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
                   />
@@ -189,9 +192,9 @@ const TradingRules = ({ hideAddButton = false }: TradingRulesProps) => {
                   </PaginationLink>
                 </PaginationItem>
                 <PaginationItem>
-                  <PaginationNext 
+                  <PaginationNext
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                    className={totalPages === 0 || currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
                   />
                 </PaginationItem>
               </PaginationContent>
