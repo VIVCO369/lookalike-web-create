@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, ReactNode, useMemo } from 'react';
+import React, { createContext, useContext, ReactNode, useMemo, useState } from 'react';
 import useLocalStorage from '@/hooks/useLocalStorage';
 
 // Define the trade data structure
@@ -34,6 +34,12 @@ interface TradeDataContextType {
   setDailyTarget: (target: number | ((prevTarget: number) => number)) => void;
   addTrade: (trade: TradeFormData) => void;
   stats: CalculatedStats;
+  // Add pagination related states and functions
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  itemsPerPage: number;
+  totalPages: number;
+  paginatedTrades: TradeFormData[];
 }
 
 const TradeDataContext = createContext<TradeDataContextType | undefined>(undefined);
@@ -49,6 +55,19 @@ export const useTradeData = () => {
 export const TradeDataProvider = ({ children }: { children: ReactNode }) => {
   const [trades, setTrades] = useLocalStorage<TradeFormData[]>('tradingDetailTrades', []);
   const [dailyTarget, setDailyTarget] = useLocalStorage<number>('dailyTarget', 0.00);
+  
+  // Add pagination state
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 5; // Show 5 trades per page
+
+  // Calculate total pages
+  const totalPages = Math.ceil(trades.length / itemsPerPage);
+
+  // Get paginated trades for current page
+  const paginatedTrades = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return trades.slice(startIndex, startIndex + itemsPerPage);
+  }, [trades, currentPage, itemsPerPage]);
 
   // Calculate statistics from trades
   const stats = useMemo(() => {
@@ -114,7 +133,19 @@ export const TradeDataProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <TradeDataContext.Provider value={{ trades, setTrades, dailyTarget, setDailyTarget, addTrade, stats }}>
+    <TradeDataContext.Provider value={{ 
+      trades, 
+      setTrades, 
+      dailyTarget, 
+      setDailyTarget, 
+      addTrade, 
+      stats,
+      currentPage,
+      setCurrentPage,
+      itemsPerPage,
+      totalPages,
+      paginatedTrades
+    }}>
       {children}
     </TradeDataContext.Provider>
   );

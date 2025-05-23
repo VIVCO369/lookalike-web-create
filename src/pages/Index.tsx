@@ -10,6 +10,7 @@ import StatsCard from "../components/StatsCard";
 import TradingRules from "../components/TradingRules";
 import ScheduleList from "../components/ScheduleList";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 import DetailedData from "../components/DetailedData";
 import { useTradeData } from "@/contexts/TradeDataContext"; // Import the trade data context
@@ -36,8 +37,17 @@ const Index = () => {
   const [selectedTimeframes, setSelectedTimeframes] = useState<string[]>(["1M", "15M", "1H", "4H", "1D"]);
   const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
 
-  // Use the trade data context with stats
-  const { trades, dailyTarget, setDailyTarget, stats } = useTradeData();
+  // Use the trade data context with stats and pagination
+  const { 
+    trades, 
+    dailyTarget, 
+    setDailyTarget, 
+    stats, 
+    currentPage, 
+    setCurrentPage, 
+    totalPages, 
+    paginatedTrades 
+  } = useTradeData();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -134,6 +144,11 @@ const Index = () => {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(value);
+  };
+
+  // Handle page changes
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -350,7 +365,7 @@ const Index = () => {
           {/* Use the DetailedData component */}
           <DetailedData showAddTrade={true} />
 
-          {/* Trades Table - Updated to use shared context */}
+          {/* Trades Table - Updated to use shared context with pagination */}
           <div className="bg-white rounded-md shadow overflow-x-auto mt-4">
             <Table>
               <TableHeader>
@@ -372,7 +387,7 @@ const Index = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {trades.slice(0, 5).map((trade) => (
+                {paginatedTrades.map((trade) => (
                   <TableRow key={trade.id}>
                     <TableCell>{trade.id}</TableCell>
                     <TableCell>{trade.strategy}</TableCell>
@@ -408,8 +423,75 @@ const Index = () => {
                 ))}
               </TableBody>
             </Table>
-            <div className="px-4 py-3 text-xs text-gray-500">
-              Showing 1 to {Math.min(trades.length, 5)} of {trades.length} results
+            
+            {/* Added pagination UI */}
+            <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200">
+              <div className="text-sm text-gray-500">
+                Showing {paginatedTrades.length > 0 ? ((currentPage - 1) * 5) + 1 : 0} to {Math.min(currentPage * 5, trades.length)} of {trades.length} results
+              </div>
+              {totalPages > 1 && (
+                <Pagination>
+                  <PaginationContent>
+                    {currentPage > 1 && (
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          href="#" 
+                          onClick={(e) => { 
+                            e.preventDefault(); 
+                            handlePageChange(currentPage - 1); 
+                          }} 
+                        />
+                      </PaginationItem>
+                    )}
+                    
+                    {/* Generate page numbers */}
+                    {Array.from({ length: totalPages }).map((_, index) => {
+                      const pageNumber = index + 1;
+                      // Show current page and at most 2 pages before and after
+                      if (
+                        pageNumber === 1 || 
+                        pageNumber === totalPages || 
+                        (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                      ) {
+                        return (
+                          <PaginationItem key={pageNumber}>
+                            <PaginationLink 
+                              href="#" 
+                              isActive={pageNumber === currentPage}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handlePageChange(pageNumber);
+                              }}
+                            >
+                              {pageNumber}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      }
+                      // Show ellipsis for skipped pages
+                      else if (
+                        pageNumber === currentPage - 2 || 
+                        pageNumber === currentPage + 2
+                      ) {
+                        return <PaginationItem key={pageNumber}>...</PaginationItem>;
+                      }
+                      return null;
+                    })}
+                    
+                    {currentPage < totalPages && (
+                      <PaginationItem>
+                        <PaginationNext 
+                          href="#" 
+                          onClick={(e) => { 
+                            e.preventDefault(); 
+                            handlePageChange(currentPage + 1); 
+                          }} 
+                        />
+                      </PaginationItem>
+                    )}
+                  </PaginationContent>
+                </Pagination>
+              )}
             </div>
           </div>
         </main>
