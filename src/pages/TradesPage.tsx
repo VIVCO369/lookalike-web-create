@@ -7,12 +7,21 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+<<<<<<< HEAD
 import { cn } from "@/lib/utils";
 import StatsCard from "../components/StatsCard";
 import { useToast } from "@/components/ui/use-toast";
 import { Progress } from "@/components/ui/progress";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { useTradeData, TradeFormData, calculateStats } from "@/contexts/TradeDataContext"; // Import useTradeData and calculateStats
+=======
+import { cn } from "@/lib/utils"; 
+import StatsCard from "../components/StatsCard"; 
+import { useToast } from "@/components/ui/use-toast";
+import { Progress } from "@/components/ui/progress";
+import useLocalStorage from "@/hooks/useLocalStorage";
+import { useTradeData, TradeFormData } from "@/contexts/TradeDataContext";
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
 
 const initialTradeFormData: TradeFormData = {
   strategy: "",
@@ -34,6 +43,7 @@ const TradesPage = () => {
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [showAddTrade, setShowAddTrade] = useState(false);
   const [formData, setFormData] = useState<TradeFormData>(initialTradeFormData);
+<<<<<<< HEAD
 
   // Use the shared context for demo trades and daily target
   const { demoTrades, addTrade, dailyTarget, setDailyTarget } = useTradeData();
@@ -65,6 +75,23 @@ const TradesPage = () => {
   const [isSettingDailyTarget, setIsSettingDailyTarget] = useState(false);
   const [newDailyTarget, setNewDailyTarget] = useLocalStorage<string>("newDailyTargetInput", "");
 
+=======
+  
+  // Use the shared context for trades and daily target
+  const { trades, addTrade, dailyTarget, setDailyTarget } = useTradeData();
+  
+  // Use localStorage for timeframes and balance
+  const [selectedTimeframes, setSelectedTimeframes] = useLocalStorage<string[]>("selectedTimeframes", ["1M", "15M", "1H", "4H", "1D"]);
+  const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
+  
+  const [balance, setBalance] = useLocalStorage<number>("userBalance", 10.00);
+  const [isSettingBalance, setIsSettingBalance] = useState(false);
+  const [newBalance, setNewBalance] = useLocalStorage<string>("newBalanceInput", "");
+  
+  const [isSettingDailyTarget, setIsSettingDailyTarget] = useState(false);
+  const [newDailyTarget, setNewDailyTarget] = useLocalStorage<string>("newDailyTargetInput", "");
+  
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
   const { toast } = useToast();
 
   const toggleSidebar = () => {
@@ -157,6 +184,7 @@ const TradesPage = () => {
   };
 
   const handleSubmit = () => {
+<<<<<<< HEAD
     // Add the trade to the DEMO list
     addTrade(formData, 'demo');
 
@@ -187,12 +215,32 @@ const TradesPage = () => {
     setCurrentPage(page);
   };
 
+=======
+    // Add the trade to the shared context
+    addTrade(formData);
+    
+    toast({
+      title: "Trade Added",
+      description: "Your trade has been successfully saved",
+    });
+    
+    // Reset form data
+    setFormData(initialTradeFormData);
+    
+    // Close the form
+    setShowAddTrade(false);
+  };
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
 
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: "#F8F5F0" }}> {/* Added inline style */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
+<<<<<<< HEAD
       <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}>
+=======
+      <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}> 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
         {/* Header */}
         <header className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10">
           {/* Replaced "Detailed Data" headline with time and date */}
@@ -385,15 +433,24 @@ const TradesPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm">Strategy</label>
+<<<<<<< HEAD
                     <Input
                       placeholder="Strategy"
+=======
+                    <Input 
+                      placeholder="Strategy" 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                       value={formData.strategy}
                       onChange={(e) => handleInputChange("strategy", e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Pair</label>
+<<<<<<< HEAD
                     <Select
+=======
+                    <Select 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                       value={formData.pair}
                       onValueChange={(value) => handleInputChange("pair", value)}
                     >
@@ -415,7 +472,11 @@ const TradesPage = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Type</label>
+<<<<<<< HEAD
                     <Select
+=======
+                    <Select 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                       value={formData.type}
                       onValueChange={(value) => handleInputChange("type", value)}
                     >
@@ -430,23 +491,37 @@ const TradesPage = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Open Time</label>
+<<<<<<< HEAD
                     <Input
                       type="datetime-local"
+=======
+                    <Input 
+                      type="datetime-local" 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                       value={formData.openTime}
                       onChange={(e) => handleInputChange("openTime", e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Trade Time</label>
+<<<<<<< HEAD
                     <Input
                       placeholder="Trade Time"
+=======
+                    <Input 
+                      placeholder="Trade Time" 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                       value={formData.tradeTime}
                       onChange={(e) => handleInputChange("tradeTime", e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Timeframe</label>
+<<<<<<< HEAD
                     <Select
+=======
+                    <Select 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                       value={formData.timeframe}
                       onValueChange={(value) => handleInputChange("timeframe", value)}
                     >
@@ -465,7 +540,11 @@ const TradesPage = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Trend</label>
+<<<<<<< HEAD
                     <Select
+=======
+                    <Select 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                       value={formData.trend}
                       onValueChange={(value) => handleInputChange("trend", value)}
                     >
@@ -481,17 +560,28 @@ const TradesPage = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Lot Size</label>
+<<<<<<< HEAD
                     <Input
                       type="number"
                       placeholder="0.01"
                       step="0.01"
+=======
+                    <Input 
+                      type="number" 
+                      placeholder="0.01" 
+                      step="0.01" 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                       value={formData.lotSize}
                       onChange={(e) => handleInputChange("lotSize", e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Win/Loss</label>
+<<<<<<< HEAD
                     <Select
+=======
+                    <Select 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                       value={formData.winLoss}
                       onValueChange={(value) => handleInputChange("winLoss", value)}
                     >
@@ -506,28 +596,47 @@ const TradesPage = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Net Profit</label>
+<<<<<<< HEAD
                     <Input
                       type="number"
                       placeholder="0.00"
                       step="0.01"
+=======
+                    <Input 
+                      type="number" 
+                      placeholder="0.00" 
+                      step="0.01" 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                       value={formData.netProfit}
                       onChange={(e) => handleInputChange("netProfit", e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Balance</label>
+<<<<<<< HEAD
                     <Input
                       type="number"
                       placeholder="0.00"
                       step="0.01"
+=======
+                    <Input 
+                      type="number" 
+                      placeholder="0.00" 
+                      step="0.01" 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                       value={formData.balance}
                       onChange={(e) => handleInputChange("balance", e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Candles</label>
+<<<<<<< HEAD
                     <Input
                       placeholder="Candles"
+=======
+                    <Input 
+                      placeholder="Candles" 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                       value={formData.candles}
                       onChange={(e) => handleInputChange("candles", e.target.value)}
                     />
@@ -535,18 +644,30 @@ const TradesPage = () => {
                 </div>
                 <div className="flex justify-end gap-2 mt-6">
                   <Button variant="outline" onClick={toggleAddTrade}>Cancel</Button>
+<<<<<<< HEAD
                   <Button
                     className="bg-green-500 hover:bg-green-600 text-white"
                     onClick={handleSubmit}
                   >
                     Add Demo Trade
+=======
+                  <Button 
+                    className="bg-green-500 hover:bg-green-600 text-white"
+                    onClick={handleSubmit}
+                  >
+                    Add Trade
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   </Button>
                 </div>
               </CardContent>
             </Card>
           )}
 
+<<<<<<< HEAD
           {/* Trades Table - Updated to use demo trades with pagination */}
+=======
+          {/* Trades Table - Updated to use shared context */}
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
           <div className="bg-white rounded-md shadow">
             <Table>
               <TableHeader>
@@ -580,12 +701,17 @@ const TradesPage = () => {
                     <TableCell>{trade.trend}</TableCell>
                     <TableCell>{trade.lotSize}</TableCell>
                     <TableCell className="text-red-500">{trade.candles}</TableCell>
+<<<<<<< HEAD
                     <TableCell className={trade.winLoss === "win" ? "text-green-500" : "text-red-500"}>
                       {trade.winLoss === "win" ? "Win" : "Loss"}
                     </TableCell>
                     <TableCell className={parseFloat(trade.netProfit) >= 0 ? "text-green-500" : "text-red-500"}>
                       {trade.netProfit}
                     </TableCell>
+=======
+                    <TableCell className={trade.winLoss === "win" ? "text-green-500" : "text-red-500"}>{trade.netProfit}</TableCell>
+                    <TableCell className={parseFloat(trade.netProfit) >= 0 ? "text-green-500" : "text-red-500"}>{trade.netProfit}</TableCell>
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                     <TableCell>{trade.balance}</TableCell>
                     <TableCell>
                       <div className="flex space-x-1">

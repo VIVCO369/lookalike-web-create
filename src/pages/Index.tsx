@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 import { useState, useEffect, useMemo } from "react";
+=======
+
+import { useState, useEffect } from "react";
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
 import { Plus, Clock, Eye, Edit, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,10 +17,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 import DetailedData from "../components/DetailedData";
+<<<<<<< HEAD
 import { useTradeData, calculateStats } from "@/contexts/TradeDataContext"; // Import useTradeData and calculateStats
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import useLocalStorage from "@/hooks/useLocalStorage"; // Import useLocalStorage
+=======
+import { useTradeData } from "@/contexts/TradeDataContext"; // Import the trade data context
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select components
+import { Input } from "@/components/ui/input"; // Ensure Input is also imported
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
 
 const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -35,6 +46,7 @@ const Index = () => {
   // State for Trading Rules card color
   const [tradingRulesCardColor, setTradingRulesCardColor] = useState("bg-white");
 
+<<<<<<< HEAD
   const [selectedTimeframes, setSelectedTimeframes] = useLocalStorage<string[]>("selectedTimeframes", ["1M", "15M", "1H", "4H", "1D"]);
   const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
 
@@ -61,6 +73,22 @@ const Index = () => {
     return realTrades.slice(startIndex, startIndex + itemsPerPage);
   }, [realTrades, currentPage, itemsPerPage]);
 
+=======
+  const [selectedTimeframes, setSelectedTimeframes] = useState<string[]>(["1M", "15M", "1H", "4H", "1D"]);
+  const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
+
+  // Use the trade data context with stats and pagination
+  const { 
+    trades, 
+    dailyTarget, 
+    setDailyTarget, 
+    stats, 
+    currentPage, 
+    setCurrentPage, 
+    totalPages, 
+    paginatedTrades 
+  } = useTradeData();
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -316,7 +344,11 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
               <StatsCard
                 title="Total Trades"
+<<<<<<< HEAD
                 value={stats.totalTrades.toString()} // Use totalTrades from calculated stats
+=======
+                value={trades.length.toString()} // Use trades.length from context
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                 labelPosition="below"
                 borderColor="border-gray-200"
               />
@@ -378,7 +410,11 @@ const Index = () => {
           {/* Use the DetailedData component for adding REAL trades */}
           <DetailedData showAddTrade={true} accountType="real" />
 
+<<<<<<< HEAD
           {/* Trades Table - Updated to use real trades with pagination */}
+=======
+          {/* Trades Table - Updated to use shared context with pagination */}
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
           <div className="bg-white rounded-md shadow overflow-x-auto mt-4">
             <Table>
               <TableHeader>
@@ -436,17 +472,26 @@ const Index = () => {
                 ))}
               </TableBody>
             </Table>
+<<<<<<< HEAD
 
             {/* Added pagination UI */}
             <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200">
               <div className="text-sm text-gray-500">
                 Showing {paginatedTrades.length > 0 ? ((currentPage - 1) * 5) + 1 : 0} to {Math.min(currentPage * 5, realTrades.length)} of {realTrades.length} results
+=======
+            
+            {/* Added pagination UI */}
+            <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200">
+              <div className="text-sm text-gray-500">
+                Showing {paginatedTrades.length > 0 ? ((currentPage - 1) * 5) + 1 : 0} to {Math.min(currentPage * 5, trades.length)} of {trades.length} results
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
               </div>
               {totalPages > 1 && (
                 <Pagination>
                   <PaginationContent>
                     {currentPage > 1 && (
                       <PaginationItem>
+<<<<<<< HEAD
                         <PaginationPrevious
                           href="#"
                           onClick={(e) => {
@@ -457,19 +502,41 @@ const Index = () => {
                       </PaginationItem>
                     )}
 
+=======
+                        <PaginationPrevious 
+                          href="#" 
+                          onClick={(e) => { 
+                            e.preventDefault(); 
+                            handlePageChange(currentPage - 1); 
+                          }} 
+                        />
+                      </PaginationItem>
+                    )}
+                    
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                     {/* Generate page numbers */}
                     {Array.from({ length: totalPages }).map((_, index) => {
                       const pageNumber = index + 1;
                       // Show current page and at most 2 pages before and after
                       if (
+<<<<<<< HEAD
                         pageNumber === 1 ||
                         pageNumber === totalPages ||
+=======
+                        pageNumber === 1 || 
+                        pageNumber === totalPages || 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                         (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
                       ) {
                         return (
                           <PaginationItem key={pageNumber}>
+<<<<<<< HEAD
                             <PaginationLink
                               href="#"
+=======
+                            <PaginationLink 
+                              href="#" 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                               isActive={pageNumber === currentPage}
                               onClick={(e) => {
                                 e.preventDefault();
@@ -483,13 +550,18 @@ const Index = () => {
                       }
                       // Show ellipsis for skipped pages
                       else if (
+<<<<<<< HEAD
                         pageNumber === currentPage - 2 ||
+=======
+                        pageNumber === currentPage - 2 || 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                         pageNumber === currentPage + 2
                       ) {
                         return <PaginationItem key={pageNumber}>...</PaginationItem>;
                       }
                       return null;
                     })}
+<<<<<<< HEAD
 
                     {currentPage < totalPages && (
                       <PaginationItem>
@@ -499,6 +571,17 @@ const Index = () => {
                             e.preventDefault();
                             handlePageChange(currentPage + 1);
                           }}
+=======
+                    
+                    {currentPage < totalPages && (
+                      <PaginationItem>
+                        <PaginationNext 
+                          href="#" 
+                          onClick={(e) => { 
+                            e.preventDefault(); 
+                            handlePageChange(currentPage + 1); 
+                          }} 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                         />
                       </PaginationItem>
                     )}

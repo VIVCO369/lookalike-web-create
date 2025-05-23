@@ -12,6 +12,10 @@ interface DetailedDataProps {
   accountType: 'real' | 'demo'; // Add accountType prop
 }
 
+<<<<<<< HEAD
+=======
+// Using the imported TradeFormData interface instead of redefining it
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
 const initialTradeFormData: TradeFormData = {
   strategy: "",
   pair: "",
@@ -27,7 +31,11 @@ const initialTradeFormData: TradeFormData = {
   candles: ""
 };
 
+<<<<<<< HEAD
 const DetailedData = ({ showAddTrade = false, accountType }: DetailedDataProps) => {
+=======
+const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
   const [showTradeForm, setShowTradeForm] = useState(false);
   const [formData, setFormData] = useState<TradeFormData>(initialTradeFormData);
   const { toast } = useToast();
@@ -42,6 +50,7 @@ const DetailedData = ({ showAddTrade = false, accountType }: DetailedDataProps) 
   };
 
   const handleSubmit = () => {
+<<<<<<< HEAD
     // Add the trade to the shared context, specifying the account type
     addTrade(formData, accountType);
 
@@ -53,6 +62,19 @@ const DetailedData = ({ showAddTrade = false, accountType }: DetailedDataProps) 
     // Reset the form to initial values after submission
     setFormData(initialTradeFormData);
 
+=======
+    // Add the trade to the shared context
+    addTrade(formData);
+    
+    toast({
+      title: "Trade Added",
+      description: "Your trade has been successfully saved to Trading Details",
+    });
+    
+    // Reset the form to initial values after submission
+    setFormData(initialTradeFormData);
+    
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
     // Close the form
     setShowTradeForm(false);
   };
@@ -81,15 +103,24 @@ const DetailedData = ({ showAddTrade = false, accountType }: DetailedDataProps) 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label className="text-sm">Strategy</label>
+<<<<<<< HEAD
                 <Input
                   placeholder="Strategy"
+=======
+                <Input 
+                  placeholder="Strategy" 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.strategy}
                   onChange={(e) => handleInputChange("strategy", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Pair</label>
+<<<<<<< HEAD
                 <Select
+=======
+                <Select 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.pair}
                   onValueChange={(value) => handleInputChange("pair", value)}
                 >
@@ -111,7 +142,11 @@ const DetailedData = ({ showAddTrade = false, accountType }: DetailedDataProps) 
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Type</label>
+<<<<<<< HEAD
                 <Select
+=======
+                <Select 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.type}
                   onValueChange={(value) => handleInputChange("type", value)}
                 >
@@ -126,23 +161,37 @@ const DetailedData = ({ showAddTrade = false, accountType }: DetailedDataProps) 
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Open Time</label>
+<<<<<<< HEAD
                 <Input
                   type="datetime-local"
+=======
+                <Input 
+                  type="datetime-local" 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.openTime}
                   onChange={(e) => handleInputChange("openTime", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Trade Time</label>
+<<<<<<< HEAD
                 <Input
                   placeholder="Trade Time"
+=======
+                <Input 
+                  placeholder="Trade Time" 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.tradeTime}
                   onChange={(e) => handleInputChange("tradeTime", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Timeframe</label>
+<<<<<<< HEAD
                 <Select
+=======
+                <Select 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.timeframe}
                   onValueChange={(value) => handleInputChange("timeframe", value)}
                 >
@@ -161,7 +210,11 @@ const DetailedData = ({ showAddTrade = false, accountType }: DetailedDataProps) 
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Trend</label>
+<<<<<<< HEAD
                 <Select
+=======
+                <Select 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.trend}
                   onValueChange={(value) => handleInputChange("trend", value)}
                 >
@@ -177,17 +230,28 @@ const DetailedData = ({ showAddTrade = false, accountType }: DetailedDataProps) 
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Lot Size</label>
+<<<<<<< HEAD
                 <Input
                   type="number"
                   placeholder="0.01"
                   step="0.01"
+=======
+                <Input 
+                  type="number" 
+                  placeholder="0.01" 
+                  step="0.01" 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.lotSize}
                   onChange={(e) => handleInputChange("lotSize", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Win/Loss</label>
+<<<<<<< HEAD
                 <Select
+=======
+                <Select 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.winLoss}
                   onValueChange={(value) => handleInputChange("winLoss", value)}
                 >
@@ -202,28 +266,47 @@ const DetailedData = ({ showAddTrade = false, accountType }: DetailedDataProps) 
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Net Profit</label>
+<<<<<<< HEAD
                 <Input
                   type="number"
                   placeholder="0.00"
                   step="0.01"
+=======
+                <Input 
+                  type="number" 
+                  placeholder="0.00" 
+                  step="0.01" 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.netProfit}
                   onChange={(e) => handleInputChange("netProfit", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Balance</label>
+<<<<<<< HEAD
                 <Input
                   type="number"
                   placeholder="0.00"
                   step="0.01"
+=======
+                <Input 
+                  type="number" 
+                  placeholder="0.00" 
+                  step="0.01" 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.balance}
                   onChange={(e) => handleInputChange("balance", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Candles</label>
+<<<<<<< HEAD
                 <Input
                   placeholder="Candles"
+=======
+                <Input 
+                  placeholder="Candles" 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.candles}
                   onChange={(e) => handleInputChange("candles", e.target.value)}
                 />
@@ -231,7 +314,11 @@ const DetailedData = ({ showAddTrade = false, accountType }: DetailedDataProps) 
             </div>
             <div className="flex justify-end gap-2 mt-6">
               <Button variant="outline" onClick={toggleTradeForm}>Cancel</Button>
+<<<<<<< HEAD
               <Button
+=======
+              <Button 
+>>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                 className="bg-green-500 hover:bg-green-600 text-white"
                 onClick={handleSubmit}
               >
