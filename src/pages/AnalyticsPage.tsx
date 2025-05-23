@@ -8,10 +8,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatsCard from "../components/StatsCard";
 import { useTradeData, calculateStats } from "@/contexts/TradeDataContext"; // Import useTradeData and calculateStats
 import useLocalStorage from "@/hooks/useLocalStorage"; // Import useLocalStorage
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"; // Import AlertDialog components
+import { useToast } from "@/components/ui/use-toast"; // Import useToast
 
 const AnalyticsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentDateTime, setCurrentDateTime] = useState(new Date()); // Add state for current date/time
+  const { toast } = useToast(); // Call useToast hook to get the toast function
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -40,11 +53,11 @@ const AnalyticsPage = () => {
     return date.toLocaleTimeString('en-US', options);
   };
 
-  // Use the trade data context for real trades
-  const { realTrades } = useTradeData();
+  // Use the trade data context for Analytics Real Trades
+  const { analyticsRealTrades, clearAnalyticsRealTrades } = useTradeData(); // Use analyticsRealTrades and clearAnalyticsRealTrades
 
-  // Calculate stats for real trades
-  const stats = useMemo(() => calculateStats(realTrades), [realTrades]);
+  // Calculate stats for Analytics Real Trades
+  const stats = useMemo(() => calculateStats(analyticsRealTrades), [analyticsRealTrades]);
 
   // Use local storage for balance (assuming analytics shows real account balance)
   const [balance] = useLocalStorage<number>("userBalance", 10.00);
@@ -57,6 +70,16 @@ const AnalyticsPage = () => {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(value);
+  };
+
+  // Handle reset Analytics Real trades
+  const handleResetAnalyticsRealTrades = () => {
+    clearAnalyticsRealTrades();
+    toast({
+      title: "Analytics Real Trades Cleared",
+      description: "All analytics real trade history has been removed.",
+    });
+    // No pagination state to reset on this page currently
   };
 
 
@@ -145,7 +168,29 @@ const AnalyticsPage = () => {
             {/* Real Account History Table Card */}
             <Card className="mb-8">
               <CardHeader>
-                <CardTitle className="text-xl font-medium text-gray-700">Real Account History</CardTitle> {/* Updated title */}
+                <div className="flex items-center justify-between"> {/* Flex container for title and button */}
+                  <CardTitle className="text-xl font-medium text-gray-700">Real Account History</CardTitle> {/* Updated title */}
+                  {/* Reset Analytics Trades Button with AlertDialog */}
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" className="bg-red-500 hover:bg-red-600 text-white">
+                        <Trash2 className="mr-2 h-4 w-4" /> Reset Analytics Trades
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete all your analytics real trade data ({analyticsRealTrades.length} trades).
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleResetAnalyticsRealTrades}>Continue</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
@@ -169,8 +214,8 @@ const AnalyticsPage = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {/* Displaying real trades */}
-                      {realTrades.map((trade) => (
+                      {/* Displaying analytics real trades */}
+                      {analyticsRealTrades.map((trade) => (
                         <TableRow key={trade.id}>
                           <TableCell>{trade.id}</TableCell>
                           <TableCell>{trade.strategy}</TableCell>
@@ -207,7 +252,7 @@ const AnalyticsPage = () => {
                     </TableBody>
                   </Table>
                   <div className="px-4 py-3 text-xs text-gray-500">
-                    Showing 1 to {realTrades.length} of {realTrades.length} results
+                    Showing 1 to {analyticsRealTrades.length} of {analyticsRealTrades.length} results
                   </div>
                 </div>
               </CardContent>

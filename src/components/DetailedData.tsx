@@ -1,21 +1,30 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react"; // Import Trash2 icon
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { useTradeData, TradeFormData } from "@/contexts/TradeDataContext";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"; // Import AlertDialog components
 
 interface DetailedDataProps {
   showAddTrade?: boolean;
   accountType: 'real' | 'demo'; // Add accountType prop
+  onResetTrades?: () => void; // Add prop for reset function
+  tradeCount?: number; // Add prop for trade count
 }
 
-<<<<<<< HEAD
-=======
-// Using the imported TradeFormData interface instead of redefining it
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
 const initialTradeFormData: TradeFormData = {
   strategy: "",
   pair: "",
@@ -31,11 +40,7 @@ const initialTradeFormData: TradeFormData = {
   candles: ""
 };
 
-<<<<<<< HEAD
-const DetailedData = ({ showAddTrade = false, accountType }: DetailedDataProps) => {
-=======
-const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
+const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeCount = 0 }: DetailedDataProps) => {
   const [showTradeForm, setShowTradeForm] = useState(false);
   const [formData, setFormData] = useState<TradeFormData>(initialTradeFormData);
   const { toast } = useToast();
@@ -50,7 +55,6 @@ const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
   };
 
   const handleSubmit = () => {
-<<<<<<< HEAD
     // Add the trade to the shared context, specifying the account type
     addTrade(formData, accountType);
 
@@ -62,19 +66,6 @@ const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
     // Reset the form to initial values after submission
     setFormData(initialTradeFormData);
 
-=======
-    // Add the trade to the shared context
-    addTrade(formData);
-    
-    toast({
-      title: "Trade Added",
-      description: "Your trade has been successfully saved to Trading Details",
-    });
-    
-    // Reset the form to initial values after submission
-    setFormData(initialTradeFormData);
-    
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
     // Close the form
     setShowTradeForm(false);
   };
@@ -85,14 +76,39 @@ const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
         <span className="text-xl font-medium text-gray-700 flex items-center gap-1">
           {accountType === 'real' ? 'Real Trading Detail' : 'Demo Trading Detail'} {/* Dynamic title */}
         </span>
-        {showAddTrade && (
-          <Button
-            onClick={toggleTradeForm}
-            className="bg-green-500 hover:bg-green-600 text-white"
-          >
-            <Plus className="mr-2 h-4 w-4" /> Add Trade
-          </Button>
-        )}
+        <div className="flex gap-2"> {/* Flex container for buttons */}
+          {showAddTrade && (
+            <Button
+              onClick={toggleTradeForm}
+              className="bg-green-500 hover:bg-green-600 text-white"
+            >
+              <Plus className="mr-2 h-4 w-4" /> Add Trade
+            </Button>
+          )}
+          {/* Reset Trades Button with AlertDialog - show if onResetTrades is provided */}
+          {onResetTrades && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="bg-red-500 hover:bg-red-600 text-white">
+                  <Trash2 className="mr-2 h-4 w-4" /> Reset Trades {/* Changed button text */}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete all your {accountType === 'real' ? 'dashboard real' : 'demo'} trade data ({tradeCount} trades). {/* Dynamic description */}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  {/* Call onResetTrades directly */}
+                  <AlertDialogAction onClick={onResetTrades}>Continue</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
       </div>
 
       {/* Add Trade Form */}
@@ -103,24 +119,15 @@ const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label className="text-sm">Strategy</label>
-<<<<<<< HEAD
                 <Input
                   placeholder="Strategy"
-=======
-                <Input 
-                  placeholder="Strategy" 
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.strategy}
                   onChange={(e) => handleInputChange("strategy", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Pair</label>
-<<<<<<< HEAD
                 <Select
-=======
-                <Select 
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.pair}
                   onValueChange={(value) => handleInputChange("pair", value)}
                 >
@@ -142,11 +149,7 @@ const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Type</label>
-<<<<<<< HEAD
                 <Select
-=======
-                <Select 
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.type}
                   onValueChange={(value) => handleInputChange("type", value)}
                 >
@@ -161,37 +164,23 @@ const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Open Time</label>
-<<<<<<< HEAD
                 <Input
                   type="datetime-local"
-=======
-                <Input 
-                  type="datetime-local" 
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.openTime}
                   onChange={(e) => handleInputChange("openTime", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Trade Time</label>
-<<<<<<< HEAD
                 <Input
                   placeholder="Trade Time"
-=======
-                <Input 
-                  placeholder="Trade Time" 
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.tradeTime}
                   onChange={(e) => handleInputChange("tradeTime", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Timeframe</label>
-<<<<<<< HEAD
                 <Select
-=======
-                <Select 
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.timeframe}
                   onValueChange={(value) => handleInputChange("timeframe", value)}
                 >
@@ -210,11 +199,7 @@ const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Trend</label>
-<<<<<<< HEAD
                 <Select
-=======
-                <Select 
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.trend}
                   onValueChange={(value) => handleInputChange("trend", value)}
                 >
@@ -230,28 +215,17 @@ const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Lot Size</label>
-<<<<<<< HEAD
                 <Input
                   type="number"
                   placeholder="0.01"
                   step="0.01"
-=======
-                <Input 
-                  type="number" 
-                  placeholder="0.01" 
-                  step="0.01" 
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.lotSize}
                   onChange={(e) => handleInputChange("lotSize", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Win/Loss</label>
-<<<<<<< HEAD
                 <Select
-=======
-                <Select 
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.winLoss}
                   onValueChange={(value) => handleInputChange("winLoss", value)}
                 >
@@ -266,47 +240,28 @@ const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Net Profit</label>
-<<<<<<< HEAD
                 <Input
                   type="number"
                   placeholder="0.00"
                   step="0.01"
-=======
-                <Input 
-                  type="number" 
-                  placeholder="0.00" 
-                  step="0.01" 
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.netProfit}
                   onChange={(e) => handleInputChange("netProfit", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Balance</label>
-<<<<<<< HEAD
                 <Input
                   type="number"
                   placeholder="0.00"
                   step="0.01"
-=======
-                <Input 
-                  type="number" 
-                  placeholder="0.00" 
-                  step="0.01" 
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.balance}
                   onChange={(e) => handleInputChange("balance", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Candles</label>
-<<<<<<< HEAD
                 <Input
                   placeholder="Candles"
-=======
-                <Input 
-                  placeholder="Candles" 
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                   value={formData.candles}
                   onChange={(e) => handleInputChange("candles", e.target.value)}
                 />
@@ -314,11 +269,7 @@ const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
             </div>
             <div className="flex justify-end gap-2 mt-6">
               <Button variant="outline" onClick={toggleTradeForm}>Cancel</Button>
-<<<<<<< HEAD
               <Button
-=======
-              <Button 
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                 className="bg-green-500 hover:bg-green-600 text-white"
                 onClick={handleSubmit}
               >

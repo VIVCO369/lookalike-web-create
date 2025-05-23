@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
 import { useState, useEffect } from 'react';
 
 // Custom hook for managing state in local storage

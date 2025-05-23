@@ -1,9 +1,6 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
 import React, { createContext, useContext, ReactNode, useMemo, useState } from 'react';
 import useLocalStorage from '@/hooks/useLocalStorage';
+// Removed date-fns imports
 
 // Define the trade data structure
 export interface TradeFormData {
@@ -28,37 +25,24 @@ interface CalculatedStats {
   bestTrade: number;
   worstTrade: number;
   winRate: string;
-<<<<<<< HEAD
   totalTrades: number; // Added totalTrades to stats
 }
 
 interface TradeDataContextType {
-  realTrades: TradeFormData[];
-  setRealTrades: (trades: TradeFormData[] | ((prevTrades: TradeFormData[]) => TradeFormData[])) => void;
+  dashboardRealTrades: TradeFormData[]; // Separate state for Dashboard Real Trades
+  setDashboardRealTrades: (trades: TradeFormData[] | ((prevTrades: TradeFormData[]) => TradeFormData[])) => void;
+  analyticsRealTrades: TradeFormData[]; // Separate state for Analytics Real Trades
+  setAnalyticsRealTrades: (trades: TradeFormData[] | ((prevTrades: TradeFormData[]) => TradeFormData[])) => void;
   demoTrades: TradeFormData[];
   setDemoTrades: (trades: TradeFormData[] | ((prevTrades: TradeFormData[]) => TradeFormData[])) => void;
   dailyTarget: number;
   setDailyTarget: (target: number | ((prevTarget: number) => number)) => void;
   addTrade: (trade: TradeFormData, accountType: 'real' | 'demo') => void;
+  clearDemoTrades: () => void;
+  clearDashboardRealTrades: () => void; // Function to clear Dashboard Real Trades
+  clearAnalyticsRealTrades: () => void; // Function to clear Analytics Real Trades
   // Removed stats from context - calculate in components that need it
   // Removed pagination states from context - handle in components that need it
-=======
-}
-
-interface TradeDataContextType {
-  trades: TradeFormData[];
-  setTrades: (trades: TradeFormData[] | ((prevTrades: TradeFormData[]) => TradeFormData[])) => void;
-  dailyTarget: number;
-  setDailyTarget: (target: number | ((prevTarget: number) => number)) => void;
-  addTrade: (trade: TradeFormData) => void;
-  stats: CalculatedStats;
-  // Add pagination related states and functions
-  currentPage: number;
-  setCurrentPage: (page: number) => void;
-  itemsPerPage: number;
-  totalPages: number;
-  paginatedTrades: TradeFormData[];
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
 }
 
 const TradeDataContext = createContext<TradeDataContextType | undefined>(undefined);
@@ -72,9 +56,9 @@ export const useTradeData = () => {
 };
 
 export const TradeDataProvider = ({ children }: { children: ReactNode }) => {
-<<<<<<< HEAD
-  // Use separate local storage keys for real and demo trades
-  const [realTrades, setRealTrades] = useLocalStorage<TradeFormData[]>('realTrades', []);
+  // Use separate local storage keys for Dashboard Real, Analytics Real, and Demo trades
+  const [dashboardRealTrades, setDashboardRealTrades] = useLocalStorage<TradeFormData[]>('dashboardRealTrades', []);
+  const [analyticsRealTrades, setAnalyticsRealTrades] = useLocalStorage<TradeFormData[]>('analyticsRealTrades', []);
   const [demoTrades, setDemoTrades] = useLocalStorage<TradeFormData[]>('demoTrades', []);
   const [dailyTarget, setDailyTarget] = useLocalStorage<number>('dailyTarget', 0.00);
 
@@ -83,127 +67,56 @@ export const TradeDataProvider = ({ children }: { children: ReactNode }) => {
       ...trade,
       // Generate ID based on the specific trade list
       id: accountType === 'real'
-        ? (realTrades.length > 0 ? Math.max(...realTrades.map(t => t.id || 0)) + 1 : 1)
+        ? (dashboardRealTrades.length > 0 ? Math.max(...dashboardRealTrades.map(t => t.id || 0)) + 1 : 1)
         : (demoTrades.length > 0 ? Math.max(...demoTrades.map(t => t.id || 0)) + 1 : 1)
     };
 
     if (accountType === 'real') {
-      setRealTrades([...realTrades, newTrade]);
+      // Add real trades only to the dashboard list
+      setDashboardRealTrades([...dashboardRealTrades, newTrade]);
+      // Note: Trades added here are NOT automatically added to analyticsRealTrades.
+      // A separate mechanism would be needed if you want them synced.
     } else {
       setDemoTrades([...demoTrades, newTrade]);
     }
   };
 
+  // Function to clear demo trades
+  const clearDemoTrades = () => {
+    setDemoTrades([]);
+  };
+
+  // Function to clear Dashboard Real Trades
+  const clearDashboardRealTrades = () => {
+    setDashboardRealTrades([]);
+  };
+
+  // Function to clear Analytics Real Trades
+  const clearAnalyticsRealTrades = () => {
+    setAnalyticsRealTrades([]);
+  };
+
+
   return (
     <TradeDataContext.Provider value={{
-      realTrades,
-      setRealTrades,
+      dashboardRealTrades,
+      setDashboardRealTrades,
+      analyticsRealTrades,
+      setAnalyticsRealTrades,
       demoTrades,
       setDemoTrades,
       dailyTarget,
       setDailyTarget,
       addTrade,
+      clearDemoTrades,
+      clearDashboardRealTrades, // Provide the clear function for Dashboard Real
+      clearAnalyticsRealTrades, // Provide the clear function for Analytics Real
       // Removed stats and pagination from context value
-=======
-  const [trades, setTrades] = useLocalStorage<TradeFormData[]>('tradingDetailTrades', []);
-  const [dailyTarget, setDailyTarget] = useLocalStorage<number>('dailyTarget', 0.00);
-  
-  // Add pagination state
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 5; // Show 5 trades per page
-
-  // Calculate total pages
-  const totalPages = Math.ceil(trades.length / itemsPerPage);
-
-  // Get paginated trades for current page
-  const paginatedTrades = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return trades.slice(startIndex, startIndex + itemsPerPage);
-  }, [trades, currentPage, itemsPerPage]);
-
-  // Calculate statistics from trades
-  const stats = useMemo(() => {
-    // Initialize values
-    let totalProfit = 0;
-    let dailyProfit = 0;
-    let bestTrade = 0;
-    let worstTrade = 0;
-    let wins = 0;
-
-    // Process all trades
-    if (trades.length > 0) {
-      // Get today's date at midnight for daily calculations
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      trades.forEach(trade => {
-        const profit = parseFloat(trade.netProfit || '0');
-        
-        // Update total profit
-        totalProfit += profit;
-        
-        // Update best and worst trades
-        if (profit > bestTrade) {
-          bestTrade = profit;
-        }
-        
-        if (profit < worstTrade) {
-          worstTrade = profit;
-        }
-        
-        // Count wins
-        if (trade.winLoss === 'win') {
-          wins++;
-        }
-        
-        // Calculate daily profit
-        const tradeDate = new Date(trade.openTime);
-        if (tradeDate >= today) {
-          dailyProfit += profit;
-        }
-      });
-    }
-    
-    // Calculate win rate
-    const winRate = trades.length > 0 ? ((wins / trades.length) * 100).toFixed(0) : '0';
-    
-    return {
-      netProfit: totalProfit,
-      dailyProfit,
-      bestTrade,
-      worstTrade,
-      winRate: `${winRate}%`
-    };
-  }, [trades]);
-
-  const addTrade = (trade: TradeFormData) => {
-    const newTrade = {
-      ...trade,
-      id: trades.length > 0 ? Math.max(...trades.map(t => t.id || 0)) + 1 : 1
-    };
-    setTrades([...trades, newTrade]);
-  };
-
-  return (
-    <TradeDataContext.Provider value={{ 
-      trades, 
-      setTrades, 
-      dailyTarget, 
-      setDailyTarget, 
-      addTrade, 
-      stats,
-      currentPage,
-      setCurrentPage,
-      itemsPerPage,
-      totalPages,
-      paginatedTrades
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
     }}>
       {children}
     </TradeDataContext.Provider>
   );
 };
-<<<<<<< HEAD
 
 // Helper function to calculate stats for a given list of trades
 export const calculateStats = (trades: TradeFormData[]): CalculatedStats => {
@@ -213,9 +126,12 @@ export const calculateStats = (trades: TradeFormData[]): CalculatedStats => {
   let worstTrade = 0;
   let wins = 0;
 
+  console.log("Calculating stats for trades:", trades); // Log the trades array
+
   if (trades.length > 0) {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0); // Set today's date to midnight
+    console.log("Today's date (midnight):", today.toISOString()); // Log today's date
 
     trades.forEach(trade => {
       const profit = parseFloat(trade.netProfit || '0');
@@ -234,14 +150,36 @@ export const calculateStats = (trades: TradeFormData[]): CalculatedStats => {
         wins++;
       }
 
+      // Attempt to parse the date string
       const tradeDate = new Date(trade.openTime);
-      if (tradeDate >= today) {
-        dailyProfit += profit;
+
+      // Check if the parsed date is valid before using it
+      if (!isNaN(tradeDate.getTime())) {
+        tradeDate.setHours(0, 0, 0, 0); // Set trade date to midnight for comparison
+
+        console.log(`Trade ID: ${trade.id}, Open Time String: "${trade.openTime}", Parsed Trade Date (midnight): ${tradeDate.toISOString()}, Profit: ${profit}`); // Log trade details
+        console.log(`Date comparison (tradeDate === today): ${tradeDate.getTime() === today.getTime()}`); // Log comparison result
+
+        if (tradeDate.getTime() === today.getTime()) { // Compare timestamps at midnight
+          dailyProfit += profit;
+          console.log("Adding to daily profit. Current dailyProfit:", dailyProfit); // Log daily profit update
+        }
+      } else {
+        console.warn(`Trade ID: ${trade.id} has an invalid openTime: "${trade.openTime}". Skipping daily profit calculation for this trade.`);
       }
     });
   }
 
   const winRate = trades.length > 0 ? ((wins / trades.length) * 100).toFixed(0) : '0';
+
+  console.log("Final calculated stats:", {
+    netProfit: totalProfit,
+    dailyProfit,
+    bestTrade,
+    worstTrade,
+    winRate: `${winRate}%`,
+    totalTrades: trades.length,
+  }); // Log final stats
 
   return {
     netProfit: totalProfit,
@@ -252,5 +190,3 @@ export const calculateStats = (trades: TradeFormData[]): CalculatedStats => {
     totalTrades: trades.length,
   };
 };
-=======
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863

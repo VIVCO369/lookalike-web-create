@@ -1,15 +1,7 @@
-<<<<<<< HEAD
 import { useState, useEffect } from "react"; // Import useEffect
 import Sidebar from "../components/Sidebar";
 import { cn } from "@/lib/utils";
 import { Settings, Clock } from "lucide-react"; // Import Clock icon
-=======
-
-import { useState } from "react";
-import Sidebar from "../components/Sidebar";
-import { cn } from "@/lib/utils";
-import { Settings } from "lucide-react";
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -35,10 +27,7 @@ const initialSettings: AppSettings = {
 
 const SettingsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-<<<<<<< HEAD
   const [currentDateTime, setCurrentDateTime] = useState(new Date()); // Add state for current date/time
-=======
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
   const [settings, setSettings] = useLocalStorage<AppSettings>("appSettings", initialSettings);
   const { toast } = useToast();
 
@@ -46,7 +35,6 @@ const SettingsPage = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-<<<<<<< HEAD
   // Update the current date and time every second
   useEffect(() => {
     const timer = setInterval(() => {
@@ -71,8 +59,6 @@ const SettingsPage = () => {
   };
 
 
-=======
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
   const handleInputChange = (field: keyof AppSettings, value: string | boolean) => {
     setSettings({ ...settings, [field]: value });
   };
@@ -95,16 +81,12 @@ const SettingsPage = () => {
             <Settings className="h-5 w-5 text-gray-500" />
             <h1 className="text-xl font-medium text-gray-700">Settings</h1>
           </div>
-<<<<<<< HEAD
           <div className="flex items-center gap-4"> {/* Added gap for spacing */}
             {/* Display current date and time */}
             <div>
               <p className="text-black text-sm font-bold">{formatDate(currentDateTime)}</p>
               <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
             </div>
-=======
-          <div>
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
             <Button onClick={saveSettings} className="bg-green-500 hover:bg-green-600 text-white">
               Save Changes
             </Button>
@@ -124,38 +106,21 @@ const SettingsPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="userName">Username</Label>
-<<<<<<< HEAD
                     <Input
                       id="userName"
                       value={settings.userName}
                       onChange={(e) => handleInputChange("userName", e.target.value)}
                       placeholder="Your username"
-=======
-                    <Input 
-                      id="userName"
-                      value={settings.userName} 
-                      onChange={(e) => handleInputChange("userName", e.target.value)}
-                      placeholder="Your username" 
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-<<<<<<< HEAD
                     <Input
                       id="email"
                       type="email"
                       value={settings.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
                       placeholder="your.email@example.com"
-=======
-                    <Input 
-                      id="email"
-                      type="email" 
-                      value={settings.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                      placeholder="your.email@example.com" 
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
                     />
                   </div>
                 </div>
@@ -193,11 +158,7 @@ const SettingsPage = () => {
             </Card>
 
             <p className="text-gray-600 text-sm">
-<<<<<<< HEAD
               Settings are automatically saved to your browser's local storage.
-=======
-              Settings are automatically saved to your browser's local storage. 
->>>>>>> ee8cc07a5392c77147998f671225ff80fa60c863
               For a full account system with cloud storage, a backend implementation would be required.
             </p>
           </div>
