@@ -7,31 +7,61 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cn } from "@/lib/utils"; // Import cn utility
-import StatsCard from "../components/StatsCard"; // Import StatsCard
-import { useToast } from "@/components/ui/use-toast"; // Import useToast
-import { Progress } from "@/components/ui/progress"; // Import Progress
+import { cn } from "@/lib/utils"; 
+import StatsCard from "../components/StatsCard"; 
+import { useToast } from "@/components/ui/use-toast";
+import { Progress } from "@/components/ui/progress";
+import useLocalStorage from "@/hooks/useLocalStorage"; 
+
+interface TradeFormData {
+  strategy: string;
+  pair: string;
+  type: string;
+  openTime: string;
+  tradeTime: string;
+  timeframe: string;
+  trend: string;
+  lotSize: string;
+  winLoss: string;
+  netProfit: string;
+  balance: string;
+  candles: string;
+}
+
+const initialTradeFormData: TradeFormData = {
+  strategy: "",
+  pair: "Boom 500 Index",
+  type: "buy",
+  openTime: "",
+  tradeTime: "",
+  timeframe: "m1",
+  trend: "up",
+  lotSize: "0.01",
+  winLoss: "win",
+  netProfit: "0.00",
+  balance: "0.00",
+  candles: ""
+};
 
 const TradesPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [currentDateTime, setCurrentDateTime] = useState(new Date()); // Add state for date and time
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [showAddTrade, setShowAddTrade] = useState(false);
-
-  // Add state and logic for timeframe buttons and trend
-  const [selectedTimeframes, setSelectedTimeframes] = useState<string[]>(["1M", "15M", "1H", "4H", "1D"]);
+  const [formData, setFormData] = useLocalStorage<TradeFormData>("tradesPageFormData", initialTradeFormData);
+  
+  // Use localStorage for timeframes, balance and daily target
+  const [selectedTimeframes, setSelectedTimeframes] = useLocalStorage<string[]>("selectedTimeframes", ["1M", "15M", "1H", "4H", "1D"]);
   const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
-
-  // State for Balance and Profit
-  const [balance, setBalance] = useState(10.00);
+  
+  const [balance, setBalance] = useLocalStorage<number>("userBalance", 10.00);
   const [isSettingBalance, setIsSettingBalance] = useState(false);
-  const [newBalance, setNewBalance] = useState("");
-  const { toast } = useToast();
-
-  // State for Daily Target
-  const [dailyTarget, setDailyTarget] = useState(0.00);
+  const [newBalance, setNewBalance] = useLocalStorage<string>("newBalanceInput", "");
+  
+  const [dailyTarget, setDailyTarget] = useLocalStorage<number>("dailyTarget", 0.00);
   const [isSettingDailyTarget, setIsSettingDailyTarget] = useState(false);
-  const [newDailyTarget, setNewDailyTarget] = useState("");
-
+  const [newDailyTarget, setNewDailyTarget] = useLocalStorage<string>("newDailyTargetInput", "");
+  
+  const { toast } = useToast();
 
   // Sample trade data
   const trades = [
@@ -127,6 +157,20 @@ const TradesPage = () => {
     });
   };
 
+  const handleInputChange = (field: keyof TradeFormData, value: string) => {
+    setFormData({ ...formData, [field]: value });
+  };
+
+  const handleSubmit = () => {
+    // Here you would normally submit the data to your backend
+    toast({
+      title: "Trade Added",
+      description: "Your trade has been successfully saved",
+    });
+    
+    // Close the form
+    setShowAddTrade(false);
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -237,7 +281,7 @@ const TradesPage = () => {
                     </Button>
                   </div>
                 ) : (
-                 <Button
+                  <Button
                     variant="outline"
                     className="bg-green-500 hover:bg-green-600 text-white"
                     onClick={() => setIsSettingDailyTarget(true)}
@@ -245,8 +289,6 @@ const TradesPage = () => {
                     <Plus className="h-4 w-4 mr-1" /> Daily Target
                   </Button>
                 )}
-
-                {/* Removed Add Profit button and logic */}
               </div>
             </div>
 
@@ -322,7 +364,7 @@ const TradesPage = () => {
             </Button>
           </div>
 
-          {/* Add Trade Form */}
+          {/* Add Trade Form with local storage */}
           {showAddTrade && (
             <Card className="mb-6">
               <CardContent className="pt-6">
@@ -331,11 +373,18 @@ const TradesPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm">Strategy</label>
-                    <Input placeholder="Strategy" />
+                    <Input 
+                      placeholder="Strategy" 
+                      value={formData.strategy}
+                      onChange={(e) => handleInputChange("strategy", e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Pair</label>
-                    <Select defaultValue="">
+                    <Select 
+                      value={formData.pair}
+                      onValueChange={(value) => handleInputChange("pair", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select Trading Pair" />
                       </SelectTrigger>
@@ -354,7 +403,10 @@ const TradesPage = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Type</label>
-                    <Select defaultValue="buy">
+                    <Select 
+                      value={formData.type}
+                      onValueChange={(value) => handleInputChange("type", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
@@ -366,15 +418,26 @@ const TradesPage = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Open Time</label>
-                    <Input type="datetime-local" />
+                    <Input 
+                      type="datetime-local" 
+                      value={formData.openTime}
+                      onChange={(e) => handleInputChange("openTime", e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Trade Time</label>
-                    <Input placeholder="Trade Time" />
+                    <Input 
+                      placeholder="Trade Time" 
+                      value={formData.tradeTime}
+                      onChange={(e) => handleInputChange("tradeTime", e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Timeframe</label>
-                    <Select defaultValue="m1">
+                    <Select 
+                      value={formData.timeframe}
+                      onValueChange={(value) => handleInputChange("timeframe", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select timeframe" />
                       </SelectTrigger>
@@ -390,7 +453,10 @@ const TradesPage = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Trend</label>
-                    <Select defaultValue="up">
+                    <Select 
+                      value={formData.trend}
+                      onValueChange={(value) => handleInputChange("trend", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select trend" />
                       </SelectTrigger>
@@ -403,11 +469,20 @@ const TradesPage = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Lot Size</label>
-                    <Input type="number" placeholder="0.01" step="0.01" />
+                    <Input 
+                      type="number" 
+                      placeholder="0.01" 
+                      step="0.01" 
+                      value={formData.lotSize}
+                      onChange={(e) => handleInputChange("lotSize", e.target.value)}
+                    />
                   </div>
-                   <div className="space-y-2">
+                  <div className="space-y-2">
                     <label className="text-sm">Win/Loss</label>
-                    <Select defaultValue="win">
+                    <Select 
+                      value={formData.winLoss}
+                      onValueChange={(value) => handleInputChange("winLoss", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select result" />
                       </SelectTrigger>
@@ -419,20 +494,41 @@ const TradesPage = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Net Profit</label>
-                    <Input type="number" placeholder="0.00" step="0.01" />
+                    <Input 
+                      type="number" 
+                      placeholder="0.00" 
+                      step="0.01" 
+                      value={formData.netProfit}
+                      onChange={(e) => handleInputChange("netProfit", e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Balance</label>
-                    <Input type="number" placeholder="0.00" step="0.01" />
+                    <Input 
+                      type="number" 
+                      placeholder="0.00" 
+                      step="0.01" 
+                      value={formData.balance}
+                      onChange={(e) => handleInputChange("balance", e.target.value)}
+                    />
                   </div>
-                   <div className="space-y-2">
+                  <div className="space-y-2">
                     <label className="text-sm">Candles</label>
-                    <Input placeholder="Candles" />
+                    <Input 
+                      placeholder="Candles" 
+                      value={formData.candles}
+                      onChange={(e) => handleInputChange("candles", e.target.value)}
+                    />
                   </div>
                 </div>
                 <div className="flex justify-end gap-2 mt-6">
                   <Button variant="outline" onClick={toggleAddTrade}>Cancel</Button>
-                  <Button className="bg-green-500 hover:bg-green-600 text-white">Add Trade</Button>
+                  <Button 
+                    className="bg-green-500 hover:bg-green-600 text-white"
+                    onClick={handleSubmit}
+                  >
+                    Add Trade
+                  </Button>
                 </div>
               </CardContent>
             </Card>
