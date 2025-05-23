@@ -11,22 +11,7 @@ interface DetailedDataProps {
   showAddTrade?: boolean;
 }
 
-// Define the form state interface
-interface TradeFormData {
-  strategy: string;
-  pair: string;
-  type: string;
-  openTime: string;
-  tradeTime: string;
-  timeframe: string;
-  trend: string;
-  lotSize: string;
-  winLoss: string;
-  netProfit: string;
-  balance: string;
-  candles: string;
-}
-
+// Using the imported TradeFormData interface instead of redefining it
 const initialTradeFormData: TradeFormData = {
   strategy: "",
   pair: "",
