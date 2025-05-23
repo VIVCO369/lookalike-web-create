@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Plus, Clock, Eye, Edit, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,38 +9,58 @@ import StatsCard from "../components/StatsCard";
 import TradingRules from "../components/TradingRules";
 import ScheduleList from "../components/ScheduleList";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 import DetailedData from "../components/DetailedData";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select components
-import { Input } from "@/components/ui/input"; // Ensure Input is also imported
+import { useTradeData, calculateStats } from "@/contexts/TradeDataContext"; // Import useTradeData and calculateStats
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import useLocalStorage from "@/hooks/useLocalStorage"; // Import useLocalStorage
 
 const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
-  const [balance, setBalance] = useState(10.00);
+  // Use local storage for balance
+  const [balance, setBalance] = useLocalStorage<number>("userBalance", 10.00);
   const [isSettingBalance, setIsSettingBalance] = useState(false);
-  const [newBalance, setNewBalance] = useState("");
+  const [newBalance, setNewBalance] = useLocalStorage<string>("newBalanceInput", "");
   const { toast } = useToast();
 
   // State for Daily Target
-  const [dailyTarget, setDailyTarget] = useState(0.00);
   const [isSettingDailyTarget, setIsSettingDailyTarget] = useState(false);
-  const [newDailyTarget, setNewDailyTarget] = useState("");
+  const [newDailyTarget, setNewDailyTarget] = useLocalStorage<string>("newDailyTargetInput", "");
 
   // New state for Trading Rules progress
   const [tradingRulesProgress, setTradingRulesProgress] = useState(0);
   // State for Trading Rules card color
   const [tradingRulesCardColor, setTradingRulesCardColor] = useState("bg-white");
 
-
-  const [selectedTimeframes, setSelectedTimeframes] = useState<string[]>(["1M", "15M", "1H", "4H", "1D"]);
+  const [selectedTimeframes, setSelectedTimeframes] = useLocalStorage<string[]>("selectedTimeframes", ["1M", "15M", "1H", "4H", "1D"]);
   const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
 
-  // Sample trade data
-  const trades = [
-    { id: 1, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:32", tradeTime: "13h 25m 23s", timeframe: "M1", trend: "Up", lotSize: "0.10", candles: "Loss", wl: "-23.11", netProfit: "-23.11", balance: "1000.00" },
-    { id: 2, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:31", tradeTime: "13h 11m 56s", timeframe: "M5", trend: "Down", lotSize: "0.50", candles: "Loss", wl: "-21.80", netProfit: "-21.80", balance: "976.89" },
-  ];
+  // Use the trade data context for real trades and daily target
+  const {
+    realTrades,
+    dailyTarget,
+    setDailyTarget,
+  } = useTradeData();
+
+  // Calculate stats for real trades
+  const stats = useMemo(() => calculateStats(realTrades), [realTrades]);
+
+  // Pagination state for real trades
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 5; // Show 5 trades per page
+
+  // Calculate total pages for real trades
+  const totalPages = Math.ceil(realTrades.length / itemsPerPage);
+
+  // Get paginated real trades for current page
+  const paginatedTrades = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return realTrades.slice(startIndex, startIndex + itemsPerPage);
+  }, [realTrades, currentPage, itemsPerPage]);
+
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -110,7 +130,6 @@ const Index = () => {
     });
   };
 
-
   const toggleTimeframe = (timeframe: string) => {
     if (selectedTimeframes.includes(timeframe)) {
       setSelectedTimeframes(selectedTimeframes.filter(t => t !== timeframe));
@@ -130,6 +149,20 @@ const Index = () => {
     // You might want to revert the color after a delay or on another event
   };
 
+  // Format currency values for display
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
+  };
+
+  // Handle page changes
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: "#F8F5F0" }}>
@@ -256,25 +289,25 @@ const Index = () => {
               />
               <StatsCard
                 title="Net Profit"
-                value="$-216.84"
-                color="text-red-500"
-                borderColor="border-red-500"
+                value={formatCurrency(stats.netProfit)}
+                color={stats.netProfit >= 0 ? "text-green-500" : "text-red-500"}
+                borderColor={stats.netProfit >= 0 ? "border-green-500" : "border-red-500"}
               />
               <StatsCard
                 title="Win Rate"
-                value="0%"
+                value={stats.winRate}
                 color="text-gray-700"
                 borderColor="border-gray-200"
               />
               <StatsCard
                 title="Best Trade"
-                value="+$0"
+                value={stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
                 color="text-green-500"
                 borderColor="border-green-500"
               />
               <StatsCard
                 title="Worst Trade"
-                value="$-23.11"
+                value={formatCurrency(stats.worstTrade)}
                 color="text-red-500"
                 borderColor="border-red-500"
               />
@@ -283,26 +316,24 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
               <StatsCard
                 title="Total Trades"
-                value={trades.length.toString()} // Updated value to trades.length
+                value={stats.totalTrades.toString()} // Use totalTrades from calculated stats
                 labelPosition="below"
                 borderColor="border-gray-200"
               />
-              {/* Removed Avg. Duration card */}
               <StatsCard
-                title="Daily Target" // Changed title from Profit Factor
-                value={`$${dailyTarget.toFixed(2)}`} // Use dailyTarget state
+                title="Daily Target"
+                value={formatCurrency(dailyTarget)} // Use dailyTarget from context
                 labelPosition="below"
                 borderColor="border-gray-200"
               />
               <StatsCard
                 title="Daily Profit"
-                value="+$0.00"
-                color="text-green-500"
+                value={stats.dailyProfit >= 0 ? `+${formatCurrency(stats.dailyProfit)}` : formatCurrency(stats.dailyProfit)}
+                color={stats.dailyProfit >= 0 ? "text-green-500" : "text-red-500"}
                 labelPosition="below"
-                borderColor="border-gray-200"
+                borderColor={stats.dailyProfit >= 0 ? "border-green-500" : "border-red-500"}
               />
             </div>
-            {/* Removed the empty third grid div */}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -344,12 +375,11 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Use the DetailedData component */}
-          <DetailedData showAddTrade={true} />
+          {/* Use the DetailedData component for adding REAL trades */}
+          <DetailedData showAddTrade={true} accountType="real" />
 
-          {/* Trades Table - Updated to match the image */}
+          {/* Trades Table - Updated to use real trades with pagination */}
           <div className="bg-white rounded-md shadow overflow-x-auto mt-4">
-            {/* Removed the h2 heading from here */}
             <Table>
               <TableHeader>
                 <TableRow>
@@ -370,7 +400,7 @@ const Index = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {trades.slice(0, 2).map((trade) => (
+                {paginatedTrades.map((trade) => (
                   <TableRow key={trade.id}>
                     <TableCell>{trade.id}</TableCell>
                     <TableCell>{trade.strategy}</TableCell>
@@ -382,8 +412,12 @@ const Index = () => {
                     <TableCell>{trade.trend}</TableCell>
                     <TableCell>{trade.lotSize}</TableCell>
                     <TableCell className="text-red-500">{trade.candles}</TableCell>
-                    <TableCell className="text-red-500">{trade.wl}</TableCell>
-                    <TableCell className="text-red-500">{trade.netProfit}</TableCell>
+                    <TableCell className={trade.winLoss === "win" ? "text-green-500" : "text-red-500"}>
+                      {trade.winLoss === "win" ? "Win" : "Loss"}
+                    </TableCell>
+                    <TableCell className={parseFloat(trade.netProfit) >= 0 ? "text-green-500" : "text-red-500"}>
+                      {trade.netProfit}
+                    </TableCell>
                     <TableCell>{trade.balance}</TableCell>
                     <TableCell>
                       <div className="flex space-x-1">
@@ -402,8 +436,75 @@ const Index = () => {
                 ))}
               </TableBody>
             </Table>
-            <div className="px-4 py-3 text-xs text-gray-500">
-              Showing 1 to 2 of 5 results
+
+            {/* Added pagination UI */}
+            <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200">
+              <div className="text-sm text-gray-500">
+                Showing {paginatedTrades.length > 0 ? ((currentPage - 1) * 5) + 1 : 0} to {Math.min(currentPage * 5, realTrades.length)} of {realTrades.length} results
+              </div>
+              {totalPages > 1 && (
+                <Pagination>
+                  <PaginationContent>
+                    {currentPage > 1 && (
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(currentPage - 1);
+                          }}
+                        />
+                      </PaginationItem>
+                    )}
+
+                    {/* Generate page numbers */}
+                    {Array.from({ length: totalPages }).map((_, index) => {
+                      const pageNumber = index + 1;
+                      // Show current page and at most 2 pages before and after
+                      if (
+                        pageNumber === 1 ||
+                        pageNumber === totalPages ||
+                        (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                      ) {
+                        return (
+                          <PaginationItem key={pageNumber}>
+                            <PaginationLink
+                              href="#"
+                              isActive={pageNumber === currentPage}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handlePageChange(pageNumber);
+                              }}
+                            >
+                              {pageNumber}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      }
+                      // Show ellipsis for skipped pages
+                      else if (
+                        pageNumber === currentPage - 2 ||
+                        pageNumber === currentPage + 2
+                      ) {
+                        return <PaginationItem key={pageNumber}>...</PaginationItem>;
+                      }
+                      return null;
+                    })}
+
+                    {currentPage < totalPages && (
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(currentPage + 1);
+                          }}
+                        />
+                      </PaginationItem>
+                    )}
+                  </PaginationContent>
+                </Pagination>
+              )}
             </div>
           </div>
         </main>

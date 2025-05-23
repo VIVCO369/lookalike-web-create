@@ -1,31 +1,67 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react"; // Import useEffect
 import Sidebar from "../components/Sidebar";
 import { cn } from "@/lib/utils";
-import { BarChart3, Eye, Edit, Trash2 } from "lucide-react";
+import { BarChart3, Eye, Edit, Trash2, Clock } from "lucide-react"; // Import Clock icon
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Import Card components
-import StatsCard from "../components/StatsCard"; // Import StatsCard
-
-// Sample trade data (using the same data for both tables as a placeholder)
-const sampleTrades = [
-  { id: 1, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:32", tradeTime: "13h 25m 23s", timeframe: "M1", trend: "Up", lotSize: "0.10", candles: "Loss", wl: "-23.11", netProfit: "-23.11", balance: "1000.00" },
-  { id: 2, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:31", tradeTime: "13h 11m 56s", timeframe: "M5", trend: "Down", lotSize: "0.50", candles: "Loss", wl: "-21.80", netProfit: "-21.80", balance: "976.89" },
-  { id: 3, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:31", tradeTime: "13h 2m 47s", timeframe: "M15", trend: "Sideways", lotSize: "0.01", candles: "Loss", wl: "-21.12", netProfit: "-21.12", balance: "955.09" },
-  { id: 4, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:31", tradeTime: "13h 25m 23s", timeframe: "H1", trend: "Up", lotSize: "0.20", candles: "Loss", wl: "-23.11", netProfit: "-23.11", balance: "933.97" },
-  { id: 5, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:30", tradeTime: "13h 11m 56s", timeframe: "H4", trend: "Down", lotSize: "0.30", candles: "Loss", wl: "-21.80", netProfit: "-21.80", balance: "910.86" },
-];
-
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import StatsCard from "../components/StatsCard";
+import { useTradeData, calculateStats } from "@/contexts/TradeDataContext"; // Import useTradeData and calculateStats
+import useLocalStorage from "@/hooks/useLocalStorage"; // Import useLocalStorage
 
 const AnalyticsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date()); // Add state for current date/time
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  // Update the current date and time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
+  // Helper function to format the date
+  const formatDate = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+  };
+
+  // Helper function to format the time
+  const formatTime = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+    return date.toLocaleTimeString('en-US', options);
+  };
+
+  // Use the trade data context for real trades
+  const { realTrades } = useTradeData();
+
+  // Calculate stats for real trades
+  const stats = useMemo(() => calculateStats(realTrades), [realTrades]);
+
+  // Use local storage for balance (assuming analytics shows real account balance)
+  const [balance] = useLocalStorage<number>("userBalance", 10.00);
+
+  // Format currency values for display
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
+  };
+
+
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen" style={{ backgroundColor: "#F8F5F0" }}> {/* Added inline style */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}>
@@ -35,47 +71,48 @@ const AnalyticsPage = () => {
             <BarChart3 className="h-5 w-5 text-gray-500" />
             <h1 className="text-xl font-medium text-gray-700">Analytics</h1>
           </div>
-          {/* You can add header elements specific to the analytics page here */}
+          {/* Display current date and time */}
           <div>
-            {/* Placeholder for date/time or other header info */}
+            <p className="text-black text-sm font-bold">{formatDate(currentDateTime)}</p>
+            <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
         </header>
 
         {/* Main content */}
         <main className="flex-1 p-6">
           <div className="max-w-full mx-auto">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-700">Trade History Analytics</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-gray-700">Real Account Analytics</h2> {/* Updated title */}
 
-            {/* Analytics Stats Cards */}
+            {/* Analytics Stats Cards - Displaying Real Account Stats */}
             <div className="mb-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <StatsCard
                   title="Balance"
-                  value="$10.00" // Placeholder value
+                  value={`$${balance.toFixed(2)}`} // Using the local balance state
                   color="text-green-500"
                   borderColor="border-green-500"
                 />
                 <StatsCard
                   title="Net Profit"
-                  value="$-216.84" // Placeholder value
-                  color="text-red-500"
-                  borderColor="border-red-500"
+                  value={formatCurrency(stats.netProfit)}
+                  color={stats.netProfit >= 0 ? "text-green-500" : "text-red-500"}
+                  borderColor={stats.netProfit >= 0 ? "border-green-500" : "border-red-500"}
                 />
                 <StatsCard
                   title="Win Rate"
-                  value="0%" // Placeholder value
+                  value={stats.winRate}
                   color="text-gray-700"
                   borderColor="border-gray-200"
                 />
                 <StatsCard
                   title="Best Trade"
-                  value="+$0" // Placeholder value
+                  value={stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
                   color="text-green-500"
                   borderColor="border-green-500"
                 />
                 <StatsCard
                   title="Worst Trade"
-                  value="$-23.11" // Placeholder value
+                  value={formatCurrency(stats.worstTrade)}
                   color="text-red-500"
                   borderColor="border-red-500"
                 />
@@ -84,34 +121,34 @@ const AnalyticsPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
                 <StatsCard
                   title="Total Trades"
-                  value={sampleTrades.length.toString()} // Using sample data length
+                  value={stats.totalTrades.toString()} // Using totalTrades from calculated stats
                   labelPosition="below"
                   borderColor="border-gray-200"
                 />
                 <StatsCard
                   title="Daily Target"
-                  value="$0.00" // Placeholder value
+                  value="$0.00" // Placeholder value - Daily Target is currently shared
                   labelPosition="below"
                   borderColor="border-gray-200"
                 />
                  <StatsCard
                   title="Daily Profit"
-                  value="+$0.00" // Placeholder value
-                  color="text-green-500"
+                  value={stats.dailyProfit >= 0 ? `+${formatCurrency(stats.dailyProfit)}` : formatCurrency(stats.dailyProfit)}
+                  color={stats.dailyProfit >= 0 ? "text-green-500" : "text-red-500"}
                   labelPosition="below"
-                  borderColor="border-gray-200"
+                  borderColor={stats.dailyProfit >= 0 ? "border-green-500" : "border-red-500"}
                 />
               </div>
             </div>
 
 
-            {/* Dashboard History Table Card */}
-            <Card className="mb-8"> {/* Wrapped in Card */}
-              <CardHeader> {/* Added CardHeader */}
-                <CardTitle className="text-xl font-medium text-gray-700">Dashboard History (Sample)</CardTitle> {/* Added CardTitle */}
+            {/* Real Account History Table Card */}
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="text-xl font-medium text-gray-700">Real Account History</CardTitle> {/* Updated title */}
               </CardHeader>
-              <CardContent className="p-0"> {/* Added CardContent with p-0 to remove default padding */}
-                <div className="overflow-x-auto"> {/* Kept overflow-x-auto for table */}
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -132,8 +169,8 @@ const AnalyticsPage = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {/* Displaying a subset of data for dashboard history simulation */}
-                      {sampleTrades.slice(0, 2).map((trade) => (
+                      {/* Displaying real trades */}
+                      {realTrades.map((trade) => (
                         <TableRow key={trade.id}>
                           <TableCell>{trade.id}</TableCell>
                           <TableCell>{trade.strategy}</TableCell>
@@ -145,8 +182,12 @@ const AnalyticsPage = () => {
                           <TableCell>{trade.trend}</TableCell>
                           <TableCell>{trade.lotSize}</TableCell>
                           <TableCell className="text-red-500">{trade.candles}</TableCell>
-                          <TableCell className="text-red-500">{trade.wl}</TableCell>
-                          <TableCell className="text-red-500">{trade.netProfit}</TableCell>
+                          <TableCell className={trade.winLoss === "win" ? "text-green-500" : "text-red-500"}>
+                            {trade.winLoss === "win" ? "Win" : "Loss"}
+                          </TableCell>
+                          <TableCell className={parseFloat(trade.netProfit) >= 0 ? "text-green-500" : "text-red-500"}>
+                            {trade.netProfit}
+                          </TableCell>
                           <TableCell>{trade.balance}</TableCell>
                           <TableCell>
                             <div className="flex space-x-1">
@@ -166,13 +207,11 @@ const AnalyticsPage = () => {
                     </TableBody>
                   </Table>
                   <div className="px-4 py-3 text-xs text-gray-500">
-                    Showing 1 to 2 of {sampleTrades.length} results (Sample)
+                    Showing 1 to {realTrades.length} of {realTrades.length} results
                   </div>
                 </div>
               </CardContent>
             </Card>
-
-            {/* Removed Trade Demo History Table Card */}
           </div>
         </main>
       </div>

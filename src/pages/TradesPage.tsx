@@ -1,46 +1,71 @@
 import { Eye, Trash2, Edit, Plus, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Sidebar from "../components/Sidebar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cn } from "@/lib/utils"; // Import cn utility
-import StatsCard from "../components/StatsCard"; // Import StatsCard
-import { useToast } from "@/components/ui/use-toast"; // Import useToast
-import { Progress } from "@/components/ui/progress"; // Import Progress
+import { cn } from "@/lib/utils";
+import StatsCard from "../components/StatsCard";
+import { useToast } from "@/components/ui/use-toast";
+import { Progress } from "@/components/ui/progress";
+import useLocalStorage from "@/hooks/useLocalStorage";
+import { useTradeData, TradeFormData, calculateStats } from "@/contexts/TradeDataContext"; // Import useTradeData and calculateStats
+
+const initialTradeFormData: TradeFormData = {
+  strategy: "",
+  pair: "Boom 500 Index",
+  type: "buy",
+  openTime: "",
+  tradeTime: "",
+  timeframe: "m1",
+  trend: "up",
+  lotSize: "0.01",
+  winLoss: "win",
+  netProfit: "0.00",
+  balance: "0.00",
+  candles: ""
+};
 
 const TradesPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [currentDateTime, setCurrentDateTime] = useState(new Date()); // Add state for date and time
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [showAddTrade, setShowAddTrade] = useState(false);
+  const [formData, setFormData] = useState<TradeFormData>(initialTradeFormData);
 
-  // Add state and logic for timeframe buttons and trend
-  const [selectedTimeframes, setSelectedTimeframes] = useState<string[]>(["1M", "15M", "1H", "4H", "1D"]);
+  // Use the shared context for demo trades and daily target
+  const { demoTrades, addTrade, dailyTarget, setDailyTarget } = useTradeData();
+
+  // Calculate stats for demo trades
+  const stats = useMemo(() => calculateStats(demoTrades), [demoTrades]);
+
+  // Pagination state for demo trades
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 5; // Show 5 trades per page
+
+  // Calculate total pages for demo trades
+  const totalPages = Math.ceil(demoTrades.length / itemsPerPage);
+
+  // Get paginated demo trades for current page
+  const paginatedTrades = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return demoTrades.slice(startIndex, startIndex + itemsPerPage);
+  }, [demoTrades, currentPage, itemsPerPage]);
+
+  // Use localStorage for timeframes and balance
+  const [selectedTimeframes, setSelectedTimeframes] = useLocalStorage<string[]>("selectedTimeframes", ["1M", "15M", "1H", "4H", "1D"]);
   const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
 
-  // State for Balance and Profit
-  const [balance, setBalance] = useState(10.00);
+  const [balance, setBalance] = useLocalStorage<number>("userBalance", 10.00); // This balance might need to be separated for demo/real too
   const [isSettingBalance, setIsSettingBalance] = useState(false);
-  const [newBalance, setNewBalance] = useState("");
-  const { toast } = useToast();
+  const [newBalance, setNewBalance] = useLocalStorage<string>("newBalanceInput", "");
 
-  // State for Daily Target
-  const [dailyTarget, setDailyTarget] = useState(0.00);
   const [isSettingDailyTarget, setIsSettingDailyTarget] = useState(false);
-  const [newDailyTarget, setNewDailyTarget] = useState("");
+  const [newDailyTarget, setNewDailyTarget] = useLocalStorage<string>("newDailyTargetInput", "");
 
-
-  // Sample trade data
-  const trades = [
-    { id: 1, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:32", tradeTime: "13h 25m 23s", timeframe: "M1", trend: "Up", lotSize: "0.10", candles: "Loss", wl: "-23.11", netProfit: "-23.11", balance: "1000.00" },
-    { id: 2, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:31", tradeTime: "13h 11m 56s", timeframe: "M5", trend: "Down", lotSize: "0.50", candles: "Loss", wl: "-21.80", netProfit: "-21.80", balance: "976.89" },
-    { id: 3, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:31", tradeTime: "13h 2m 47s", timeframe: "M15", trend: "Sideways", lotSize: "0.01", candles: "Loss", wl: "-21.12", netProfit: "-21.12", balance: "955.09" },
-    { id: 4, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:31", tradeTime: "13h 25m 23s", timeframe: "H1", trend: "Up", lotSize: "0.20", candles: "Loss", wl: "-23.11", netProfit: "-23.11", balance: "933.97" },
-    { id: 5, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:30", tradeTime: "13h 11m 56s", timeframe: "H4", trend: "Down", lotSize: "0.30", candles: "Loss", wl: "-21.80", netProfit: "-21.80", balance: "910.86" },
-  ];
+  const { toast } = useToast();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -127,12 +152,47 @@ const TradesPage = () => {
     });
   };
 
+  const handleInputChange = (field: keyof TradeFormData, value: string) => {
+    setFormData({ ...formData, [field]: value });
+  };
+
+  const handleSubmit = () => {
+    // Add the trade to the DEMO list
+    addTrade(formData, 'demo');
+
+    toast({
+      title: "Trade Added",
+      description: "Your demo trade has been successfully saved",
+    });
+
+    // Reset form data
+    setFormData(initialTradeFormData);
+
+    // Close the form
+    setShowAddTrade(false);
+  };
+
+  // Format currency values for display
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
+  };
+
+  // Handle page changes
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen" style={{ backgroundColor: "#F8F5F0" }}> {/* Added inline style */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
-      <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}> {/* Added dynamic padding */}
+      <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}>
         {/* Header */}
         <header className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10">
           {/* Replaced "Detailed Data" headline with time and date */}
@@ -172,10 +232,10 @@ const TradesPage = () => {
 
         {/* Main content */}
         <main className="flex-1 p-6">
-          {/* Your Highlights Section */}
+          {/* Your Highlights Section - Displaying Demo Stats */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-medium text-gray-700">Your Highlights</h2>
+              <h2 className="text-xl font-medium text-gray-700">Demo Account</h2> {/* Updated title */}
               <div className="flex gap-2">
                 {isSettingBalance ? (
                   <div className="flex gap-2 items-center">
@@ -237,7 +297,7 @@ const TradesPage = () => {
                     </Button>
                   </div>
                 ) : (
-                 <Button
+                  <Button
                     variant="outline"
                     className="bg-green-500 hover:bg-green-600 text-white"
                     onClick={() => setIsSettingDailyTarget(true)}
@@ -245,97 +305,98 @@ const TradesPage = () => {
                     <Plus className="h-4 w-4 mr-1" /> Daily Target
                   </Button>
                 )}
-
-                {/* Removed Add Profit button and logic */}
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               <StatsCard
                 title="Balance"
-                value={`$${balance.toFixed(2)}`}
+                value={`$${balance.toFixed(2)}`} // Using the local balance state for now
                 color="text-green-500"
                 borderColor="border-green-500"
               />
               <StatsCard
                 title="Net Profit"
-                value="$-216.84"
-                color="text-red-500"
-                borderColor="border-red-500"
+                value={formatCurrency(stats.netProfit)}
+                color={stats.netProfit >= 0 ? "text-green-500" : "text-red-500"}
+                borderColor={stats.netProfit >= 0 ? "border-green-500" : "border-red-500"}
               />
               <StatsCard
                 title="Win Rate"
-                value="0%"
+                value={stats.winRate}
                 color="text-gray-700"
                 borderColor="border-gray-200"
               />
               <StatsCard
                 title="Best Trade"
-                value="+$0"
+                value={stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
                 color="text-green-500"
                 borderColor="border-green-500"
               />
               <StatsCard
                 title="Worst Trade"
-                value="$-23.11"
+                value={formatCurrency(stats.worstTrade)}
                 color="text-red-500"
                 borderColor="border-red-500"
               />
             </div>
 
-            {/* Combined the second and third grid rows */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
               <StatsCard
                 title="Total Trades"
-                value={trades.length.toString()} // Updated value to trades.length
+                value={stats.totalTrades.toString()} // Use totalTrades from calculated stats
                 labelPosition="below"
                 borderColor="border-gray-200"
               />
               <StatsCard
                 title="Daily Target" // Changed title from Avg. Duration
-                value={`$${dailyTarget.toFixed(2)}`} // Use dailyTarget state
+                value={formatCurrency(dailyTarget)} // Use dailyTarget state
                 labelPosition="below"
                 borderColor="border-gray-200"
               />
-              {/* Removed Profit Factor card */}
               <StatsCard
                 title="Daily Profit"
-                value="+$0.00"
-                color="text-green-500"
+                value={stats.dailyProfit >= 0 ? `+${formatCurrency(stats.dailyProfit)}` : formatCurrency(stats.dailyProfit)}
+                color={stats.dailyProfit >= 0 ? "text-green-500" : "text-red-500"}
                 labelPosition="below"
-                borderColor="border-gray-201"
+                borderColor={stats.dailyProfit >= 0 ? "border-green-500" : "border-red-500"}
               />
             </div>
-            {/* Removed the empty third grid div */}
           </div>
-
 
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-2">
-              <span className="text-green-500 flex items-center gap-1">
+              <span className="text-xl font-medium text-gray-700 flex items-center gap-1"> {/* Changed text color and size */}
                 <span className="h-2 w-2 rounded-full bg-green-500"></span>
-                Trades
+                Demo Trades
               </span>
             </div>
             <Button onClick={toggleAddTrade} className="bg-green-500 hover:bg-green-600 text-white">
-              <Plus className="mr-2 h-4 w-4" /> Add Trade
+              <Plus className="mr-2 h-4 w-4" /> Add Demo Trade
             </Button>
           </div>
 
-          {/* Add Trade Form */}
+          {/* Add Trade Form with local storage */}
           {showAddTrade && (
             <Card className="mb-6">
               <CardContent className="pt-6">
-                <h3 className="text-lg font-medium mb-4">Add New Trade Entry</h3>
+                <h3 className="text-lg font-medium mb-4">Add New Demo Trade Entry</h3> {/* Updated title */}
                 {/* Adjusted grid layout to 2 columns on medium/large screens */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm">Strategy</label>
-                    <Input placeholder="Strategy" />
+                    <Input
+                      placeholder="Strategy"
+                      value={formData.strategy}
+                      onChange={(e) => handleInputChange("strategy", e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Pair</label>
-                    <Select defaultValue="">
+                    <Select
+                      value={formData.pair}
+                      onValueChange={(value) => handleInputChange("pair", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select Trading Pair" />
                       </SelectTrigger>
@@ -354,7 +415,10 @@ const TradesPage = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Type</label>
-                    <Select defaultValue="buy">
+                    <Select
+                      value={formData.type}
+                      onValueChange={(value) => handleInputChange("type", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
@@ -366,15 +430,26 @@ const TradesPage = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Open Time</label>
-                    <Input type="datetime-local" />
+                    <Input
+                      type="datetime-local"
+                      value={formData.openTime}
+                      onChange={(e) => handleInputChange("openTime", e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Trade Time</label>
-                    <Input placeholder="Trade Time" />
+                    <Input
+                      placeholder="Trade Time"
+                      value={formData.tradeTime}
+                      onChange={(e) => handleInputChange("tradeTime", e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Timeframe</label>
-                    <Select defaultValue="m1">
+                    <Select
+                      value={formData.timeframe}
+                      onValueChange={(value) => handleInputChange("timeframe", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select timeframe" />
                       </SelectTrigger>
@@ -390,7 +465,10 @@ const TradesPage = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Trend</label>
-                    <Select defaultValue="up">
+                    <Select
+                      value={formData.trend}
+                      onValueChange={(value) => handleInputChange("trend", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select trend" />
                       </SelectTrigger>
@@ -403,11 +481,20 @@ const TradesPage = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Lot Size</label>
-                    <Input type="number" placeholder="0.01" step="0.01" />
+                    <Input
+                      type="number"
+                      placeholder="0.01"
+                      step="0.01"
+                      value={formData.lotSize}
+                      onChange={(e) => handleInputChange("lotSize", e.target.value)}
+                    />
                   </div>
-                   <div className="space-y-2">
+                  <div className="space-y-2">
                     <label className="text-sm">Win/Loss</label>
-                    <Select defaultValue="win">
+                    <Select
+                      value={formData.winLoss}
+                      onValueChange={(value) => handleInputChange("winLoss", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select result" />
                       </SelectTrigger>
@@ -419,28 +506,48 @@ const TradesPage = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Net Profit</label>
-                    <Input type="number" placeholder="0.00" step="0.01" />
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      step="0.01"
+                      value={formData.netProfit}
+                      onChange={(e) => handleInputChange("netProfit", e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm">Balance</label>
-                    <Input type="number" placeholder="0.00" step="0.01" />
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      step="0.01"
+                      value={formData.balance}
+                      onChange={(e) => handleInputChange("balance", e.target.value)}
+                    />
                   </div>
-                   <div className="space-y-2">
+                  <div className="space-y-2">
                     <label className="text-sm">Candles</label>
-                    <Input placeholder="Candles" />
+                    <Input
+                      placeholder="Candles"
+                      value={formData.candles}
+                      onChange={(e) => handleInputChange("candles", e.target.value)}
+                    />
                   </div>
                 </div>
                 <div className="flex justify-end gap-2 mt-6">
                   <Button variant="outline" onClick={toggleAddTrade}>Cancel</Button>
-                  <Button className="bg-green-500 hover:bg-green-600 text-white">Add Trade</Button>
+                  <Button
+                    className="bg-green-500 hover:bg-green-600 text-white"
+                    onClick={handleSubmit}
+                  >
+                    Add Demo Trade
+                  </Button>
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* Trades Table */}
+          {/* Trades Table - Updated to use demo trades with pagination */}
           <div className="bg-white rounded-md shadow">
-            {/* Removed the h2 heading from here */}
             <Table>
               <TableHeader>
                 <TableRow>
@@ -461,7 +568,7 @@ const TradesPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {trades.map((trade) => (
+                {paginatedTrades.map((trade) => (
                   <TableRow key={trade.id}>
                     <TableCell>{trade.id}</TableCell>
                     <TableCell>{trade.strategy}</TableCell>
@@ -473,8 +580,12 @@ const TradesPage = () => {
                     <TableCell>{trade.trend}</TableCell>
                     <TableCell>{trade.lotSize}</TableCell>
                     <TableCell className="text-red-500">{trade.candles}</TableCell>
-                    <TableCell className="text-red-500">{trade.wl}</TableCell>
-                    <TableCell className="text-red-500">{trade.netProfit}</TableCell>
+                    <TableCell className={trade.winLoss === "win" ? "text-green-500" : "text-red-500"}>
+                      {trade.winLoss === "win" ? "Win" : "Loss"}
+                    </TableCell>
+                    <TableCell className={parseFloat(trade.netProfit) >= 0 ? "text-green-500" : "text-red-500"}>
+                      {trade.netProfit}
+                    </TableCell>
                     <TableCell>{trade.balance}</TableCell>
                     <TableCell>
                       <div className="flex space-x-1">
@@ -494,29 +605,74 @@ const TradesPage = () => {
               </TableBody>
             </Table>
 
+            {/* Added pagination UI */}
             <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200">
               <div className="text-sm text-gray-500">
-                Showing 1 to 5 of 15 results
+                Showing {paginatedTrades.length > 0 ? ((currentPage - 1) * 5) + 1 : 0} to {Math.min(currentPage * 5, demoTrades.length)} of {demoTrades.length} results
               </div>
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious href="#" />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink href="#" isActive>1</PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink href="#">2</PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink href="#">3</PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationNext href="#" />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+              {totalPages > 1 && (
+                <Pagination>
+                  <PaginationContent>
+                    {currentPage > 1 && (
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(currentPage - 1);
+                          }}
+                        />
+                      </PaginationItem>
+                    )}
+
+                    {/* Generate page numbers */}
+                    {Array.from({ length: totalPages }).map((_, index) => {
+                      const pageNumber = index + 1;
+                      // Show current page and at most 2 pages before and after
+                      if (
+                        pageNumber === 1 ||
+                        pageNumber === totalPages ||
+                        (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                      ) {
+                        return (
+                          <PaginationItem key={pageNumber}>
+                            <PaginationLink
+                              href="#"
+                              isActive={pageNumber === currentPage}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handlePageChange(pageNumber);
+                              }}
+                            >
+                              {pageNumber}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      }
+                      // Show ellipsis for skipped pages
+                      else if (
+                        pageNumber === currentPage - 2 ||
+                        pageNumber === currentPage + 2
+                      ) {
+                        return <PaginationItem key={pageNumber}>...</PaginationItem>;
+                      }
+                      return null;
+                    })}
+
+                    {currentPage < totalPages && (
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(currentPage + 1);
+                          }}
+                        />
+                      </PaginationItem>
+                    )}
+                  </PaginationContent>
+                </Pagination>
+              )}
             </div>
           </div>
         </main>
