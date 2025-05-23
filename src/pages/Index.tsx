@@ -11,6 +11,7 @@ import ScheduleList from "../components/ScheduleList";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import DetailedData from "../components/DetailedData";
+import { useTradeData } from "@/contexts/TradeDataContext"; // Import the trade data context
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select components
 import { Input } from "@/components/ui/input"; // Ensure Input is also imported
 
@@ -23,7 +24,6 @@ const Index = () => {
   const { toast } = useToast();
 
   // State for Daily Target
-  const [dailyTarget, setDailyTarget] = useState(0.00);
   const [isSettingDailyTarget, setIsSettingDailyTarget] = useState(false);
   const [newDailyTarget, setNewDailyTarget] = useState("");
 
@@ -32,15 +32,11 @@ const Index = () => {
   // State for Trading Rules card color
   const [tradingRulesCardColor, setTradingRulesCardColor] = useState("bg-white");
 
-
   const [selectedTimeframes, setSelectedTimeframes] = useState<string[]>(["1M", "15M", "1H", "4H", "1D"]);
   const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
 
-  // Sample trade data
-  const trades = [
-    { id: 1, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:32", tradeTime: "13h 25m 23s", timeframe: "M1", trend: "Up", lotSize: "0.10", candles: "Loss", wl: "-23.11", netProfit: "-23.11", balance: "1000.00" },
-    { id: 2, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:31", tradeTime: "13h 11m 56s", timeframe: "M5", trend: "Down", lotSize: "0.50", candles: "Loss", wl: "-21.80", netProfit: "-21.80", balance: "976.89" },
-  ];
+  // Use the trade data context
+  const { trades, dailyTarget, setDailyTarget } = useTradeData();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -110,7 +106,6 @@ const Index = () => {
     });
   };
 
-
   const toggleTimeframe = (timeframe: string) => {
     if (selectedTimeframes.includes(timeframe)) {
       setSelectedTimeframes(selectedTimeframes.filter(t => t !== timeframe));
@@ -129,7 +124,6 @@ const Index = () => {
     setTradingRulesCardColor("bg-green-100 border-green-500"); // Change color to green
     // You might want to revert the color after a delay or on another event
   };
-
 
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: "#F8F5F0" }}>
@@ -283,14 +277,13 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
               <StatsCard
                 title="Total Trades"
-                value={trades.length.toString()} // Updated value to trades.length
+                value={trades.length.toString()} // Use trades.length from context
                 labelPosition="below"
                 borderColor="border-gray-200"
               />
-              {/* Removed Avg. Duration card */}
               <StatsCard
-                title="Daily Target" // Changed title from Profit Factor
-                value={`$${dailyTarget.toFixed(2)}`} // Use dailyTarget state
+                title="Daily Target"
+                value={`$${dailyTarget.toFixed(2)}`} // Use dailyTarget from context
                 labelPosition="below"
                 borderColor="border-gray-200"
               />
@@ -302,7 +295,6 @@ const Index = () => {
                 borderColor="border-gray-200"
               />
             </div>
-            {/* Removed the empty third grid div */}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -347,9 +339,8 @@ const Index = () => {
           {/* Use the DetailedData component */}
           <DetailedData showAddTrade={true} />
 
-          {/* Trades Table - Updated to match the image */}
+          {/* Trades Table - Updated to use shared context */}
           <div className="bg-white rounded-md shadow overflow-x-auto mt-4">
-            {/* Removed the h2 heading from here */}
             <Table>
               <TableHeader>
                 <TableRow>
@@ -370,7 +361,7 @@ const Index = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {trades.slice(0, 2).map((trade) => (
+                {trades.slice(0, 5).map((trade) => (
                   <TableRow key={trade.id}>
                     <TableCell>{trade.id}</TableCell>
                     <TableCell>{trade.strategy}</TableCell>
@@ -382,8 +373,12 @@ const Index = () => {
                     <TableCell>{trade.trend}</TableCell>
                     <TableCell>{trade.lotSize}</TableCell>
                     <TableCell className="text-red-500">{trade.candles}</TableCell>
-                    <TableCell className="text-red-500">{trade.wl}</TableCell>
-                    <TableCell className="text-red-500">{trade.netProfit}</TableCell>
+                    <TableCell className={trade.winLoss === "win" ? "text-green-500" : "text-red-500"}>
+                      {trade.winLoss === "win" ? "Win" : "Loss"}
+                    </TableCell>
+                    <TableCell className={parseFloat(trade.netProfit) >= 0 ? "text-green-500" : "text-red-500"}>
+                      {trade.netProfit}
+                    </TableCell>
                     <TableCell>{trade.balance}</TableCell>
                     <TableCell>
                       <div className="flex space-x-1">
@@ -403,7 +398,7 @@ const Index = () => {
               </TableBody>
             </Table>
             <div className="px-4 py-3 text-xs text-gray-500">
-              Showing 1 to 2 of 5 results
+              Showing 1 to {Math.min(trades.length, 5)} of {trades.length} results
             </div>
           </div>
         </main>
