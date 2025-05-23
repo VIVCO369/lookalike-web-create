@@ -1,12 +1,11 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import useLocalStorage from "@/hooks/useLocalStorage";
 import { useToast } from "@/components/ui/use-toast";
+import { useTradeData, TradeFormData } from "@/contexts/TradeDataContext";
 
 interface DetailedDataProps {
   showAddTrade?: boolean;
@@ -45,8 +44,9 @@ const initialTradeFormData: TradeFormData = {
 
 const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
   const [showTradeForm, setShowTradeForm] = useState(false);
-  const [formData, setFormData] = useLocalStorage<TradeFormData>("tradeFormData", initialTradeFormData);
+  const [formData, setFormData] = useState<TradeFormData>(initialTradeFormData);
   const { toast } = useToast();
+  const { addTrade } = useTradeData();
 
   const toggleTradeForm = () => {
     setShowTradeForm(!showTradeForm);
@@ -57,14 +57,16 @@ const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
   };
 
   const handleSubmit = () => {
-    // Here you would normally submit the data to your backend
+    // Add the trade to the shared context
+    addTrade(formData);
+    
     toast({
       title: "Trade Added",
-      description: "Your trade has been successfully saved",
+      description: "Your trade has been successfully saved to Trading Details",
     });
     
-    // Reset the form to initial values after submission if needed
-    // setFormData(initialTradeFormData);
+    // Reset the form to initial values after submission
+    setFormData(initialTradeFormData);
     
     // Close the form
     setShowTradeForm(false);

@@ -11,22 +11,8 @@ import { cn } from "@/lib/utils";
 import StatsCard from "../components/StatsCard"; 
 import { useToast } from "@/components/ui/use-toast";
 import { Progress } from "@/components/ui/progress";
-import useLocalStorage from "@/hooks/useLocalStorage"; 
-
-interface TradeFormData {
-  strategy: string;
-  pair: string;
-  type: string;
-  openTime: string;
-  tradeTime: string;
-  timeframe: string;
-  trend: string;
-  lotSize: string;
-  winLoss: string;
-  netProfit: string;
-  balance: string;
-  candles: string;
-}
+import useLocalStorage from "@/hooks/useLocalStorage";
+import { useTradeData, TradeFormData } from "@/contexts/TradeDataContext";
 
 const initialTradeFormData: TradeFormData = {
   strategy: "",
@@ -47,9 +33,12 @@ const TradesPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [showAddTrade, setShowAddTrade] = useState(false);
-  const [formData, setFormData] = useLocalStorage<TradeFormData>("tradesPageFormData", initialTradeFormData);
+  const [formData, setFormData] = useState<TradeFormData>(initialTradeFormData);
   
-  // Use localStorage for timeframes, balance and daily target
+  // Use the shared context for trades and daily target
+  const { trades, addTrade, dailyTarget, setDailyTarget } = useTradeData();
+  
+  // Use localStorage for timeframes and balance
   const [selectedTimeframes, setSelectedTimeframes] = useLocalStorage<string[]>("selectedTimeframes", ["1M", "15M", "1H", "4H", "1D"]);
   const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
   
@@ -57,20 +46,10 @@ const TradesPage = () => {
   const [isSettingBalance, setIsSettingBalance] = useState(false);
   const [newBalance, setNewBalance] = useLocalStorage<string>("newBalanceInput", "");
   
-  const [dailyTarget, setDailyTarget] = useLocalStorage<number>("dailyTarget", 0.00);
   const [isSettingDailyTarget, setIsSettingDailyTarget] = useState(false);
   const [newDailyTarget, setNewDailyTarget] = useLocalStorage<string>("newDailyTargetInput", "");
   
   const { toast } = useToast();
-
-  // Sample trade data
-  const trades = [
-    { id: 1, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:32", tradeTime: "13h 25m 23s", timeframe: "M1", trend: "Up", lotSize: "0.10", candles: "Loss", wl: "-23.11", netProfit: "-23.11", balance: "1000.00" },
-    { id: 2, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:31", tradeTime: "13h 11m 56s", timeframe: "M5", trend: "Down", lotSize: "0.50", candles: "Loss", wl: "-21.80", netProfit: "-21.80", balance: "976.89" },
-    { id: 3, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:31", tradeTime: "13h 2m 47s", timeframe: "M15", trend: "Sideways", lotSize: "0.01", candles: "Loss", wl: "-21.12", netProfit: "-21.12", balance: "955.09" },
-    { id: 4, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:31", tradeTime: "13h 25m 23s", timeframe: "H1", trend: "Up", lotSize: "0.20", candles: "Loss", wl: "-23.11", netProfit: "-23.11", balance: "933.97" },
-    { id: 5, strategy: "None", pair: "Boom 500 Index", type: "Buy", openTime: "2023-03-18T06:30", tradeTime: "13h 11m 56s", timeframe: "H4", trend: "Down", lotSize: "0.30", candles: "Loss", wl: "-21.80", netProfit: "-21.80", balance: "910.86" },
-  ];
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -162,11 +141,16 @@ const TradesPage = () => {
   };
 
   const handleSubmit = () => {
-    // Here you would normally submit the data to your backend
+    // Add the trade to the shared context
+    addTrade(formData);
+    
     toast({
       title: "Trade Added",
       description: "Your trade has been successfully saved",
     });
+    
+    // Reset form data
+    setFormData(initialTradeFormData);
     
     // Close the form
     setShowAddTrade(false);
@@ -176,7 +160,7 @@ const TradesPage = () => {
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
-      <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}> {/* Added dynamic padding */}
+      <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}> 
         {/* Header */}
         <header className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10">
           {/* Replaced "Detailed Data" headline with time and date */}
@@ -350,7 +334,6 @@ const TradesPage = () => {
             </div>
             {/* Removed the empty third grid div */}
           </div>
-
 
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-2">
@@ -534,9 +517,8 @@ const TradesPage = () => {
             </Card>
           )}
 
-          {/* Trades Table */}
+          {/* Trades Table - Updated to use shared context */}
           <div className="bg-white rounded-md shadow">
-            {/* Removed the h2 heading from here */}
             <Table>
               <TableHeader>
                 <TableRow>
@@ -569,8 +551,8 @@ const TradesPage = () => {
                     <TableCell>{trade.trend}</TableCell>
                     <TableCell>{trade.lotSize}</TableCell>
                     <TableCell className="text-red-500">{trade.candles}</TableCell>
-                    <TableCell className="text-red-500">{trade.wl}</TableCell>
-                    <TableCell className="text-red-500">{trade.netProfit}</TableCell>
+                    <TableCell className={trade.winLoss === "win" ? "text-green-500" : "text-red-500"}>{trade.netProfit}</TableCell>
+                    <TableCell className={parseFloat(trade.netProfit) >= 0 ? "text-green-500" : "text-red-500"}>{trade.netProfit}</TableCell>
                     <TableCell>{trade.balance}</TableCell>
                     <TableCell>
                       <div className="flex space-x-1">
