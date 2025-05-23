@@ -2,7 +2,7 @@ import {
   LayoutDashboard,
   Calendar,
   BookOpen,
-  Users,
+  Users, // Keep Users icon for now, can change later if needed
   BarChart3,
   Settings,
   Menu,
@@ -34,7 +34,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     { icon: Calendar, label: "Schedule", path: "/schedule" },
     { icon: BookOpen, label: "Trade Rules", path: "/trading-rules" },
     { icon: BarChart3, label: "Trade Demo", path: "/trades" },
-    { icon: Users, label: "Users", path: "/users" },
+    { icon: Users, label: "Trade Goals", path: "/trade-goals" }, // Changed label and path
     { icon: BarChart3, label: "Analytics", path: "/analytics" },
     { icon: Settings, label: "Settings", path: "/settings" },
   ];

@@ -19,15 +19,18 @@ const Index = () => {
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [balance, setBalance] = useState(10.00);
   const [isSettingBalance, setIsSettingBalance] = useState(false);
-  const [isAddingProfit, setIsAddingProfit] = useState(false);
   const [newBalance, setNewBalance] = useState("");
-  const [newProfit, setNewProfit] = useState("");
   const { toast } = useToast();
 
   // State for Daily Target
   const [dailyTarget, setDailyTarget] = useState(0.00);
   const [isSettingDailyTarget, setIsSettingDailyTarget] = useState(false);
   const [newDailyTarget, setNewDailyTarget] = useState("");
+
+  // New state for Trading Rules progress
+  const [tradingRulesProgress, setTradingRulesProgress] = useState(0);
+  // State for Trading Rules card color
+  const [tradingRulesCardColor, setTradingRulesCardColor] = useState("bg-white");
 
 
   const [selectedTimeframes, setSelectedTimeframes] = useState<string[]>(["1M", "15M", "1H", "4H", "1D"]);
@@ -118,7 +121,14 @@ const Index = () => {
 
   const numberOfRedButtons = timeframes.length - selectedTimeframes.length;
   const trend = numberOfRedButtons >= 3 ? "Down Trend" : "Up Trend";
-  const trendColor = numberOfRedButtons >= 3 ? "text-red-500" : "text-green-500";
+  // Updated trendColor to use Tailwind classes directly for button background
+  const trendColorClass = numberOfRedButtons >= 3 ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600";
+
+  // Handle click on Trading Rules card
+  const handleTradingRulesClick = () => {
+    setTradingRulesCardColor("bg-green-100 border-green-500"); // Change color to green
+    // You might want to revert the color after a delay or on another event
+  };
 
 
   return (
@@ -133,9 +143,14 @@ const Index = () => {
             <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
           <div className="flex items-center gap-4"> {/* Adjusted gap */}
-            <div>
-              <p className={trendColor}>Trend: {trend}</p>
-            </div>
+            {/* Changed Trend display from p to Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn("text-white", trendColorClass)} // Apply dynamic background color class
+            >
+              {trend}
+            </Button>
             <div className="flex items-center gap-2">
               {timeframes.map((timeframe) => (
                 <Button
@@ -160,7 +175,7 @@ const Index = () => {
         <main className="flex-1 p-6">
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-medium text-gray-700">Your Highlights</h2>
+              <h2 className="text-xl font-medium text-gray-700">Dashboard</h2> {/* Changed text here */}
               <div className="flex gap-2">
                 {isSettingBalance ? (
                   <div className="flex gap-2 items-center">
@@ -292,8 +307,10 @@ const Index = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-1">
-              {/* Removed duplicate headline */}
-              <TradingRules hideAddButton={true} />
+              {/* Added onClick handler and dynamic class for background color */}
+              <div onClick={handleTradingRulesClick} className={cn("cursor-pointer", tradingRulesCardColor)}>
+                <TradingRules hideAddButton={true} dashboardView={true} onProgressChange={setTradingRulesProgress} /> {/* Pass dashboardView prop */}
+              </div>
             </div>
             <div className="md:col-span-1">
               <Card>
@@ -301,15 +318,22 @@ const Index = () => {
                   <h3 className="text-lg font-medium text-center mb-6">Signal Progress</h3>
                   <div className="flex justify-center mb-4">
                     <div className="relative h-32 w-32">
-                      <Progress value={50} className="h-full w-full rounded-full" />
+                      {/* Increased thickness of the progress bar */}
+                      <Progress value={tradingRulesProgress} className="h-full w-full rounded-full [&>div]:!bg-green-500" /> {/* Use tradingRulesProgress and set color */}
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-2xl font-bold">50%</span>
+                        <span className="text-2xl font-bold text-gray-800">{tradingRulesProgress.toFixed(0)}%</span> {/* Display progress with better contrast */}
                       </div>
                     </div>
                   </div>
                   <p className="text-center text-gray-600 mb-6">Trade Completed</p>
                   <div className="flex justify-center">
-                    <Button variant="destructive">Ready To Trade</Button>
+                    {/* Conditional button text and color */}
+                    <Button
+                      variant={tradingRulesProgress === 100 ? "default" : "destructive"}
+                      className={tradingRulesProgress === 100 ? "bg-green-500 hover:bg-green-600 text-white" : ""}
+                    >
+                      {tradingRulesProgress === 100 ? "Take The Trade" : "Ready To Trade"}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
