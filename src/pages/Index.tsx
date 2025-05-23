@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Plus, Clock, Eye, Edit, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,8 +36,8 @@ const Index = () => {
   const [selectedTimeframes, setSelectedTimeframes] = useState<string[]>(["1M", "15M", "1H", "4H", "1D"]);
   const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
 
-  // Use the trade data context
-  const { trades, dailyTarget, setDailyTarget } = useTradeData();
+  // Use the trade data context with stats
+  const { trades, dailyTarget, setDailyTarget, stats } = useTradeData();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -123,6 +124,16 @@ const Index = () => {
   const handleTradingRulesClick = () => {
     setTradingRulesCardColor("bg-green-100 border-green-500"); // Change color to green
     // You might want to revert the color after a delay or on another event
+  };
+
+  // Format currency values for display
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
   };
 
   return (
@@ -250,25 +261,25 @@ const Index = () => {
               />
               <StatsCard
                 title="Net Profit"
-                value="$-216.84"
-                color="text-red-500"
-                borderColor="border-red-500"
+                value={formatCurrency(stats.netProfit)}
+                color={stats.netProfit >= 0 ? "text-green-500" : "text-red-500"}
+                borderColor={stats.netProfit >= 0 ? "border-green-500" : "border-red-500"}
               />
               <StatsCard
                 title="Win Rate"
-                value="0%"
+                value={stats.winRate}
                 color="text-gray-700"
                 borderColor="border-gray-200"
               />
               <StatsCard
                 title="Best Trade"
-                value="+$0"
+                value={stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
                 color="text-green-500"
                 borderColor="border-green-500"
               />
               <StatsCard
                 title="Worst Trade"
-                value="$-23.11"
+                value={formatCurrency(stats.worstTrade)}
                 color="text-red-500"
                 borderColor="border-red-500"
               />
@@ -283,16 +294,16 @@ const Index = () => {
               />
               <StatsCard
                 title="Daily Target"
-                value={`$${dailyTarget.toFixed(2)}`} // Use dailyTarget from context
+                value={formatCurrency(dailyTarget)} // Use dailyTarget from context
                 labelPosition="below"
                 borderColor="border-gray-200"
               />
               <StatsCard
                 title="Daily Profit"
-                value="+$0.00"
-                color="text-green-500"
+                value={stats.dailyProfit >= 0 ? `+${formatCurrency(stats.dailyProfit)}` : formatCurrency(stats.dailyProfit)}
+                color={stats.dailyProfit >= 0 ? "text-green-500" : "text-red-500"}
                 labelPosition="below"
-                borderColor="border-gray-200"
+                borderColor={stats.dailyProfit >= 0 ? "border-green-500" : "border-red-500"}
               />
             </div>
           </div>
