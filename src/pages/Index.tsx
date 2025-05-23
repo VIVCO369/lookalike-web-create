@@ -11,6 +11,8 @@ import ScheduleList from "../components/ScheduleList";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import DetailedData from "../components/DetailedData";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select components
+import { Input } from "@/components/ui/input"; // Ensure Input is also imported
 
 const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -21,6 +23,12 @@ const Index = () => {
   const [newBalance, setNewBalance] = useState("");
   const [newProfit, setNewProfit] = useState("");
   const { toast } = useToast();
+
+  // State for Daily Target
+  const [dailyTarget, setDailyTarget] = useState(0.00);
+  const [isSettingDailyTarget, setIsSettingDailyTarget] = useState(false);
+  const [newDailyTarget, setNewDailyTarget] = useState("");
+
 
   const [selectedTimeframes, setSelectedTimeframes] = useState<string[]>(["1M", "15M", "1H", "4H", "1D"]);
   const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
@@ -46,13 +54,13 @@ const Index = () => {
     };
   }, []);
 
-  const formatDate = (date) => {
-    const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+  const formatDate = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
     return date.toLocaleDateString('en-US', options);
   };
 
-  const formatTime = (date) => {
-    const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+  const formatTime = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
     return date.toLocaleTimeString('en-US', options);
   };
 
@@ -77,9 +85,10 @@ const Index = () => {
     });
   };
 
-  const handleAddProfit = () => {
-    const parsedProfit = parseFloat(newProfit);
-    if (isNaN(parsedProfit)) {
+  // Handler for setting Daily Target
+  const handleSetDailyTarget = () => {
+    const parsedTarget = parseFloat(newDailyTarget);
+    if (isNaN(parsedTarget)) {
       toast({
         title: "Invalid amount",
         description: "Please enter a valid number",
@@ -88,15 +97,16 @@ const Index = () => {
       return;
     }
 
-    setBalance(prev => prev + parsedProfit);
-    setIsAddingProfit(false);
-    setNewProfit("");
+    setDailyTarget(parsedTarget);
+    setIsSettingDailyTarget(false);
+    setNewDailyTarget("");
 
     toast({
-      title: "Profit added",
-      description: `$${parsedProfit.toFixed(2)} has been added to your balance`,
+      title: "Daily Target updated",
+      description: `Your daily target has been set to $${parsedTarget.toFixed(2)}`,
     });
   };
+
 
   const toggleTimeframe = (timeframe: string) => {
     if (selectedTimeframes.includes(timeframe)) {
@@ -106,8 +116,9 @@ const Index = () => {
     }
   };
 
-  const trend = selectedTimeframes.length >= 3 ? "Up Trend" : "Down Trend";
-  const trendColor = selectedTimeframes.length >= 3 ? "text-green-500" : "text-red-500";
+  const numberOfRedButtons = timeframes.length - selectedTimeframes.length;
+  const trend = numberOfRedButtons >= 3 ? "Down Trend" : "Up Trend";
+  const trendColor = numberOfRedButtons >= 3 ? "text-red-500" : "text-green-500";
 
 
   return (
@@ -185,37 +196,37 @@ const Index = () => {
                   </Button>
                 )}
 
-                {isAddingProfit ? (
+                {isSettingDailyTarget ? (
                   <div className="flex gap-2 items-center">
                     <input
                       type="number"
-                      value={newProfit}
-                      onChange={(e) => setNewProfit(e.target.value)}
-                      placeholder="Enter profit amount"
+                      value={newDailyTarget}
+                      onChange={(e) => setNewDailyTarget(e.target.value)}
+                      placeholder="Enter daily target"
                       className="border p-1 rounded text-sm"
                     />
                     <Button
                       size="sm"
-                      onClick={handleAddProfit}
+                      onClick={handleSetDailyTarget}
                       className="bg-green-500 hover:bg-green-600 text-white"
                     >
-                      Add
+                      Set
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => setIsAddingProfit(false)}
+                      onClick={() => setIsSettingDailyTarget(false)}
                     >
                       Cancel
                     </Button>
                   </div>
                 ) : (
-                  <Button
+                 <Button
                     variant="outline"
                     className="bg-green-500 hover:bg-green-600 text-white"
-                    onClick={() => setIsAddingProfit(true)}
+                    onClick={() => setIsSettingDailyTarget(true)}
                   >
-                    <Plus className="h-4 w-4 mr-1" /> Add Profit
+                    <Plus className="h-4 w-4 mr-1" /> Daily Target
                   </Button>
                 )}
               </div>
@@ -257,34 +268,26 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
               <StatsCard
                 title="Total Trades"
-                value="10"
+                value={trades.length.toString()} // Updated value to trades.length
+                labelPosition="below"
+                borderColor="border-gray-200"
+              />
+              {/* Removed Avg. Duration card */}
+              <StatsCard
+                title="Daily Target" // Changed title from Profit Factor
+                value={`$${dailyTarget.toFixed(2)}`} // Use dailyTarget state
                 labelPosition="below"
                 borderColor="border-gray-200"
               />
               <StatsCard
-                title="Avg. Duration"
-                value="13h 09m 09s"
-                labelPosition="below"
-                borderColor="border-gray-200"
-              />
-              <StatsCard
-                title="Profit Factor"
-                value="0.00"
+                title="Daily Profit"
+                value="+$0.00"
+                color="text-green-500"
                 labelPosition="below"
                 borderColor="border-gray-200"
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-              <div className="lg:col-start-3">
-                <StatsCard
-                  title="Daily Profit"
-                  value="+$0.00"
-                  color="text-green-500"
-                  labelPosition="below"
-                  borderColor="border-gray-200"
-                />
-              </div>
-            </div>
+            {/* Removed the empty third grid div */}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -322,7 +325,7 @@ const Index = () => {
 
           {/* Trades Table - Updated to match the image */}
           <div className="bg-white rounded-md shadow overflow-x-auto mt-4">
-            {/* Removed the h2 headline from here */}
+            {/* Removed the h2 heading from here */}
             <Table>
               <TableHeader>
                 <TableRow>

@@ -18,8 +18,10 @@ const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
 
   return (
     <div className="mt-8">
-      {/* Styled this span to match "Your Highlights" */}
+      {/* Removed the h2 heading from here */}
+
       <div className="flex items-center justify-between mb-4">
+        {/* Styled this span to match "Your Highlights" */}
         <span className="text-xl font-medium text-gray-700 flex items-center gap-1">
           {/* Removed the green dot span */}
           Trading Detail
@@ -46,7 +48,23 @@ const DetailedData = ({ showAddTrade = false }: DetailedDataProps) => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Pair</label>
-                <Input placeholder="Trading Pair" />
+                {/* Replaced Input with Select and added options */}
+                <Select defaultValue="">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Trading Pair" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Boom 300 Index">Boom 300 Index</SelectItem>
+                    <SelectItem value="Boom 500 Index">Boom 500 Index</SelectItem>
+                    <SelectItem value="Boom 600 Index">Boom 600 Index</SelectItem>
+                    <SelectItem value="Boom 900 Index">Boom 900 Index</SelectItem>
+                    <SelectItem value="Boom 1000 Index">Boom 1000 Index</SelectItem>
+                    <SelectItem value="Crash 300 Index">Crash 300 Index</SelectItem>
+                    <SelectItem value="Crash 500 Index">Crash 500 Index</SelectItem>
+                    <SelectItem value="Crash 600 Index">Crash 600 Index</SelectItem>
+                    <SelectItem value="Crash 1000 Index">Crash 1000 Index</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <label className="text-sm">Type</label>

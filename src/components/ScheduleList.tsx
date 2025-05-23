@@ -21,7 +21,10 @@ const colorOptions = [
   { label: "Yellow", value: "yellow", bgColor: "bg-yellow-100 border-l-4 border-yellow-400" },
   { label: "Blue", value: "blue", bgColor: "bg-blue-50 border-l-4 border-blue-400" },
   { label: "Green", value: "green", bgColor: "bg-green-50 border-l-4 border-green-400" },
-  { label: "Purple", value: "purple", bgColor: "bg-purple-50 border-l-4 border-purple-400" }
+  { label: "Purple", value: "purple", bgColor: "bg-purple-50 border-l-4 border-purple-400" },
+  { label: "Red", value: "red", bgColor: "bg-red-50 border-l-4 border-red-400" }, // Added Red
+  { label: "Indigo", value: "indigo", bgColor: "bg-indigo-50 border-l-4 border-indigo-400" }, // Added another color
+  { label: "Pink", value: "pink", bgColor: "bg-pink-50 border-l-4 border-pink-400" }, // Added another color
 ];
 
 const ScheduleList = ({ hideAddButton = false }: ScheduleListProps) => {
@@ -30,51 +33,51 @@ const ScheduleList = ({ hideAddButton = false }: ScheduleListProps) => {
   const [newTitle, setNewTitle] = useState("");
   const [newLabel, setNewLabel] = useState("");
   const [selectedColor, setSelectedColor] = useState("yellow");
-  
+
   const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>([
-    { 
+    {
       id: "1",
-      time: "07:00 - 08:00", 
-      title: "Morning Routine", 
+      time: "07:00 - 08:00",
+      title: "Morning Routine",
       type: "Personal",
-      color: "bg-yellow-100 border-l-4 border-yellow-400" 
+      color: "bg-yellow-100 border-l-4 border-yellow-400"
     },
-    { 
+    {
       id: "2",
-      time: "08:30 - 12:00", 
-      title: "Deep Work Session", 
+      time: "08:30 - 12:00",
+      title: "Deep Work Session",
       type: "Work",
-      color: "bg-blue-50 border-l-4 border-blue-400" 
+      color: "bg-blue-50 border-l-4 border-blue-400"
     },
-    { 
+    {
       id: "3",
-      time: "12:30 - 13:30", 
-      title: "Lunch & Quick Walk", 
+      time: "12:30 - 13:30",
+      title: "Lunch & Quick Walk",
       type: "Fitness",
-      color: "bg-green-50 border-l-4 border-green-400" 
+      color: "bg-green-50 border-l-4 border-green-400"
     },
-    { 
+    {
       id: "4",
-      time: "14:00 - 16:30", 
-      title: "Team Meetings", 
+      time: "14:00 - 16:30",
+      title: "Team Meetings",
       type: "Work",
-      color: "bg-blue-50 border-l-4 border-blue-400" 
+      color: "bg-blue-50 border-l-4 border-blue-400"
     },
-    { 
+    {
       id: "5",
-      time: "17:00 - 19:00", 
-      title: "Family Dinner", 
+      time: "17:00 - 19:00",
+      title: "Family Dinner",
       type: "Family",
-      color: "bg-purple-50 border-l-4 border-purple-400" 
+      color: "bg-purple-50 border-l-4 border-purple-400"
     },
   ]);
 
   const handleAddSchedule = () => {
     if (newTime.trim() === "" || newTitle.trim() === "") return;
-    
+
     const selectedColorObj = colorOptions.find(c => c.value === selectedColor);
     const colorClass = selectedColorObj ? selectedColorObj.bgColor : colorOptions[0].bgColor;
-    
+
     setScheduleItems([
       ...scheduleItems,
       {
@@ -85,7 +88,7 @@ const ScheduleList = ({ hideAddButton = false }: ScheduleListProps) => {
         color: colorClass
       }
     ]);
-    
+
     setNewTime("");
     setNewTitle("");
     setNewLabel("");
@@ -115,7 +118,7 @@ const ScheduleList = ({ hideAddButton = false }: ScheduleListProps) => {
         {addingSchedule && (
           <div className="border rounded-md p-4 mb-6 bg-gray-50">
             <h4 className="font-medium mb-4">Add New Schedule Entry</h4>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <p className="text-sm text-gray-500 mb-1">Time (e.g., 07:00 - 08:00)</p>
@@ -134,7 +137,7 @@ const ScheduleList = ({ hideAddButton = false }: ScheduleListProps) => {
                 />
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <p className="text-sm text-gray-500 mb-1">Label (Optional)</p>
@@ -160,7 +163,7 @@ const ScheduleList = ({ hideAddButton = false }: ScheduleListProps) => {
                 </Select>
               </div>
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setAddingSchedule(false)}>
                 Cancel
@@ -186,7 +189,7 @@ const ScheduleList = ({ hideAddButton = false }: ScheduleListProps) => {
                   <button className="text-gray-400 p-1 rounded-full hover:bg-gray-100">
                     <Pencil className="h-3 w-3" />
                   </button>
-                  <button 
+                  <button
                     className="text-gray-400 p-1 rounded-full hover:bg-gray-100"
                     onClick={() => handleRemoveSchedule(item.id)}
                   >
