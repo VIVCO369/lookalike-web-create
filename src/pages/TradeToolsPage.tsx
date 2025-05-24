@@ -118,6 +118,113 @@ const TradeToolsPage = () => {
               accountType="trade-tools"
               showAddTrade={true}
             />
+
+            {/* Trades Table */}
+            <div className="bg-white rounded-lg shadow-sm border mt-6">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-700">Trade History</h3>
+                </div>
+                
+                {tradeToolsTrades.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No trades found. Add your first trade to get started.
+                  </div>
+                ) : (
+                  <>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>TRADE</TableHead>
+                          <TableHead>PAIR</TableHead>
+                          <TableHead>TYPE</TableHead>
+                          <TableHead>TIMEFRAME</TableHead>
+                          <TableHead>TREND</TableHead>
+                          <TableHead>LOT SIZE</TableHead>
+                          <TableHead>CANDLES</TableHead>
+                          <TableHead>W/L</TableHead>
+                          <TableHead>NET PROFIT</TableHead>
+                          <TableHead>BALANCE</TableHead>
+                          <TableHead>ACTIONS</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {paginatedTrades.map((trade, index) => (
+                          <TableRow key={trade.id}>
+                            <TableCell>{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
+                            <TableCell>{trade.pair}</TableCell>
+                            <TableCell>
+                              <span className={trade.type === 'buy' ? 'text-blue-600' : 'text-red-600'}>
+                                {trade.type}
+                              </span>
+                            </TableCell>
+                            <TableCell>{trade.timeframe}</TableCell>
+                            <TableCell>{trade.trend}</TableCell>
+                            <TableCell>{trade.lotSize}</TableCell>
+                            <TableCell>{trade.candles}</TableCell>
+                            <TableCell>
+                              <span className={trade.winLoss === 'win' ? 'text-green-600' : 'text-red-600'}>
+                                {trade.winLoss === 'win' ? 'Win' : 'Loss'}
+                              </span>
+                            </TableCell>
+                            <TableCell className={parseFloat(trade.netProfit) >= 0 ? 'text-green-600' : 'text-red-600'}>
+                              {parseFloat(trade.netProfit) >= 0 ? '+' : ''}{parseFloat(trade.netProfit).toFixed(2)}
+                            </TableCell>
+                            <TableCell>{parseFloat(trade.balance).toFixed(2)}</TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button variant="ghost" size="sm">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm">
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <div className="mt-4">
+                        <Pagination>
+                          <PaginationContent>
+                            <PaginationItem>
+                              <PaginationPrevious 
+                                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                                className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                              />
+                            </PaginationItem>
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                              <PaginationItem key={page}>
+                                <PaginationLink
+                                  onClick={() => handlePageChange(page)}
+                                  isActive={currentPage === page}
+                                  className="cursor-pointer"
+                                >
+                                  {page}
+                                </PaginationLink>
+                              </PaginationItem>
+                            ))}
+                            <PaginationItem>
+                              <PaginationNext 
+                                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                                className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                              />
+                            </PaginationItem>
+                          </PaginationContent>
+                        </Pagination>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         </main>
       </div>
