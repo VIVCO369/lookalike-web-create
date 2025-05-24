@@ -39,7 +39,9 @@ interface TradeDataContextType {
   setTradeToolsTrades: (trades: TradeFormData[] | ((prevTrades: TradeFormData[]) => TradeFormData[])) => void; // Setter for Trade Tools trades
   dailyTarget: number;
   setDailyTarget: (target: number | ((prevTarget: number) => number)) => void;
-  addTrade: (trade: TradeFormData, accountType: 'real' | 'demo' | 'trade-tools') => void; // Updated addTrade to include 'trade-tools'
+  addTrade: (trade: TradeFormData, accountType: 'real' | 'demo' | 'trade-tools') => void;
+  updateTrade: (id: number, updatedTrade: TradeFormData, accountType: 'real' | 'demo' | 'trade-tools') => void; // Add updateTrade function
+  deleteTrade: (id: number, accountType: 'real' | 'demo' | 'trade-tools') => void; // Add deleteTrade function
   clearDemoTrades: () => void;
   clearDashboardRealTrades: () => void; // Function to clear Dashboard Real Trades
   clearAnalyticsRealTrades: () => void; // Function to clear Analytics Real Trades
@@ -96,6 +98,53 @@ export const TradeDataProvider = ({ children }: { children: ReactNode }) => {
     // A separate mechanism would be needed if you want them synced.
   };
 
+  // Function to update a trade
+  const updateTrade = (id: number, updatedTrade: TradeFormData, accountType: 'real' | 'demo' | 'trade-tools') => {
+    let targetTrades: TradeFormData[];
+    let setTargetTrades: React.Dispatch<React.SetStateAction<TradeFormData[]>>;
+
+    if (accountType === 'real') {
+      targetTrades = dashboardRealTrades;
+      setTargetTrades = setDashboardRealTrades;
+    } else if (accountType === 'demo') {
+      targetTrades = demoTrades;
+      setTargetTrades = setDemoTrades;
+    } else if (accountType === 'trade-tools') {
+      targetTrades = tradeToolsTrades;
+      setTargetTrades = setTradeToolsTrades;
+    } else {
+      console.error("Unknown account type:", accountType);
+      return;
+    }
+
+    setTargetTrades(targetTrades.map(trade =>
+      trade.id === id ? { ...trade, ...updatedTrade } : trade
+    ));
+  };
+
+  // Function to delete a trade
+  const deleteTrade = (id: number, accountType: 'real' | 'demo' | 'trade-tools') => {
+    let targetTrades: TradeFormData[];
+    let setTargetTrades: React.Dispatch<React.SetStateAction<TradeFormData[]>>;
+
+    if (accountType === 'real') {
+      targetTrades = dashboardRealTrades;
+      setTargetTrades = setDashboardRealTrades;
+    } else if (accountType === 'demo') {
+      targetTrades = demoTrades;
+      setTargetTrades = setDemoTrades;
+    } else if (accountType === 'trade-tools') {
+      targetTrades = tradeToolsTrades;
+      setTargetTrades = setTradeToolsTrades;
+    } else {
+      console.error("Unknown account type:", accountType);
+      return;
+    }
+
+    setTargetTrades(targetTrades.filter(trade => trade.id !== id));
+  };
+
+
   // Function to clear demo trades
   const clearDemoTrades = () => {
     setDemoTrades([]);
@@ -130,6 +179,8 @@ export const TradeDataProvider = ({ children }: { children: ReactNode }) => {
       dailyTarget,
       setDailyTarget,
       addTrade,
+      updateTrade, // Provide updateTrade
+      deleteTrade, // Provide deleteTrade
       clearDemoTrades,
       clearDashboardRealTrades, // Provide the clear function for Dashboard Real
       clearAnalyticsRealTrades, // Provide the clear function for Analytics Real

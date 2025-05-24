@@ -12,11 +12,30 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 import DetailedData from "../components/DetailedData";
-import { useTradeData, calculateStats } from "@/contexts/TradeDataContext"; // Import useTradeData and calculateStats
+import { useTradeData, calculateStats, TradeFormData } from "@/contexts/TradeDataContext"; // Import useTradeData, calculateStats, and TradeFormData
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import useLocalStorage from "@/hooks/useLocalStorage"; // Import useLocalStorage
-// Removed AlertDialog imports as they are now in DetailedData
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"; // Import AlertDialog components
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"; // Import Dialog components
+
 
 const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -44,7 +63,9 @@ const Index = () => {
     dashboardRealTrades, // Use dashboardRealTrades
     dailyTarget,
     setDailyTarget,
-    clearDashboardRealTrades // Use clearDashboardRealTrades
+    clearDashboardRealTrades, // Use clearDashboardRealTrades
+    updateTrade, // Import updateTrade
+    deleteTrade, // Import deleteTrade
   } = useTradeData();
 
   // Calculate stats for Dashboard Real Trades
@@ -53,6 +74,14 @@ const Index = () => {
   // Pagination state for Dashboard Real Trades
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 5; // Show 5 trades per page
+
+  // State for selected trade for view/edit/delete
+  const [selectedTrade, setSelectedTrade] = useState<TradeFormData | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState<TradeFormData | null>(null);
+
 
   // Calculate total pages for Dashboard Real Trades
   const totalPages = Math.ceil(dashboardRealTrades.length / itemsPerPage);
@@ -174,6 +203,52 @@ const Index = () => {
       description: "All dashboard real trade history has been removed.",
     });
     setCurrentPage(1); // Reset to the first page after clearing
+  };
+
+  // Handle View icon click
+  const handleViewTrade = (trade: TradeFormData) => {
+    setSelectedTrade(trade);
+    setIsViewDialogOpen(true);
+  };
+
+  // Handle Edit icon click
+  const handleEditTrade = (trade: TradeFormData) => {
+    setSelectedTrade(trade);
+    setEditFormData(trade); // Initialize edit form with selected trade data
+    setIsEditDialogOpen(true);
+  };
+
+  // Handle Delete icon click
+  const handleDeleteTrade = (trade: TradeFormData) => {
+    setSelectedTrade(trade);
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Handle saving edited trade
+  const handleSaveEdit = () => {
+    if (editFormData && selectedTrade?.id !== undefined) {
+      updateTrade(selectedTrade.id, editFormData, 'real'); // Update trade in context
+      toast({
+        title: "Trade Updated",
+        description: `Trade ${selectedTrade.id} has been updated.`,
+      });
+      setIsEditDialogOpen(false);
+      setSelectedTrade(null);
+      setEditFormData(null);
+    }
+  };
+
+  // Handle confirming deletion
+  const handleConfirmDelete = () => {
+    if (selectedTrade?.id !== undefined) {
+      deleteTrade(selectedTrade.id, 'real'); // Delete trade from context
+      toast({
+        title: "Trade Deleted",
+        description: `Trade ${selectedTrade.id} has been deleted.`,
+      });
+      setIsDeleteDialogOpen(false);
+      setSelectedTrade(null);
+    }
   };
 
 
@@ -441,13 +516,13 @@ const Index = () => {
                     <TableCell>{trade.balance}</TableCell>
                     <TableCell>
                       <div className="flex space-x-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleViewTrade(trade)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditTrade(trade)}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteTrade(trade)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -529,6 +604,218 @@ const Index = () => {
           </div>
         </main>
       </div>
+
+      {/* View Trade Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Trade Details</DialogTitle>
+            <DialogDescription>
+              Details for Trade ID: {selectedTrade?.id}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {selectedTrade && (
+              <>
+                <div><strong>Strategy:</strong> {selectedTrade.strategy}</div>
+                <div><strong>Pair:</strong> {selectedTrade.pair}</div>
+                <div><strong>Type:</strong> {selectedTrade.type}</div>
+                <div><strong>Open Time:</strong> {selectedTrade.openTime}</div>
+                <div><strong>Trade Time:</strong> {selectedTrade.tradeTime}</div>
+                <div><strong>Timeframe:</strong> {selectedTrade.timeframe}</div>
+                <div><strong>Trend:</strong> {selectedTrade.trend}</div>
+                <div><strong>Lot Size:</strong> {selectedTrade.lotSize}</div>
+                <div><strong>Win/Loss:</strong> {selectedTrade.winLoss}</div>
+                <div><strong>Net Profit:</strong> {selectedTrade.netProfit}</div>
+                <div><strong>Balance:</strong> {selectedTrade.balance}</div>
+                <div><strong>Candles:</strong> {selectedTrade.candles}</div>
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsViewDialogOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Trade Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Trade</DialogTitle>
+            <DialogDescription>
+              Edit details for Trade ID: {selectedTrade?.id}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {editFormData && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm">Strategy</label>
+                  <Input
+                    value={editFormData.strategy}
+                    onChange={(e) => setEditFormData({ ...editFormData, strategy: e.target.value })}
+                  />
+                </div>
+                 <div className="space-y-2">
+                  <label className="text-sm">Pair</label>
+                   <Select
+                      value={editFormData.pair}
+                      onValueChange={(value) => setEditFormData({ ...editFormData, pair: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Trading Pair" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Boom 300 Index">Boom 300 Index</SelectItem>
+                        <SelectItem value="Boom 500 Index">Boom 500 Index</SelectItem>
+                        <SelectItem value="Boom 600 Index">Boom 600 Index</SelectItem>
+                        <SelectItem value="Boom 900 Index">Boom 900 Index</SelectItem>
+                        <SelectItem value="Boom 1000 Index">Boom 1000 Index</SelectItem>
+                        <SelectItem value="Crash 300 Index">Crash 300 Index</SelectItem>
+                        <SelectItem value="Crash 500 Index">Crash 500 Index</SelectItem>
+                        <SelectItem value="Crash 600 Index">Crash 600 Index</SelectItem>
+                        <SelectItem value="Crash 1000 Index">Crash 1000 Index</SelectItem>
+                      </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm">Type</label>
+                   <Select
+                      value={editFormData.type}
+                      onValueChange={(value) => setEditFormData({ ...editFormData, type: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="buy">Buy</SelectItem>
+                        <SelectItem value="sell">Sell</SelectItem>
+                      </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm">Open Time</label>
+                  <Input
+                    type="datetime-local"
+                    value={editFormData.openTime}
+                    onChange={(e) => setEditFormData({ ...editFormData, openTime: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm">Trade Time</label>
+                  <Input
+                    value={editFormData.tradeTime}
+                    onChange={(e) => setEditFormData({ ...editFormData, tradeTime: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm">Timeframe</label>
+                   <Select
+                      value={editFormData.timeframe}
+                      onValueChange={(value) => setEditFormData({ ...editFormData, timeframe: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select timeframe" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="m1">M1</SelectItem>
+                        <SelectItem value="m5">M5</SelectItem>
+                        <SelectItem value="m15">M15</SelectItem>
+                        <SelectItem value="h1">H1</SelectItem>
+                        <SelectItem value="h4">H4</SelectItem>
+                        <SelectItem value="d1">D1</SelectItem>
+                      </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm">Trend</label>
+                   <Select
+                      value={editFormData.trend}
+                      onValueChange={(value) => setEditFormData({ ...editFormData, trend: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select trend" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="up">Up</SelectItem>
+                        <SelectItem value="down">Down</SelectItem>
+                        <SelectItem value="sideways">Sideways</SelectItem>
+                      </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm">Lot Size</label>
+                  <Input
+                    type="number"
+                    value={editFormData.lotSize}
+                    onChange={(e) => setEditFormData({ ...editFormData, lotSize: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm">Win/Loss</label>
+                   <Select
+                      value={editFormData.winLoss}
+                      onValueChange={(value) => setEditFormData({ ...editFormData, winLoss: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select result" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="win">Win</SelectItem>
+                        <SelectItem value="loss">Loss</SelectItem>
+                      </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm">Net Profit</label>
+                  <Input
+                    type="number"
+                    value={editFormData.netProfit}
+                    onChange={(e) => setEditFormData({ ...editFormData, netProfit: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm">Balance</label>
+                  <Input
+                    type="number"
+                    value={editFormData.balance}
+                    onChange={(e) => setEditFormData({ ...editFormData, balance: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm">Candles</label>
+                  <Input
+                    value={editFormData.candles}
+                    onChange={(e) => setEditFormData({ ...editFormData, candles: e.target.value })}
+                  />
+                </div>
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveEdit}>Save changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Trade AlertDialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete Trade ID: {selectedTrade?.id}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>Continue</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   );
 };
