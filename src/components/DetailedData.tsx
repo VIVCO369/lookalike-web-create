@@ -20,7 +20,7 @@ import {
 
 interface DetailedDataProps {
   showAddTrade?: boolean;
-  accountType: 'real' | 'demo'; // Add accountType prop
+  accountType: 'real' | 'demo' | 'trade-tools'; // Add accountType prop
   onResetTrades?: () => void; // Add prop for reset function
   tradeCount?: number; // Add prop for trade count
 }
@@ -74,7 +74,7 @@ const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeC
     <div className="mt-8">
       <div className="flex items-center justify-between mb-4">
         <span className="text-xl font-medium text-gray-700 flex items-center gap-1">
-          {accountType === 'real' ? 'Real Trading Detail' : 'Demo Trading Detail'} {/* Dynamic title */}
+          {accountType === 'real' ? 'Real Trading Detail' : accountType === 'demo' ? 'Demo Trading Detail' : 'Trade Tools Detail'} {/* Dynamic title */}
         </span>
         <div className="flex gap-2"> {/* Flex container for buttons */}
           {showAddTrade && (
@@ -82,7 +82,7 @@ const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeC
               onClick={toggleTradeForm}
               className="bg-green-500 hover:bg-green-600 text-white"
             >
-              <Plus className="mr-2 h-4 w-4" /> Add Trade
+              <Plus className="mr-2 h-4 w-4" /> New Trade
             </Button>
           )}
           {/* Reset Trades Button with AlertDialog - show if onResetTrades is provided */}
@@ -97,7 +97,7 @@ const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeC
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete all your {accountType === 'real' ? 'dashboard real' : 'demo'} trade data ({tradeCount} trades). {/* Dynamic description */}
+                    This action cannot be undone. This will permanently delete all your {accountType === 'real' ? 'dashboard real' : accountType === 'demo' ? 'demo' : 'trade tools'} trade data ({tradeCount} trades). {/* Dynamic description */}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -115,7 +115,7 @@ const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeC
       {showTradeForm && (
         <Card className="mb-6">
           <CardContent className="pt-6">
-            <h3 className="text-lg font-medium mb-4">Add New Trade Entry ({accountType === 'real' ? 'Real' : 'Demo'})</h3> {/* Dynamic form title */}
+            <h3 className="text-lg font-medium mb-4">Add New Trade Entry ({accountType === 'real' ? 'Real' : accountType === 'demo' ? 'Demo' : 'Trade Tools'})</h3> {/* Dynamic form title */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label className="text-sm">Strategy</label>

@@ -1,15 +1,28 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BarChart3 } from "lucide-react"; // Using BarChart3 for the icon
+import { useTradeData, calculateStats } from "@/contexts/TradeDataContext"; // Import useTradeData and calculateStats
+import { useMemo } from "react"; // Import useMemo
+import { cn } from "@/lib/utils"; // Import cn utility
 
-const DailyPerformanceTracker = () => {
-  // Placeholder data for the stats
-  const stats = {
-    todaysPnL: 41.00,
-    tradesToday: 2,
-    winRate: "50.0%",
-    avgWin: 50.00,
-  };
+interface DailyPerformanceTrackerProps {
+  accountType: 'real' | 'demo' | 'trade-tools'; // Add accountType prop
+  onResetDay?: () => void; // Add prop for reset function
+}
+
+const DailyPerformanceTracker = ({ accountType, onResetDay }: DailyPerformanceTrackerProps) => {
+  const { dashboardRealTrades, demoTrades, tradeToolsTrades } = useTradeData(); // Get all trade lists
+
+  // Select the correct trade list based on accountType
+  const trades = useMemo(() => {
+    if (accountType === 'real') return dashboardRealTrades;
+    if (accountType === 'demo') return demoTrades;
+    if (accountType === 'trade-tools') return tradeToolsTrades; // Use tradeToolsTrades
+    return [];
+  }, [accountType, dashboardRealTrades, demoTrades, tradeToolsTrades]); // Add tradeToolsTrades to dependencies
+
+  // Calculate stats for the selected trade list
+  const stats = useMemo(() => calculateStats(trades), [trades]);
 
   // Format currency values for display
   const formatCurrency = (value: number) => {
@@ -34,7 +47,9 @@ const DailyPerformanceTracker = () => {
           {/* Today's P&L Card */}
           <Card className="text-center"> {/* Removed dark background/border classes */}
             <CardContent className="p-4">
-              <p className="text-lg font-bold text-gray-900">{formatCurrency(stats.todaysPnL)}</p> {/* Changed text color */}
+              <p className={cn("text-lg font-bold", stats.dailyProfit >= 0 ? "text-green-500" : "text-red-500")}>
+                {stats.dailyProfit >= 0 ? `+${formatCurrency(stats.dailyProfit)}` : formatCurrency(stats.dailyProfit)}
+              </p> {/* Changed text color based on profit */}
               <p className="text-sm text-gray-500">Today's P&L</p> {/* Changed label color */}
             </CardContent>
           </Card>
@@ -42,7 +57,7 @@ const DailyPerformanceTracker = () => {
           {/* Trades Today Card */}
           <Card className="text-center"> {/* Removed dark background/border classes */}
             <CardContent className="p-4">
-              <p className="text-lg font-bold text-gray-900">{stats.tradesToday}</p> {/* Changed text color */}
+              <p className="text-lg font-bold text-gray-900">{stats.totalTrades}</p> {/* Changed to use totalTrades from stats */}
               <p className="text-sm text-gray-500">Trades Today</p> {/* Changed label color */}
             </CardContent>
           </Card>
@@ -50,28 +65,29 @@ const DailyPerformanceTracker = () => {
           {/* Win Rate Card */}
           <Card className="text-center"> {/* Removed dark background/border classes */}
             <CardContent className="p-4">
-              <p className="text-lg font-bold text-gray-900">{stats.winRate}</p> {/* Changed text color */}
+              <p className="text-lg font-bold text-gray-900">{stats.winRate}</p> {/* Changed to use winRate from stats */}
               <p className="text-sm text-gray-500">Win Rate</p> {/* Changed label color */}
             </CardContent>
           </Card>
 
-          {/* Avg Win Card */}
+          {/* Best Trade Card */}
           <Card className="text-center"> {/* Removed dark background/border classes */}
             <CardContent className="p-4">
-              <p className="text-lg font-bold text-gray-900">{formatCurrency(stats.avgWin)}</p> {/* Changed text color */}
-              <p className="text-sm text-gray-500">Avg Win</p> {/* Changed label color */}
+               <p className="text-lg font-bold text-green-500">
+                {stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
+              </p> {/* Changed text color to green */}
+              <p className="text-sm text-gray-500">Best Trade</p> {/* Changed label color */}
             </CardContent>
           </Card>
         </div>
 
-        {/* Buttons */}
-        <div className="flex gap-4"> {/* Flex container for buttons */}
-          <Button className="font-semibold"> {/* Removed specific background color */}
-            Log New Trade
-          </Button>
-          <Button variant="outline" className="font-semibold"> {/* Changed to outline variant */}
-            Reset Day
-          </Button>
+        {/* Buttons - Removed "Log New Trade" as it's handled by DetailedData, kept "Reset Day" */}
+        <div className="flex gap-4 justify-end"> {/* Align buttons to the right */}
+           {onResetDay && ( // Only show reset button if onResetDay is provided
+             <Button variant="outline" className="font-semibold bg-red-500 hover:bg-red-600 text-white" onClick={onResetDay}>
+               Reset Day
+             </Button>
+           )}
         </div>
       </CardContent>
     </Card>
