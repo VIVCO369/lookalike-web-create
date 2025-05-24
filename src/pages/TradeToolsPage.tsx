@@ -116,8 +116,7 @@ const TradeToolsPage = () => {
             {/* Trade Tracker Section */}
             <DetailedData 
               accountType="trade-tools"
-              title="Trade Tracker"
-              showNewTradeButton={true}
+              showAddTrade={true}
             />
           </div>
         </main>
