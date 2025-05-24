@@ -8,6 +8,7 @@ import {
   Menu,
   ChevronLeft,
   ChevronRight,
+  Wrench, // Import the Wrench icon instead of Tool
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -34,8 +35,9 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     { icon: Calendar, label: "Schedule", path: "/schedule" },
     { icon: BookOpen, label: "Trade Rules", path: "/trading-rules" },
     { icon: BarChart3, label: "Trade Demo", path: "/trades" },
-    { icon: Users, label: "Trade Goals", path: "/trade-goals" }, // Changed label and path
+    { icon: Users, label: "Trade Goals", path: "/trade-goals" },
     { icon: BarChart3, label: "Analytics", path: "/analytics" },
+    { icon: Wrench, label: "Trade Tools", path: "/trade-tools" }, // Use Wrench icon
     { icon: Settings, label: "Settings", path: "/settings" },
   ];
 

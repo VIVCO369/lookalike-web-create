@@ -10,6 +10,7 @@ import TradesPage from "./pages/TradesPage";
 import SettingsPage from "./pages/SettingsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import TradeGoalsPage from "./pages/TradeGoalsPage";
+import TradeToolsPage from "./pages/TradeToolsPage"; // Import the new page
 import NotFound from "./pages/NotFound";
 import { TradeDataProvider } from "./contexts/TradeDataContext";
 
@@ -27,9 +28,10 @@ const App = () => (
             <Route path="/trading-rules" element={<TradingRulesPage />} />
             <Route path="/schedule" element={<SchedulePage />} />
             <Route path="/trades" element={<TradesPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/trade-goals" element={<TradeGoalsPage />} />
+            <Route path="/trade-tools" element={<TradeToolsPage />} /> {/* Add the new route */}
+            <Route path="/settings" element={<SettingsPage />} /> {/* Keep Settings page after the new page */}
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
