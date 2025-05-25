@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,7 +11,9 @@ import TradesPage from "./pages/TradesPage";
 import SettingsPage from "./pages/SettingsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import TradeGoalsPage from "./pages/TradeGoalsPage";
-import TradeToolsPage from "./pages/TradeToolsPage"; // Import the new page
+import TradeToolsPage from "./pages/TradeToolsPage";
+import TradeSummaryPage from "./pages/TradeSummaryPage";
+import TradeHistoryPage from "./pages/TradeHistoryPage";
 import NotFound from "./pages/NotFound";
 import { TradeDataProvider } from "./contexts/TradeDataContext";
 
@@ -30,8 +33,10 @@ const App = () => (
             <Route path="/trades" element={<TradesPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/trade-goals" element={<TradeGoalsPage />} />
-            <Route path="/trade-tools" element={<TradeToolsPage />} /> {/* Add the new route */}
-            <Route path="/settings" element={<SettingsPage />} /> {/* Keep Settings page after the new page */}
+            <Route path="/trade-tools" element={<TradeToolsPage />} />
+            <Route path="/trade-analytics/summary" element={<TradeSummaryPage />} />
+            <Route path="/trade-analytics/history" element={<TradeHistoryPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
