@@ -32,9 +32,9 @@ const initialTradeFormData: TradeFormData = {
   strategy: "",
   pair: "",
   type: "buy",
-  openTime: "",
-  tradeTime: "",
-  timeframe: "m1",
+  openTime: "", // This will now store the date string (YYYY-MM-DD)
+  tradeTime: "", // This will now store the time string (HH:mm)
+  timeframe: "1m", // Changed default to lowercase for consistency with new values
   trend: "up",
   lotSize: "0.01",
   winLoss: "win",
@@ -119,7 +119,8 @@ const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeC
         <AnimatedContainer delay={0.1}>
           <Card className="mb-6">
             <CardContent className="pt-6">
-              <h3 className="text-lg font-medium mb-4">Add New Trade Entry ({accountType === 'real' ? 'Real' : accountType === 'demo' ? 'Demo' : 'Trade Tools'})</h3> {/* Dynamic form title */}
+              {/* Changed form title */}
+              <h3 className="text-lg font-medium mb-4">Trade Entry ({accountType === 'real' ? 'Real' : accountType === 'demo' ? 'Demo' : 'Trade Tools'})</h3> {/* Dynamic form title */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm">Strategy</label>
@@ -167,17 +168,19 @@ const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeC
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Open Time</label>
+                  {/* Changed label to Date and input type to date */}
+                  <label className="text-sm">Date</label>
                   <Input
-                    type="datetime-local"
+                    type="date"
                     value={formData.openTime}
                     onChange={(e) => handleInputChange("openTime", e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
+                  {/* Changed label to Trade Time and input type to time */}
                   <label className="text-sm">Trade Time</label>
                   <Input
-                    placeholder="Trade Time"
+                    type="time"
                     value={formData.tradeTime}
                     onChange={(e) => handleInputChange("tradeTime", e.target.value)}
                   />
@@ -192,12 +195,13 @@ const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeC
                       <SelectValue placeholder="Select timeframe" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="m1">M1</SelectItem>
-                      <SelectItem value="m5">M5</SelectItem>
-                      <SelectItem value="m15">M15</SelectItem>
-                      <SelectItem value="h1">H1</SelectItem>
-                      <SelectItem value="h4">H4</SelectItem>
-                      <SelectItem value="d1">D1</SelectItem>
+                      {/* Updated Timeframe options */}
+                      <SelectItem value="1m">1M</SelectItem>
+                      <SelectItem value="5m">5M</SelectItem>
+                      <SelectItem value="15m">15M</SelectItem>
+                      <SelectItem value="1h">1H</SelectItem>
+                      <SelectItem value="4h">4H</SelectItem>
+                      <SelectItem value="1d">1D</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -262,13 +266,30 @@ const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeC
                     onChange={(e) => handleInputChange("balance", e.target.value)}
                   />
                 </div>
+                {/* Changed Candles from Input to Select */}
                 <div className="space-y-2">
                   <label className="text-sm">Candles</label>
-                  <Input
-                    placeholder="Candles"
+                  <Select
                     value={formData.candles}
-                    onChange={(e) => handleInputChange("candles", e.target.value)}
-                  />
+                    onValueChange={(value) => handleInputChange("candles", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select candles" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {/* Updated Candles options */}
+                      <SelectItem value="1">1 Candles</SelectItem>
+                      <SelectItem value="2">2 Candles</SelectItem>
+                      <SelectItem value="3">3 Candles</SelectItem>
+                      <SelectItem value="4">4 Candles</SelectItem>
+                      <SelectItem value="5">5 Candles</SelectItem>
+                      <SelectItem value="10">10 Candles</SelectItem>
+                      <SelectItem value="15">15 Candles</SelectItem>
+                      <SelectItem value="20">20 Candles</SelectItem>
+                      <SelectItem value="25">25 Candles</SelectItem>
+                      <SelectItem value="30">30 Candles</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="flex justify-end gap-2 mt-6">

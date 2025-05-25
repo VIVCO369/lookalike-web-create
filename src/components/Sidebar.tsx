@@ -56,6 +56,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
 
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/" },
+    { icon: Calendar, label: "Schedule", path: "/schedule" },
     { icon: BookOpen, label: "Trade Rules", path: "/trading-rules" },
     { icon: BarChart3, label: "Trade Demo", path: "/trades" },
     { icon: Target, label: "Trade Goals", path: "/trade-goals" },
@@ -130,19 +131,49 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
           </Link>
         ))}
 
-        {/* Schedule Link - Moved here */}
-        <Link
-          to="/schedule"
-          className={cn(
-            "flex items-center px-4 py-3 text-gray-100 hover:bg-teal-800 transition-all duration-200",
-            currentPath === "/schedule" && "bg-teal-700 border-l-4 border-white",
-            !isOpen && "justify-center"
-          )}
-        >
-          <Calendar className={cn("h-5 w-5", !isOpen && "h-6 w-6")} />
-          {isOpen && <span className={cn("ml-4 transition-opacity", isOpen ? "opacity-100" : "opacity-0")}>Schedule</span>}
-        </Link>
+        {/* Trade Challenge Menu Item - Moved before Trade Manage */}
+        <div>
+          <div
+            onClick={isOpen ? toggleTradeChallenge : undefined}
+            className={cn(
+              "flex items-center px-4 py-3 text-gray-100 hover:bg-teal-800 transition-all duration-200 cursor-pointer",
+              (currentPath.includes('/trade-challenge')) && "bg-teal-700 border-l-4 border-white",
+              !isOpen && "justify-center"
+            )}
+          >
+            <Trophy className={cn("h-5 w-5", !isOpen && "h-6 w-6")} />
+            {isOpen && (
+              <>
+                <span className="ml-4 flex-1">Trade Challenge</span>
+                <ChevronDown
+                  className={cn(
+                    "h-4 w-4 transition-transform duration-200",
+                    tradeChallengeExpanded && "rotate-180"
+                  )}
+                />
+              </>
+            )}
+          </div>
 
+          {/* Trade Challenge Sub Items */}
+          {isOpen && tradeChallengeExpanded && (
+            <div className="bg-teal-800">
+              {tradeChallengeSubItems.map((subItem, subIndex) => (
+                <Link
+                  key={subIndex}
+                  to={subItem.path}
+                  className={cn(
+                    "flex items-center px-8 py-2 text-gray-200 hover:bg-teal-700 transition-all duration-200 text-sm",
+                    currentPath === subItem.path && "bg-teal-600 text-white"
+                  )}
+                >
+                  <subItem.icon className="h-4 w-4" />
+                  <span className="ml-3">{subItem.label}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Trade Manage Menu Item */}
         <div>
@@ -172,50 +203,6 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
           {isOpen && tradeManageExpanded && (
             <div className="bg-teal-800">
               {tradeManageSubItems.map((subItem, subIndex) => (
-                <Link
-                  key={subIndex}
-                  to={subItem.path}
-                  className={cn(
-                    "flex items-center px-8 py-2 text-gray-200 hover:bg-teal-700 transition-all duration-200 text-sm",
-                    currentPath === subItem.path && "bg-teal-600 text-white"
-                  )}
-                >
-                  <subItem.icon className="h-4 w-4" />
-                  <span className="ml-3">{subItem.label}</span>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Trade Challenge Menu Item */}
-        <div>
-          <div
-            onClick={isOpen ? toggleTradeChallenge : undefined}
-            className={cn(
-              "flex items-center px-4 py-3 text-gray-100 hover:bg-teal-800 transition-all duration-200 cursor-pointer",
-              (currentPath.includes('/trade-challenge')) && "bg-teal-700 border-l-4 border-white",
-              !isOpen && "justify-center"
-            )}
-          >
-            <Trophy className={cn("h-5 w-5", !isOpen && "h-6 w-6")} />
-            {isOpen && (
-              <>
-                <span className="ml-4 flex-1">Trade Challenge</span>
-                <ChevronDown
-                  className={cn(
-                    "h-4 w-4 transition-transform duration-200",
-                    tradeChallengeExpanded && "rotate-180"
-                  )}
-                />
-              </>
-            )}
-          </div>
-
-          {/* Trade Challenge Sub Items */}
-          {isOpen && tradeChallengeExpanded && (
-            <div className="bg-teal-800">
-              {tradeChallengeSubItems.map((subItem, subIndex) => (
                 <Link
                   key={subIndex}
                   to={subItem.path}
@@ -276,7 +263,6 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
           )}
         </div>
 
-        {/* Settings Link - Moved here */}
         <Link
           to="/settings"
           className={cn(

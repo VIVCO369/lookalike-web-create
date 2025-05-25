@@ -488,7 +488,8 @@ const DailyTradesPage = () => {
                       <TableHead>STRATEGY</TableHead>
                       <TableHead>PAIR</TableHead>
                       <TableHead>TYPE</TableHead>
-                      <TableHead>OPEN TIME</TableHead>
+                      {/* Updated table headers */}
+                      <TableHead>DATE</TableHead>
                       <TableHead>TRADE TIME</TableHead>
                       <TableHead>TIMEFRAME</TableHead>
                       <TableHead>TREND</TableHead>
@@ -513,6 +514,7 @@ const DailyTradesPage = () => {
                         <TableCell>{trade.strategy}</TableCell>
                         <TableCell>{trade.pair}</TableCell>
                         <TableCell className="text-blue-500">{trade.type}</TableCell>
+                        {/* Display Date and Trade Time separately */}
                         <TableCell>{trade.openTime}</TableCell>
                         <TableCell>{trade.tradeTime}</TableCell>
                         <TableCell>{trade.timeframe}</TableCell>

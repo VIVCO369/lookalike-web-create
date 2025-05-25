@@ -498,7 +498,8 @@ const Index = () => {
                     <TableHead>STRATEGY</TableHead>
                     <TableHead>PAIR</TableHead>
                     <TableHead>TYPE</TableHead>
-                    <TableHead>OPEN TIME</TableHead>
+                    {/* Updated table headers */}
+                    <TableHead>DATE</TableHead>
                     <TableHead>TRADE TIME</TableHead>
                     <TableHead>TIMEFRAME</TableHead>
                     <TableHead>TREND</TableHead>
@@ -523,6 +524,7 @@ const Index = () => {
                       <TableCell>{trade.strategy}</TableCell>
                       <TableCell>{trade.pair}</TableCell>
                       <TableCell className="text-blue-500">{trade.type}</TableCell>
+                      {/* Display Date and Trade Time separately */}
                       <TableCell>{trade.openTime}</TableCell>
                       <TableCell>{trade.tradeTime}</TableCell>
                       <TableCell>{trade.timeframe}</TableCell>
@@ -552,6 +554,7 @@ const Index = () => {
                     </motion.tr>
                   ))}
                 </TableBody>
+                {/* Removed TableCaption */}
               </Table>
 
               {/* Added pagination UI */}
@@ -643,7 +646,8 @@ const Index = () => {
                 <div><strong>Strategy:</strong> {selectedTrade.strategy}</div>
                 <div><strong>Pair:</strong> {selectedTrade.pair}</div>
                 <div><strong>Type:</strong> {selectedTrade.type}</div>
-                <div><strong>Open Time:</strong> {selectedTrade.openTime}</div>
+                {/* Display Date and Trade Time separately */}
+                <div><strong>Date:</strong> {selectedTrade.openTime}</div>
                 <div><strong>Trade Time:</strong> {selectedTrade.tradeTime}</div>
                 <div><strong>Timeframe:</strong> {selectedTrade.timeframe}</div>
                 <div><strong>Trend:</strong> {selectedTrade.trend}</div>
@@ -718,16 +722,19 @@ const Index = () => {
                     </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Open Time</label>
+                  {/* Changed label to Date and input type to date */}
+                  <label className="text-sm">Date</label>
                   <Input
-                    type="datetime-local"
+                    type="date"
                     value={editFormData.openTime}
                     onChange={(e) => setEditFormData({ ...editFormData, openTime: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
+                  {/* Changed label to Trade Time and input type to time */}
                   <label className="text-sm">Trade Time</label>
                   <Input
+                    type="time"
                     value={editFormData.tradeTime}
                     onChange={(e) => setEditFormData({ ...editFormData, tradeTime: e.target.value })}
                   />
