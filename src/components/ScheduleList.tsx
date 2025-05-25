@@ -18,6 +18,7 @@ interface ScheduleItem {
 
 interface ScheduleListProps {
   hideAddButton?: boolean;
+  hideActions?: boolean; // New prop to hide edit/delete actions
 }
 
 const colorOptions = [
@@ -30,7 +31,7 @@ const colorOptions = [
   { label: "Pink", value: "pink", bgColor: "bg-pink-50 border-l-4 border-pink-400" }, // Added another color
 ];
 
-const ScheduleList = ({ hideAddButton = false }: ScheduleListProps) => {
+const ScheduleList = ({ hideAddButton = false, hideActions = false }: ScheduleListProps) => { // Default hideActions to false
   const [addingSchedule, setAddingSchedule] = useState(false);
   const [newTime, setNewTime] = useState("");
   const [newTitle, setNewTitle] = useState("");
@@ -191,17 +192,20 @@ const ScheduleList = ({ hideAddButton = false }: ScheduleListProps) => {
                 <p className="text-sm font-medium">{item.title}</p>
                 <div className="flex justify-between items-center mt-1">
                   <span className="text-xs text-gray-500">{item.type}</span>
-                  <div className="flex items-center gap-1">
-                    <button className="text-gray-400 p-1 rounded-full hover:bg-gray-100">
-                      <Pencil className="h-3 w-3" />
-                    </button>
-                    <button
-                      className="text-gray-400 p-1 rounded-full hover:bg-gray-100"
-                      onClick={() => handleRemoveSchedule(item.id)}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </button>
-                  </div>
+                  {/* Conditionally render action buttons based on hideActions prop */}
+                  {!hideActions && (
+                    <div className="flex items-center gap-1">
+                      <button className="text-gray-400 p-1 rounded-full hover:bg-gray-100">
+                        <Pencil className="h-3 w-3" />
+                      </button>
+                      <button
+                        className="text-gray-400 p-1 rounded-full hover:bg-gray-100"
+                        onClick={() => handleRemoveSchedule(item.id)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </AnimatedContainer>

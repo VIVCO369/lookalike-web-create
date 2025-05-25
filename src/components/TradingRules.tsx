@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BookOpen, X, Plus, Check, Pencil, Trash2 } from "lucide-react";
+import { BookOpen, X, Plus, Check, Pencil, Trash2, ChevronDown } from "lucide-react"; // Removed Settings icon
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Pagination,
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/pagination";
 import AnimatedContainer from "@/components/AnimatedContainer"; // Import AnimatedContainer
 import { motion } from "framer-motion"; // Import motion
+import { cn } from "@/lib/utils"; // Import cn utility
 
 
 interface Rule {
@@ -153,11 +154,18 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
                   <span className="text-gray-700">{rule.name}</span>
                 </div>
                 <div className="flex items-center gap-1">
+                  {/* Improved Checkbox Button Styling */}
                   <button
-                    className={`text-gray-400 p-1 rounded-full hover:bg-gray-100 ${rule.completed ? 'bg-green-100' : ''}`}
+                    className={cn(
+                      "w-6 h-6 flex items-center justify-center rounded-full border-2 transition-colors",
+                      rule.completed
+                        ? "bg-green-500 border-green-500 hover:bg-green-600 hover:border-green-600"
+                        : "bg-white border-gray-300 hover:bg-gray-100"
+                    )}
                     onClick={() => handleToggleComplete(rule.id)}
                   >
-                    {rule.completed ? <Check className="h-4 w-4 text-green-500" /> : <Check className="h-4 w-4" />}
+                    {/* Check icon color changes based on completion */}
+                    <Check className={cn("h-4 w-4", rule.completed ? "text-white" : "text-gray-400")} />
                   </button>
                   {/* Hide edit/delete rule buttons in dashboard view */}
                   {!dashboardView && (
@@ -204,6 +212,7 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
             <Select onValueChange={setSelectedStrategy} value={selectedStrategy}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a strategy" />
+                {/* Removed the SelectPrimitive.Icon component */}
               </SelectTrigger>
               <SelectContent>
                 {uniqueStrategies.map(strategy => (

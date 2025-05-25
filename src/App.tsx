@@ -8,7 +8,7 @@ import TradingRulesPage from "./pages/TradingRulesPage";
 import SchedulePage from "./pages/SchedulePage";
 import TradesPage from "./pages/TradesPage";
 import SettingsPage from "./pages/SettingsPage";
-import AnalyticsPage from "./pages/AnalyticsPage";
+// Removed AnalyticsPage import
 import TradeGoalsPage from "./pages/TradeGoalsPage";
 import TradeToolsPage from "./pages/TradeToolsPage";
 import TradeSummaryPage from "./pages/TradeSummaryPage";
@@ -34,7 +34,7 @@ const App = () => (
             <Route path="/trading-rules" element={<TradingRulesPage />} />
             <Route path="/schedule" element={<SchedulePage />} />
             <Route path="/trades" element={<TradesPage />} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
+            {/* Removed AnalyticsPage route */}
             <Route path="/trade-goals" element={<TradeGoalsPage />} />
             <Route path="/trade-tools" element={<TradeToolsPage />} />
             <Route path="/trade-manage/goals" element={<TradeManageGoalsPage />} />

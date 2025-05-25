@@ -468,7 +468,7 @@ const Index = () => {
             </AnimatedContainer>
             <AnimatedContainer delay={0.4} className="md:col-span-1">
               {/* Removed duplicate headline */}
-              <ScheduleList hideAddButton={true} />
+              <ScheduleList hideAddButton={true} hideActions={true} /> {/* Pass hideActions={true} here */}
             </AnimatedContainer>
           </div>
 

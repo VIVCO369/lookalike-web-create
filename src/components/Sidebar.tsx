@@ -60,7 +60,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     { icon: BookOpen, label: "Trade Rules", path: "/trading-rules" },
     { icon: BarChart3, label: "Trade Demo", path: "/trades" },
     { icon: Target, label: "Trade Goals", path: "/trade-goals" },
-    { icon: BarChart3, label: "Analytics", path: "/analytics" },
+    // Removed Analytics link
     { icon: Wrench, label: "Trade Tools", path: "/trade-tools" },
   ];
 
@@ -130,7 +130,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
             {isOpen && <span className={cn("ml-4 transition-opacity", isOpen ? "opacity-100" : "opacity-0")}>{item.label}</span>}
           </Link>
         ))}
-        
+
         {/* Trade Manage Menu Item */}
         <div>
           <div
@@ -145,7 +145,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
             {isOpen && (
               <>
                 <span className="ml-4 flex-1">Trade Manage</span>
-                <ChevronDown 
+                <ChevronDown
                   className={cn(
                     "h-4 w-4 transition-transform duration-200",
                     tradeManageExpanded && "rotate-180"
@@ -154,7 +154,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
               </>
             )}
           </div>
-          
+
           {/* Trade Manage Sub Items */}
           {isOpen && tradeManageExpanded && (
             <div className="bg-teal-800">
@@ -174,7 +174,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
             </div>
           )}
         </div>
-        
+
         {/* Trade Challenge Menu Item */}
         <div>
           <div
@@ -189,7 +189,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
             {isOpen && (
               <>
                 <span className="ml-4 flex-1">Trade Challenge</span>
-                <ChevronDown 
+                <ChevronDown
                   className={cn(
                     "h-4 w-4 transition-transform duration-200",
                     tradeChallengeExpanded && "rotate-180"
@@ -198,7 +198,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
               </>
             )}
           </div>
-          
+
           {/* Trade Challenge Sub Items */}
           {isOpen && tradeChallengeExpanded && (
             <div className="bg-teal-800">
@@ -218,7 +218,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
             </div>
           )}
         </div>
-        
+
         {/* Trade Analytics Menu Item */}
         <div>
           <div
@@ -233,7 +233,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
             {isOpen && (
               <>
                 <span className="ml-4 flex-1">Trade Analytics</span>
-                <ChevronDown 
+                <ChevronDown
                   className={cn(
                     "h-4 w-4 transition-transform duration-200",
                     analyticsExpanded && "rotate-180"
@@ -242,7 +242,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
               </>
             )}
           </div>
-          
+
           {/* Analytics Sub Items */}
           {isOpen && analyticsExpanded && (
             <div className="bg-teal-800">
