@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar, Clock, Plus, Pencil, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import AnimatedContainer from "@/components/AnimatedContainer"; // Import AnimatedContainer
+import { motion } from "framer-motion"; // Import motion
+
 
 interface ScheduleItem {
   id: string;
@@ -116,88 +119,92 @@ const ScheduleList = ({ hideAddButton = false }: ScheduleListProps) => {
         </div>
 
         {addingSchedule && (
-          <div className="border rounded-md p-4 mb-6 bg-gray-50">
-            <h4 className="font-medium mb-4">Add New Schedule Entry</h4>
+          <AnimatedContainer delay={0.1}>
+            <div className="border rounded-md p-4 mb-6 bg-gray-50">
+              <h4 className="font-medium mb-4">Add New Schedule Entry</h4>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Time (e.g., 07:00 - 08:00)</p>
-                <Input
-                  placeholder="e.g., 07:00 - 08:00"
-                  value={newTime}
-                  onChange={(e) => setNewTime(e.target.value)}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Time (e.g., 07:00 - 08:00)</p>
+                  <Input
+                    placeholder="e.g., 07:00 - 08:00"
+                    value={newTime}
+                    onChange={(e) => setNewTime(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Task</p>
+                  <Input
+                    placeholder="Enter task name"
+                    value={newTitle}
+                    onChange={(e) => setNewTitle(e.target.value)}
+                  />
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Task</p>
-                <Input
-                  placeholder="Enter task name"
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Label (Optional)</p>
+                  <Input
+                    placeholder="Enter label"
+                    value={newLabel}
+                    onChange={(e) => setNewLabel(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Color</p>
+                  <Select onValueChange={setSelectedColor} value={selectedColor}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select color" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {colorOptions.map(color => (
+                        <SelectItem key={color.value} value={color.value}>
+                          {color.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 mt-4">
+                <Button variant="outline" onClick={() => setAddingSchedule(false)}>
+                  Cancel
+                </Button>
+                <Button className="bg-green-500 hover:bg-green-600" onClick={handleAddSchedule}>
+                  Add Entry
+                </Button>
               </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Label (Optional)</p>
-                <Input
-                  placeholder="Enter label"
-                  value={newLabel}
-                  onChange={(e) => setNewLabel(e.target.value)}
-                />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Color</p>
-                <Select onValueChange={setSelectedColor} value={selectedColor}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select color" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {colorOptions.map(color => (
-                      <SelectItem key={color.value} value={color.value}>
-                        {color.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" onClick={() => setAddingSchedule(false)}>
-                Cancel
-              </Button>
-              <Button className="bg-green-500 hover:bg-green-600" onClick={handleAddSchedule}>
-                Add Entry
-              </Button>
-            </div>
-          </div>
+          </AnimatedContainer>
         )}
 
         <div className="space-y-2">
-          {scheduleItems.map((item) => (
-            <div key={item.id} className={`p-3 rounded ${item.color}`}>
-              <div className="flex items-center gap-1 text-gray-600 mb-1">
-                <Clock className="h-3 w-3" />
-                <span className="text-xs">{item.time}</span>
-              </div>
-              <p className="text-sm font-medium">{item.title}</p>
-              <div className="flex justify-between items-center mt-1">
-                <span className="text-xs text-gray-500">{item.type}</span>
-                <div className="flex items-center gap-1">
-                  <button className="text-gray-400 p-1 rounded-full hover:bg-gray-100">
-                    <Pencil className="h-3 w-3" />
-                  </button>
-                  <button
-                    className="text-gray-400 p-1 rounded-full hover:bg-gray-100"
-                    onClick={() => handleRemoveSchedule(item.id)}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
+          {scheduleItems.map((item, index) => (
+            <AnimatedContainer key={item.id} delay={0.2 + index * 0.05}>
+              <div className={`p-3 rounded ${item.color}`}>
+                <div className="flex items-center gap-1 text-gray-600 mb-1">
+                  <Clock className="h-3 w-3" />
+                  <span className="text-xs">{item.time}</span>
+                </div>
+                <p className="text-sm font-medium">{item.title}</p>
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-xs text-gray-500">{item.type}</span>
+                  <div className="flex items-center gap-1">
+                    <button className="text-gray-400 p-1 rounded-full hover:bg-gray-100">
+                      <Pencil className="h-3 w-3" />
+                    </button>
+                    <button
+                      className="text-gray-400 p-1 rounded-full hover:bg-gray-100"
+                      onClick={() => handleRemoveSchedule(item.id)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </AnimatedContainer>
           ))}
         </div>
       </CardContent>

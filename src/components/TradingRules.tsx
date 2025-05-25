@@ -12,6 +12,9 @@ import {
   PaginationNext,
   PaginationPrevious
 } from "@/components/ui/pagination";
+import AnimatedContainer from "@/components/AnimatedContainer"; // Import AnimatedContainer
+import { motion } from "framer-motion"; // Import motion
+
 
 interface Rule {
   id: string;
@@ -126,54 +129,56 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
       grouped[strategy].push(rule);
     });
 
-    return Object.entries(grouped).map(([strategy, rules]) => (
-      <div key={strategy} className="mb-6 border rounded p-4 bg-gray-50">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-green-500 font-medium">{strategy}</h3>
-          {/* Conditionally render Delete Strategy button */}
-          {!dashboardView && !showLastEntryOnly && ( // Hide delete button in dashboard view and when showing only last entry
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-red-500 hover:bg-red-600 text-white"
-              onClick={() => handleDeleteStrategy(strategy)}
-            >
-              <Trash2 className="h-4 w-4 mr-1" /> Delete Strategy
-            </Button>
-          )}
-        </div>
-        <div className="space-y-2">
-          {rules.map(rule => (
-            <div key={rule.id} className="flex items-center justify-between border rounded p-3 bg-white">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-700">{rule.name}</span>
+    return Object.entries(grouped).map(([strategy, rules], index) => (
+      <AnimatedContainer key={strategy} delay={0.2 + index * 0.1}>
+        <div className="mb-6 border rounded p-4 bg-gray-50">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-green-500 font-medium">{strategy}</h3>
+            {/* Conditionally render Delete Strategy button */}
+            {!dashboardView && !showLastEntryOnly && ( // Hide delete button in dashboard view and when showing only last entry
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-red-500 hover:bg-red-600 text-white"
+                onClick={() => handleDeleteStrategy(strategy)}
+              >
+                <Trash2 className="h-4 w-4 mr-1" /> Delete Strategy
+              </Button>
+            )}
+          </div>
+          <div className="space-y-2">
+            {rules.map(rule => (
+              <div key={rule.id} className="flex items-center justify-between border rounded p-3 bg-white">
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-700">{rule.name}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    className={`text-gray-400 p-1 rounded-full hover:bg-gray-100 ${rule.completed ? 'bg-green-100' : ''}`}
+                    onClick={() => handleToggleComplete(rule.id)}
+                  >
+                    {rule.completed ? <Check className="h-4 w-4 text-green-500" /> : <Check className="h-4 w-4" />}
+                  </button>
+                  {/* Hide edit/delete rule buttons in dashboard view */}
+                  {!dashboardView && (
+                    <>
+                      <button className="text-gray-400 p-1 rounded-full hover:bg-gray-100">
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        className="text-gray-400 p-1 rounded-full hover:bg-gray-100"
+                        onClick={() => handleRemoveRule(rule.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <button
-                  className={`text-gray-400 p-1 rounded-full hover:bg-gray-100 ${rule.completed ? 'bg-green-100' : ''}`}
-                  onClick={() => handleToggleComplete(rule.id)}
-                >
-                  {rule.completed ? <Check className="h-4 w-4 text-green-500" /> : <Check className="h-4 w-4" />}
-                </button>
-                {/* Hide edit/delete rule buttons in dashboard view */}
-                {!dashboardView && (
-                  <>
-                    <button className="text-gray-400 p-1 rounded-full hover:bg-gray-100">
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button
-                      className="text-gray-400 p-1 rounded-full hover:bg-gray-100"
-                      onClick={() => handleRemoveRule(rule.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      </AnimatedContainer>
     ));
   };
 
@@ -214,37 +219,39 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
 
         {/* Add Rule Form (Hidden in Dashboard View) */}
         {addingRule && !dashboardView && (
-          <div className="border rounded-md p-4 mb-6 bg-gray-50">
-            <h4 className="font-medium mb-4">Add New Trading Rule</h4>
+          <AnimatedContainer delay={0.1}>
+            <div className="border rounded-md p-4 mb-6 bg-gray-50">
+              <h4 className="font-medium mb-4">Add New Trading Rule</h4>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Trading Rule Name</p>
-                <Input
-                  placeholder="Enter rule name"
-                  value={newRuleName}
-                  onChange={(e) => setNewRuleName(e.target.value)}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Trading Rule Name</p>
+                  <Input
+                    placeholder="Enter rule name"
+                    value={newRuleName}
+                    onChange={(e) => setNewRuleName(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Trading Strategy Name</p>
+                  <Input
+                    placeholder="Enter strategy name"
+                    value={newStrategyName}
+                    onChange={(e) => setNewStrategyName(e.target.value)}
+                  />
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Trading Strategy Name</p>
-                <Input
-                  placeholder="Enter strategy name"
-                  value={newStrategyName}
-                  onChange={(e) => setNewStrategyName(e.target.value)}
-                />
+
+              <div className="flex justify-end gap-2 mt-4">
+                <Button variant="outline" onClick={() => setAddingRule(false)}>
+                  Cancel
+                </Button>
+                <Button className="bg-green-500 hover:bg-green-600" onClick={handleAddRule}>
+                  Add Rule
+                </Button>
               </div>
             </div>
-
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" onClick={() => setAddingRule(false)}>
-                Cancel
-              </Button>
-              <Button className="bg-green-500 hover:bg-green-600" onClick={handleAddRule}>
-                Add Rule
-              </Button>
-            </div>
-          </div>
+          </AnimatedContainer>
         )}
 
         {/* Display Rules (Filtered for Dashboard View) */}

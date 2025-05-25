@@ -1,36 +1,24 @@
-import { useState, useEffect, useMemo } from "react"; // Import useMemo
+import { useState, useEffect, useMemo } from "react";
 import Sidebar from "../components/Sidebar";
 import { cn } from "@/lib/utils";
-import { Wrench, Clock, Eye, Edit, Trash2 } from "lucide-react"; // Import icons for table actions
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import PositionSizeCalculator from "@/components/PositionSizeCalculator"; // Import the new component
-import DailyPerformanceTracker from "@/components/DailyPerformanceTracker"; // Import the new component
-import DetailedData from "@/components/DetailedData"; // Import DetailedData component
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"; // Import Table components
-import { Button } from "@/components/ui/button"; // Import Button component
-import { useTradeData, calculateStats } from "@/contexts/TradeDataContext"; // Import useTradeData and calculateStats
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"; // Import AlertDialog components
-import { useToast } from "@/components/ui/use-toast"; // Import useToast
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"; // Import Pagination components
-
+import { Wrench, Clock, Eye, Edit, Trash2 } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { useTradeData, calculateStats } from "@/contexts/TradeDataContext";
+import { useToast } from "@/components/ui/use-toast";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import DailyPerformanceTracker from "../components/DailyPerformanceTracker";
+import DetailedData from "../components/DetailedData";
+import AnimatedContainer from "../components/AnimatedContainer";
+import { motion } from "framer-motion";
 
 const TradeToolsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
-  const { toast } = useToast(); // Call useToast hook to get the toast function
+  const { toast } = useToast();
 
   // Use the trade data context for Trade Tools trades
-  const { tradeToolsTrades, clearTradeToolsTrades } = useTradeData(); // Use tradeToolsTrades and clearTradeToolsTrades
+  const { tradeToolsTrades, clearTradeToolsTrades } = useTradeData();
 
   // Calculate stats for Trade Tools trades
   const stats = useMemo(() => calculateStats(tradeToolsTrades), [tradeToolsTrades]);
@@ -47,7 +35,6 @@ const TradeToolsPage = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return tradeToolsTrades.slice(startIndex, startIndex + itemsPerPage);
   }, [tradeToolsTrades, currentPage, itemsPerPage]);
-
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -91,16 +78,14 @@ const TradeToolsPage = () => {
     setCurrentPage(page);
   };
 
-  // Handle reset Trade Tools trades (This function is now called from AlertDialog in DetailedData)
-  const handleResetTradeToolsTrades = () => {
+  // Handle reset day
+  const handleResetDay = () => {
     clearTradeToolsTrades();
     toast({
-      title: "Trade Tools Trades Cleared",
-      description: "All trade tools trade history has been removed.",
+      title: "Day Reset",
+      description: "All Trade Tools trades have been cleared.",
     });
-    setCurrentPage(1); // Reset to the first page after clearing
   };
-
 
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: "#F8F5F0" }}>
@@ -108,7 +93,12 @@ const TradeToolsPage = () => {
 
       <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}>
         {/* Header */}
-        <header className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10">
+        <motion.header 
+          className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
           <div className="flex items-center gap-2">
             <Wrench className="h-5 w-5 text-gray-500" />
             <h1 className="text-xl font-medium text-gray-700">Trade Tools</h1>
@@ -118,170 +108,161 @@ const TradeToolsPage = () => {
             <p className="text-black text-sm font-bold">{formatDate(currentDateTime)}</p>
             <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
-        </header>
+        </motion.header>
 
         {/* Main content */}
         <main className="flex-1 p-6">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold mb-4">Available Trade Tools</h2>
-            <p className="text-gray-600 mb-8">
-              Here are some tools to assist you with your trading analysis and planning.
-            </p>
-
-            {/* Position Size Calculator Component */}
-            <PositionSizeCalculator />
-
-            {/* Daily Performance Tracker Component - Pass accountType and reset function */}
-            <DailyPerformanceTracker accountType="trade-tools" onResetDay={handleResetTradeToolsTrades} />
+          <div className="max-w-6xl mx-auto">
+            {/* Daily Performance Tracker */}
+            <AnimatedContainer delay={0.1}>
+              <DailyPerformanceTracker 
+                accountType="trade-tools" 
+                onResetDay={handleResetDay}
+              />
+            </AnimatedContainer>
 
             {/* Trade Tracker Section */}
-            <div className="mt-8">
-              <h2 className="text-xl font-medium text-gray-700 mb-4">Trade Tracker</h2>
-
-              {/* DetailedData component for adding Trade Tools trades */}
-              <DetailedData
+            <AnimatedContainer delay={0.2}>
+              <DetailedData 
+                accountType="trade-tools"
                 showAddTrade={true}
-                accountType="trade-tools" // Specify account type
-                onResetTrades={handleResetTradeToolsTrades} // Pass the reset function
-                tradeCount={tradeToolsTrades.length} // Pass the trade count
               />
+            </AnimatedContainer>
 
-              {/* Trade Tracker Table */}
-              <div className="bg-white rounded-md shadow overflow-x-auto mt-4">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[80px]">TRADE</TableHead>
-                      <TableHead>STRATEGY</TableHead>
-                      <TableHead>PAIR</TableHead>
-                      <TableHead>TYPE</TableHead>
-                      <TableHead>OPEN TIME</TableHead>
-                      <TableHead>TRADE TIME</TableHead>
-                      <TableHead>TIMEFRAME</TableHead>
-                      <TableHead>TREND</TableHead>
-                      <TableHead>LOT SIZE</TableHead>
-                      <TableHead>CANDLES</TableHead>
-                      <TableHead>W/L</TableHead>
-                      <TableHead>NET PROFIT</TableHead>
-                      <TableHead>BALANCE</TableHead>
-                      <TableHead>ACTIONS</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {/* Displaying paginated Trade Tools trades */}
-                    {paginatedTrades.map((trade) => (
-                      <TableRow key={trade.id}>
-                        <TableCell>{trade.id}</TableCell>
-                        <TableCell>{trade.strategy}</TableCell>
-                        <TableCell>{trade.pair}</TableCell>
-                        <TableCell className="text-blue-500">{trade.type}</TableCell>
-                        <TableCell>{trade.openTime}</TableCell>
-                        <TableCell>{trade.tradeTime}</TableCell>
-                        <TableCell>{trade.timeframe}</TableCell>
-                        <TableCell>{trade.trend}</TableCell>
-                        <TableCell>{trade.lotSize}</TableCell>
-                        <TableCell className="text-red-500">{trade.candles}</TableCell>
-                        <TableCell className={trade.winLoss === "win" ? "text-green-500" : "text-red-500"}>
-                          {trade.winLoss === "win" ? "Win" : "Loss"}
-                        </TableCell>
-                        <TableCell className={parseFloat(trade.netProfit) >= 0 ? "text-green-500" : "text-red-500"}>
-                          {trade.netProfit}
-                        </TableCell>
-                        <TableCell>{trade.balance}</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-
-                {/* Added pagination UI */}
-                <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200">
-                  <div className="text-sm text-gray-500">
-                    Showing {paginatedTrades.length > 0 ? ((currentPage - 1) * 5) + 1 : 0} to {Math.min(currentPage * 5, tradeToolsTrades.length)} of {tradeToolsTrades.length} results
+            {/* Trades Table */}
+            <AnimatedContainer delay={0.3}>
+              <motion.div 
+                className="bg-white rounded-lg shadow-lg border mt-6 hover:shadow-xl transition-shadow duration-300"
+                whileHover={{ y: -2 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-medium text-gray-700">Trade History</h3>
                   </div>
-                  {totalPages > 1 && (
-                    <Pagination>
-                      <PaginationContent>
-                        {currentPage > 1 && (
-                          <PaginationItem>
-                            <PaginationPrevious
-                              href="#"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handlePageChange(currentPage - 1);
-                              }}
-                            />
-                          </PaginationItem>
-                        )}
+                  
+                  {tradeToolsTrades.length === 0 ? (
+                    <motion.div 
+                      className="text-center py-8 text-gray-500"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5, duration: 0.3 }}
+                    >
+                      No trades found. Add your first trade to get started.
+                    </motion.div>
+                  ) : (
+                    <>
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4, duration: 0.5 }}
+                      >
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>TRADE</TableHead>
+                              <TableHead>PAIR</TableHead>
+                              <TableHead>TYPE</TableHead>
+                              <TableHead>TIMEFRAME</TableHead>
+                              <TableHead>TREND</TableHead>
+                              <TableHead>LOT SIZE</TableHead>
+                              <TableHead>CANDLES</TableHead>
+                              <TableHead>W/L</TableHead>
+                              <TableHead>NET PROFIT</TableHead>
+                              <TableHead>BALANCE</TableHead>
+                              <TableHead>ACTIONS</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {paginatedTrades.map((trade, index) => (
+                              <motion.tr 
+                                key={trade.id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.5 + index * 0.1, duration: 0.3 }}
+                                whileHover={{ backgroundColor: "#f8f9fa" }}
+                              >
+                                <TableCell>{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
+                                <TableCell>{trade.pair}</TableCell>
+                                <TableCell>
+                                  <span className={trade.type === 'buy' ? 'text-blue-600' : 'text-red-600'}>
+                                    {trade.type}
+                                  </span>
+                                </TableCell>
+                                <TableCell>{trade.timeframe}</TableCell>
+                                <TableCell>{trade.trend}</TableCell>
+                                <TableCell>{trade.lotSize}</TableCell>
+                                <TableCell>{trade.candles}</TableCell>
+                                <TableCell>
+                                  <span className={trade.winLoss === 'win' ? 'text-green-600' : 'text-red-600'}>
+                                    {trade.winLoss === 'win' ? 'Win' : 'Loss'}
+                                  </span>
+                                </TableCell>
+                                <TableCell className={parseFloat(trade.netProfit) >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                  {parseFloat(trade.netProfit) >= 0 ? '+' : ''}{parseFloat(trade.netProfit).toFixed(2)}
+                                </TableCell>
+                                <TableCell>{parseFloat(trade.balance).toFixed(2)}</TableCell>
+                                <TableCell>
+                                  <div className="flex gap-2">
+                                    <Button variant="ghost" size="sm">
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="sm">
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="sm">
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </motion.tr>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </motion.div>
 
-                        {/* Generate page numbers */}
-                        {Array.from({ length: totalPages }).map((_, index) => {
-                          const pageNumber = index + 1;
-                          // Show current page and at most 2 pages before and after
-                          if (
-                            pageNumber === 1 ||
-                            pageNumber === totalPages ||
-                            (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
-                          ) {
-                            return (
-                              <PaginationItem key={pageNumber}>
-                                <PaginationLink
-                                  href="#"
-                                  isActive={pageNumber === currentPage}
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    handlePageChange(pageNumber);
-                                  }}
-                                >
-                                  {pageNumber}
-                                </PaginationLink>
+                      {/* Pagination */}
+                      {totalPages > 1 && (
+                        <motion.div 
+                          className="mt-4"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.6, duration: 0.3 }}
+                        >
+                          <Pagination>
+                            <PaginationContent>
+                              <PaginationItem>
+                                <PaginationPrevious 
+                                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                />
                               </PaginationItem>
-                            );
-                          }
-                          // Show ellipsis for skipped pages
-                          else if (
-                            pageNumber === currentPage - 2 ||
-                            pageNumber === currentPage + 2
-                          ) {
-                            return <PaginationItem key={pageNumber}>...</PaginationItem>;
-                          }
-                          return null;
-                        })}
-
-                        {currentPage < totalPages && (
-                          <PaginationItem>
-                            <PaginationNext
-                              href="#"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handlePageChange(currentPage + 1);
-                              }}
-                            />
-                          </PaginationItem>
-                        )}
-                      </PaginationContent>
-                    </Pagination>
+                              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                <PaginationItem key={page}>
+                                  <PaginationLink
+                                    onClick={() => handlePageChange(page)}
+                                    isActive={currentPage === page}
+                                    className="cursor-pointer"
+                                  >
+                                    {page}
+                                  </PaginationLink>
+                                </PaginationItem>
+                              ))}
+                              <PaginationItem>
+                                <PaginationNext 
+                                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                />
+                              </PaginationItem>
+                            </PaginationContent>
+                          </Pagination>
+                        </motion.div>
+                      )}
+                    </>
                   )}
                 </div>
-              </div>
-            </div>
-
-            {/* Add other trade tools components here in the future */}
-            <div className="mt-8 space-y-6">
-              {/* Removed the placeholder card */}
-            </div>
+              </motion.div>
+            </AnimatedContainer>
           </div>
         </main>
       </div>

@@ -4,6 +4,9 @@ import Sidebar from "../components/Sidebar";
 import ScheduleList from "../components/ScheduleList";
 import { useState, useEffect } from "react"; // Import useEffect
 import { cn } from "@/lib/utils"; // Import cn utility
+import AnimatedContainer from "@/components/AnimatedContainer"; // Import AnimatedContainer
+import { motion } from "framer-motion"; // Import motion
+
 
 const SchedulePage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -43,7 +46,12 @@ const SchedulePage = () => {
 
       <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}> {/* Added dynamic padding */}
         {/* Header */}
-        <header className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10">
+        <motion.header
+          className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-gray-500" />
             <h1 className="text-xl font-medium text-gray-700">Today's Schedule</h1>
@@ -53,13 +61,15 @@ const SchedulePage = () => {
             <p className="text-black text-sm font-bold">{formatDate(currentDateTime)}</p>
             <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
-        </header>
+        </motion.header>
 
         {/* Main content */}
         <main className="flex-1 p-6">
-          <div className="max-w-4xl mx-auto">
-            <ScheduleList />
-          </div>
+          <AnimatedContainer delay={0.1}>
+            <div className="max-w-4xl mx-auto">
+              <ScheduleList />
+            </div>
+          </AnimatedContainer>
         </main>
       </div>
     </div>

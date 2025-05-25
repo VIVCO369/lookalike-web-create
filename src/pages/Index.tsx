@@ -35,6 +35,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"; // Import Dialog components
+import AnimatedContainer from "@/components/AnimatedContainer"; // Import AnimatedContainer
+import { motion } from "framer-motion"; // Import motion
 
 
 const Index = () => {
@@ -258,7 +260,12 @@ const Index = () => {
 
       <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}>
         {/* Header */}
-        <header className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10">
+        <motion.header
+          className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
           <div>
             <p className="text-black text-sm font-bold">{formatDate(currentDateTime)}</p>
             <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
@@ -290,148 +297,150 @@ const Index = () => {
               ))}
             </div>
           </div>
-        </header>
+        </motion.header>
 
         {/* Main content */}
         <main className="flex-1 p-6">
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-medium text-gray-700">Dashboard</h2> {/* Changed text here */}
-              <div className="flex gap-2">
-                {isSettingBalance ? (
-                  <div className="flex gap-2 items-center">
-                    <input
-                      type="number"
-                      value={newBalance}
-                      onChange={(e) => setNewBalance(e.target.value)}
-                      placeholder="Enter new balance"
-                      className="border p-1 rounded text-sm"
-                    />
+          <AnimatedContainer delay={0.1}>
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-medium text-gray-700">Dashboard</h2> {/* Changed text here */}
+                <div className="flex gap-2">
+                  {isSettingBalance ? (
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="number"
+                        value={newBalance}
+                        onChange={(e) => setNewBalance(e.target.value)}
+                        placeholder="Enter new balance"
+                        className="border p-1 rounded text-sm"
+                      />
+                      <Button
+                        size="sm"
+                        onClick={handleSetBalance}
+                        className="bg-blue-500 hover:bg-blue-600 text-white"
+                      >
+                        Set
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setIsSettingBalance(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
                     <Button
-                      size="sm"
-                      onClick={handleSetBalance}
+                      variant="outline"
                       className="bg-blue-500 hover:bg-blue-600 text-white"
+                      onClick={() => setIsSettingBalance(true)}
                     >
-                      Set
+                      <Plus className="h-4 w-4 mr-1" /> Set Balance
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setIsSettingBalance(false)}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    variant="outline"
-                    className="bg-blue-500 hover:bg-blue-600 text-white"
-                    onClick={() => setIsSettingBalance(true)}
-                  >
-                    <Plus className="h-4 w-4 mr-1" /> Set Balance
-                  </Button>
-                )}
+                  )}
 
-                {isSettingDailyTarget ? (
-                  <div className="flex gap-2 items-center">
-                    <input
-                      type="number"
-                      value={newDailyTarget}
-                      onChange={(e) => setNewDailyTarget(e.target.value)}
-                      placeholder="Enter daily target"
-                      className="border p-1 rounded text-sm"
-                    />
-                    <Button
-                      size="sm"
-                      onClick={handleSetDailyTarget}
-                      className="bg-green-500 hover:bg-green-600 text-white"
-                    >
-                      Set
-                    </Button>
-                    <Button
-                      size="sm"
+                  {isSettingDailyTarget ? (
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="number"
+                        value={newDailyTarget}
+                        onChange={(e) => setNewDailyTarget(e.target.value)}
+                        placeholder="Enter daily target"
+                        className="border p-1 rounded text-sm"
+                      />
+                      <Button
+                        size="sm"
+                        onClick={handleSetDailyTarget}
+                        className="bg-green-500 hover:bg-green-600 text-white"
+                      >
+                        Set
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setIsSettingDailyTarget(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                   <Button
                       variant="outline"
-                      onClick={() => setIsSettingDailyTarget(false)}
+                      className="bg-green-500 hover:bg-green-600 text-white"
+                      onClick={() => setIsSettingDailyTarget(true)}
                     >
-                      Cancel
+                      <Plus className="h-4 w-4 mr-1" /> Daily Target
                     </Button>
-                  </div>
-                ) : (
-                 <Button
-                    variant="outline"
-                    className="bg-green-500 hover:bg-green-600 text-white"
-                    onClick={() => setIsSettingDailyTarget(true)}
-                  >
-                    <Plus className="h-4 w-4 mr-1" /> Daily Target
-                  </Button>
-                )}
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <StatsCard
+                  title="Balance"
+                  value={`$${balance.toFixed(2)}`}
+                  color="text-green-500"
+                  borderColor="border-green-500"
+                />
+                <StatsCard
+                  title="Net Profit"
+                  value={formatCurrency(stats.netProfit)}
+                  color={stats.netProfit >= 0 ? "text-green-500" : "text-red-500"}
+                  borderColor={stats.netProfit >= 0 ? "border-green-500" : "border-red-500"}
+                />
+                <StatsCard
+                  title="Win Rate"
+                  value={stats.winRate}
+                  color="text-gray-700"
+                  borderColor="border-gray-200"
+                />
+                <StatsCard
+                  title="Best Trade"
+                  value={stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
+                  color="text-green-500"
+                  borderColor="border-green-500"
+                />
+                <StatsCard
+                  title="Worst Trade"
+                  value={formatCurrency(stats.worstTrade)}
+                  color="text-red-500"
+                  borderColor="border-red-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                <StatsCard
+                  title="Total Trades"
+                  value={stats.totalTrades.toString()} // Use totalTrades from calculated stats
+                  labelPosition="below"
+                  borderColor="border-gray-200"
+                />
+                <StatsCard
+                  title="Daily Target"
+                  value={formatCurrency(dailyTarget)} // Use dailyTarget from context
+                  labelPosition="below"
+                  borderColor="border-gray-200"
+                />
+                <StatsCard
+                  title="Today's P&L" // Changed title here
+                  value={stats.dailyProfit >= 0 ? `+${formatCurrency(stats.dailyProfit)}` : formatCurrency(stats.dailyProfit)}
+                  color={stats.dailyProfit >= 0 ? "text-green-500" : "text-red-500"}
+                  labelPosition="below"
+                  borderColor={stats.dailyProfit >= 0 ? "border-green-500" : "border-red-500"}
+                />
               </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              <StatsCard
-                title="Balance"
-                value={`$${balance.toFixed(2)}`}
-                color="text-green-500"
-                borderColor="border-green-500"
-              />
-              <StatsCard
-                title="Net Profit"
-                value={formatCurrency(stats.netProfit)}
-                color={stats.netProfit >= 0 ? "text-green-500" : "text-red-500"}
-                borderColor={stats.netProfit >= 0 ? "border-green-500" : "border-red-500"}
-              />
-              <StatsCard
-                title="Win Rate"
-                value={stats.winRate}
-                color="text-gray-700"
-                borderColor="border-gray-200"
-              />
-              <StatsCard
-                title="Best Trade"
-                value={stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
-                color="text-green-500"
-                borderColor="border-green-500"
-              />
-              <StatsCard
-                title="Worst Trade"
-                value={formatCurrency(stats.worstTrade)}
-                color="text-red-500"
-                borderColor="border-red-500"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-              <StatsCard
-                title="Total Trades"
-                value={stats.totalTrades.toString()} // Use totalTrades from calculated stats
-                labelPosition="below"
-                borderColor="border-gray-200"
-              />
-              <StatsCard
-                title="Daily Target"
-                value={formatCurrency(dailyTarget)} // Use dailyTarget from context
-                labelPosition="below"
-                borderColor="border-gray-200"
-              />
-              <StatsCard
-                title="Today's P&L" // Changed title here
-                value={stats.dailyProfit >= 0 ? `+${formatCurrency(stats.dailyProfit)}` : formatCurrency(stats.dailyProfit)}
-                color={stats.dailyProfit >= 0 ? "text-green-500" : "text-red-500"}
-                labelPosition="below"
-                borderColor={stats.dailyProfit >= 0 ? "border-green-500" : "border-red-500"}
-              />
-            </div>
-          </div>
+          </AnimatedContainer>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-1">
+            <AnimatedContainer delay={0.2} className="md:col-span-1">
               {/* Added onClick handler and dynamic class for background color */}
               <div onClick={handleTradingRulesClick} className={cn("cursor-pointer", tradingRulesCardColor)}>
                 <TradingRules hideAddButton={true} dashboardView={true} onProgressChange={setTradingRulesProgress} /> {/* Pass dashboardView prop */}
               </div>
-            </div>
-            <div className="md:col-span-1">
+            </AnimatedContainer>
+            <AnimatedContainer delay={0.3} className="md:col-span-1">
               <Card>
                 <CardContent className="pt-6">
                   <h3 className="text-lg font-medium text-center mb-6">Signal Progress</h3>
@@ -456,152 +465,166 @@ const Index = () => {
                   </div>
                 </CardContent>
               </Card>
-            </div>
-            <div className="md:col-span-1">
+            </AnimatedContainer>
+            <AnimatedContainer delay={0.4} className="md:col-span-1">
               {/* Removed duplicate headline */}
               <ScheduleList hideAddButton={true} />
-            </div>
+            </AnimatedContainer>
           </div>
 
           {/* Use the DetailedData component for adding REAL trades */}
           {/* Pass the reset function and trade count */}
-          <DetailedData
-            showAddTrade={true}
-            accountType="real"
-            onResetTrades={handleResetDashboardRealTrades} // Pass the correct reset function
-            tradeCount={dashboardRealTrades.length} // Pass the correct trade count
-          />
+          <AnimatedContainer delay={0.5}>
+            <DetailedData
+              showAddTrade={true}
+              accountType="real"
+              onResetTrades={handleResetDashboardRealTrades} // Pass the correct reset function
+              tradeCount={dashboardRealTrades.length} // Pass the correct trade count
+            />
+          </AnimatedContainer>
 
           {/* Trades Table - Updated to use Dashboard Real trades with pagination */}
-          <div className="bg-white rounded-md shadow overflow-x-auto mt-4">
-            {/* Removed the div containing the title and reset button */}
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[80px]">TRADE</TableHead>
-                  <TableHead>STRATEGY</TableHead>
-                  <TableHead>PAIR</TableHead>
-                  <TableHead>TYPE</TableHead>
-                  <TableHead>OPEN TIME</TableHead>
-                  <TableHead>TRADE TIME</TableHead>
-                  <TableHead>TIMEFRAME</TableHead>
-                  <TableHead>TREND</TableHead>
-                  <TableHead>LOT SIZE</TableHead>
-                  <TableHead>CANDLES</TableHead>
-                  <TableHead>W/L</TableHead>
-                  <TableHead>NET PROFIT</TableHead>
-                  <TableHead>BALANCE</TableHead>
-                  <TableHead>ACTIONS</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedTrades.map((trade) => (
-                  <TableRow key={trade.id}>
-                    <TableCell>{trade.id}</TableCell>
-                    <TableCell>{trade.strategy}</TableCell>
-                    <TableCell>{trade.pair}</TableCell>
-                    <TableCell className="text-blue-500">{trade.type}</TableCell>
-                    <TableCell>{trade.openTime}</TableCell>
-                    <TableCell>{trade.tradeTime}</TableCell>
-                    <TableCell>{trade.timeframe}</TableCell>
-                    <TableCell>{trade.trend}</TableCell>
-                    <TableCell>{trade.lotSize}</TableCell>
-                    <TableCell className="text-red-500">{trade.candles}</TableCell>
-                    <TableCell className={trade.winLoss === "win" ? "text-green-500" : "text-red-500"}>
-                      {trade.winLoss === "win" ? "Win" : "Loss"}
-                    </TableCell>
-                    <TableCell className={parseFloat(trade.netProfit) >= 0 ? "text-green-500" : "text-red-500"}>
-                      {trade.netProfit}
-                    </TableCell>
-                    <TableCell>{trade.balance}</TableCell>
-                    <TableCell>
-                      <div className="flex space-x-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleViewTrade(trade)}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditTrade(trade)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteTrade(trade)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+          <AnimatedContainer delay={0.6}>
+            <motion.div
+              className="bg-white rounded-md shadow overflow-x-auto mt-4 hover:shadow-lg transition-shadow duration-300"
+              whileHover={{ y: -2 }}
+              transition={{ duration: 0.2 }}
+            >
+              {/* Removed the div containing the title and reset button */}
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[80px]">TRADE</TableHead>
+                    <TableHead>STRATEGY</TableHead>
+                    <TableHead>PAIR</TableHead>
+                    <TableHead>TYPE</TableHead>
+                    <TableHead>OPEN TIME</TableHead>
+                    <TableHead>TRADE TIME</TableHead>
+                    <TableHead>TIMEFRAME</TableHead>
+                    <TableHead>TREND</TableHead>
+                    <TableHead>LOT SIZE</TableHead>
+                    <TableHead>CANDLES</TableHead>
+                    <TableHead>W/L</TableHead>
+                    <TableHead>NET PROFIT</TableHead>
+                    <TableHead>BALANCE</TableHead>
+                    <TableHead>ACTIONS</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedTrades.map((trade, index) => (
+                    <motion.tr
+                      key={trade.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 + index * 0.05, duration: 0.3 }}
+                      whileHover={{ backgroundColor: "#f8f9fa" }}
+                    >
+                      <TableCell>{trade.id}</TableCell>
+                      <TableCell>{trade.strategy}</TableCell>
+                      <TableCell>{trade.pair}</TableCell>
+                      <TableCell className="text-blue-500">{trade.type}</TableCell>
+                      <TableCell>{trade.openTime}</TableCell>
+                      <TableCell>{trade.tradeTime}</TableCell>
+                      <TableCell>{trade.timeframe}</TableCell>
+                      <TableCell>{trade.trend}</TableCell>
+                      <TableCell>{trade.lotSize}</TableCell>
+                      <TableCell className="text-red-500">{trade.candles}</TableCell>
+                      <TableCell className={trade.winLoss === "win" ? "text-green-500" : "text-red-500"}>
+                        {trade.winLoss === "win" ? "Win" : "Loss"}
+                      </TableCell>
+                      <TableCell className={parseFloat(trade.netProfit) >= 0 ? "text-green-500" : "text-red-500"}>
+                        {trade.netProfit}
+                      </TableCell>
+                      <TableCell>{trade.balance}</TableCell>
+                      <TableCell>
+                        <div className="flex space-x-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleViewTrade(trade)}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditTrade(trade)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteTrade(trade)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </motion.tr>
+                  ))}
+                </TableBody>
+              </Table>
 
-            {/* Added pagination UI */}
-            <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200">
-              <div className="text-sm text-gray-500">
-                Showing {paginatedTrades.length > 0 ? ((currentPage - 1) * 5) + 1 : 0} to {Math.min(currentPage * 5, dashboardRealTrades.length)} of {dashboardRealTrades.length} results
-              </div>
+              {/* Added pagination UI */}
               {totalPages > 1 && (
-                <Pagination>
-                  <PaginationContent>
-                    {currentPage > 1 && (
-                      <PaginationItem>
-                        <PaginationPrevious
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(currentPage - 1);
-                          }}
-                        />
-                      </PaginationItem>
-                    )}
+                <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200">
+                  <div className="text-sm text-gray-500">
+                    Showing {paginatedTrades.length > 0 ? ((currentPage - 1) * 5) + 1 : 0} to {Math.min(currentPage * 5, dashboardRealTrades.length)} of {dashboardRealTrades.length} results
+                  </div>
+                  <Pagination>
+                    <PaginationContent>
+                      {currentPage > 1 && (
+                        <PaginationItem>
+                          <PaginationPrevious
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handlePageChange(currentPage - 1);
+                            }}
+                          />
+                        </PaginationItem>
+                      )}
 
-                    {/* Generate page numbers */}
-                    {Array.from({ length: totalPages }).map((_, index) => {
-                      const pageNumber = index + 1;
-                      // Show current page and at most 2 pages before and after
-                      if (
-                        pageNumber === 1 ||
-                        pageNumber === totalPages ||
-                        (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
-                      ) {
-                        return (
-                          <PaginationItem key={pageNumber}>
-                            <PaginationLink
-                              href="#"
-                              isActive={pageNumber === currentPage}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handlePageChange(pageNumber);
-                              }}
-                            >
-                              {pageNumber}
-                            </PaginationLink>
-                          </PaginationItem>
-                        );
-                      }
-                      // Show ellipsis for skipped pages
-                      else if (
-                        pageNumber === currentPage - 2 ||
-                        pageNumber === currentPage + 2
-                      ) {
-                        return <PaginationItem key={pageNumber}>...</PaginationItem>;
-                      }
-                      return null;
-                    })}
+                      {/* Generate page numbers */}
+                      {Array.from({ length: totalPages }).map((_, index) => {
+                        const pageNumber = index + 1;
+                        // Show current page and at most 2 pages before and after
+                        if (
+                          pageNumber === 1 ||
+                          pageNumber === totalPages ||
+                          (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                        ) {
+                          return (
+                            <PaginationItem key={pageNumber}>
+                              <PaginationLink
+                                href="#"
+                                isActive={pageNumber === currentPage}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handlePageChange(pageNumber);
+                                }}
+                              >
+                                {pageNumber}
+                              </PaginationLink>
+                            </PaginationItem>
+                          );
+                        }
+                        // Show ellipsis for skipped pages
+                        else if (
+                          pageNumber === currentPage - 2 ||
+                          pageNumber === currentPage + 2
+                        ) {
+                          return <PaginationItem key={pageNumber}>...</PaginationItem>;
+                        }
+                        return null;
+                      })}
 
-                    {currentPage < totalPages && (
-                      <PaginationItem>
-                        <PaginationNext
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(currentPage + 1);
-                          }}
-                        />
-                      </PaginationItem>
-                    )}
-                  </PaginationContent>
-                </Pagination>
+                      {currentPage < totalPages && (
+                        <PaginationItem>
+                          <PaginationNext
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handlePageChange(currentPage + 1);
+                            }}
+                          />
+                        </PaginationItem>
+                      )}
+                    </PaginationContent>
+                  </Pagination>
+                </div>
               )}
-            </div>
-          </div>
+            </motion.div>
+          </AnimatedContainer>
         </main>
       </div>
 

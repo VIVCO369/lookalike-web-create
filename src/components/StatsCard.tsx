@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
+import { motion } from "framer-motion";
 
 interface StatsCardProps {
   title: string;
@@ -17,22 +18,45 @@ const StatsCard = ({
   borderColor = "border-gray-200"
 }: StatsCardProps) => {
   return (
-    <Card className={cn("border-1", borderColor)}>
-      <CardContent className="p-4">
-        {labelPosition === "above" && (
-          <div className="flex flex-col">
-            <p className="text-sm text-gray-500">{title}</p>
-            <p className={cn("text-lg font-semibold", color)}>{value}</p>
-          </div>
-        )}
-        {labelPosition === "below" && (
-          <div className="flex flex-col">
-            <p className={cn("text-lg font-semibold", color)}>{value}</p>
-            <p className="text-sm text-gray-500">{title}</p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      whileHover={{ 
+        y: -5,
+        transition: { duration: 0.2 }
+      }}
+    >
+      <Card className={cn(
+        "border-1 shadow-lg hover:shadow-xl transition-shadow duration-300",
+        borderColor
+      )}>
+        <CardContent className="p-4">
+          {labelPosition === "above" && (
+            <motion.div 
+              className="flex flex-col"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+            >
+              <p className="text-sm text-gray-500">{title}</p>
+              <p className={cn("text-lg font-semibold", color)}>{value}</p>
+            </motion.div>
+          )}
+          {labelPosition === "below" && (
+            <motion.div 
+              className="flex flex-col"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+            >
+              <p className={cn("text-lg font-semibold", color)}>{value}</p>
+              <p className="text-sm text-gray-500">{title}</p>
+            </motion.div>
+          )}
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 
