@@ -14,6 +14,8 @@ import TradeGoalsPage from "./pages/TradeGoalsPage";
 import TradeToolsPage from "./pages/TradeToolsPage";
 import TradeSummaryPage from "./pages/TradeSummaryPage";
 import TradeHistoryPage from "./pages/TradeHistoryPage";
+import DailyTradesPage from "./pages/DailyTradesPage";
+import ThirtyDayTradePage from "./pages/ThirtyDayTradePage";
 import NotFound from "./pages/NotFound";
 import { TradeDataProvider } from "./contexts/TradeDataContext";
 
@@ -34,6 +36,8 @@ const App = () => (
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/trade-goals" element={<TradeGoalsPage />} />
             <Route path="/trade-tools" element={<TradeToolsPage />} />
+            <Route path="/trade-challenge/daily-trades" element={<DailyTradesPage />} />
+            <Route path="/trade-challenge/30-day-trade" element={<ThirtyDayTradePage />} />
             <Route path="/trade-analytics/summary" element={<TradeSummaryPage />} />
             <Route path="/trade-analytics/history" element={<TradeHistoryPage />} />
             <Route path="/settings" element={<SettingsPage />} />

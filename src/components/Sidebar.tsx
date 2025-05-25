@@ -1,4 +1,3 @@
-
 import {
   LayoutDashboard,
   Calendar,
@@ -14,6 +13,8 @@ import {
   FileText,
   History,
   ChevronDown,
+  Trophy,
+  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const currentPath = location.pathname;
   const [mounted, setMounted] = useState(false);
   const [analyticsExpanded, setAnalyticsExpanded] = useState(false);
+  const [tradeChallengeExpanded, setTradeChallengeExpanded] = useState(false);
 
   useEffect(() => {
     // Add a slight delay for mounting animation
@@ -41,6 +43,9 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     if (currentPath.includes('/trade-analytics')) {
       setAnalyticsExpanded(true);
     }
+    if (currentPath.includes('/trade-challenge')) {
+      setTradeChallengeExpanded(true);
+    }
   }, [currentPath]);
 
   const navItems = [
@@ -48,7 +53,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     { icon: Calendar, label: "Schedule", path: "/schedule" },
     { icon: BookOpen, label: "Trade Rules", path: "/trading-rules" },
     { icon: BarChart3, label: "Trade Demo", path: "/trades" },
-    { icon: Users, label: "Trade Goals", path: "/trade-goals" },
+    { icon: Target, label: "Trade Goals", path: "/trade-goals" },
     { icon: BarChart3, label: "Analytics", path: "/analytics" },
     { icon: Wrench, label: "Trade Tools", path: "/trade-tools" },
   ];
@@ -58,8 +63,17 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     { icon: History, label: "Trade History", path: "/trade-analytics/history" },
   ];
 
+  const tradeChallengeSubItems = [
+    { icon: Calendar, label: "Daily Trades", path: "/trade-challenge/daily-trades" },
+    { icon: Trophy, label: "30 Day Trade", path: "/trade-challenge/30-day-trade" },
+  ];
+
   const toggleAnalytics = () => {
     setAnalyticsExpanded(!analyticsExpanded);
+  };
+
+  const toggleTradeChallenge = () => {
+    setTradeChallengeExpanded(!tradeChallengeExpanded);
   };
 
   return (
@@ -101,6 +115,50 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
             {isOpen && <span className={cn("ml-4 transition-opacity", isOpen ? "opacity-100" : "opacity-0")}>{item.label}</span>}
           </Link>
         ))}
+        
+        {/* Trade Challenge Menu Item */}
+        <div>
+          <div
+            onClick={isOpen ? toggleTradeChallenge : undefined}
+            className={cn(
+              "flex items-center px-4 py-3 text-gray-100 hover:bg-teal-800 transition-all duration-200 cursor-pointer",
+              (currentPath.includes('/trade-challenge')) && "bg-teal-700 border-l-4 border-white",
+              !isOpen && "justify-center"
+            )}
+          >
+            <Trophy className={cn("h-5 w-5", !isOpen && "h-6 w-6")} />
+            {isOpen && (
+              <>
+                <span className="ml-4 flex-1">Trade Challenge</span>
+                <ChevronDown 
+                  className={cn(
+                    "h-4 w-4 transition-transform duration-200",
+                    tradeChallengeExpanded && "rotate-180"
+                  )}
+                />
+              </>
+            )}
+          </div>
+          
+          {/* Trade Challenge Sub Items */}
+          {isOpen && tradeChallengeExpanded && (
+            <div className="bg-teal-800">
+              {tradeChallengeSubItems.map((subItem, subIndex) => (
+                <Link
+                  key={subIndex}
+                  to={subItem.path}
+                  className={cn(
+                    "flex items-center px-8 py-2 text-gray-200 hover:bg-teal-700 transition-all duration-200 text-sm",
+                    currentPath === subItem.path && "bg-teal-600 text-white"
+                  )}
+                >
+                  <subItem.icon className="h-4 w-4" />
+                  <span className="ml-3">{subItem.label}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
         
         {/* Trade Analytics Menu Item */}
         <div>
