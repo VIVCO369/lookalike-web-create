@@ -1,3 +1,4 @@
+
 import {
   LayoutDashboard,
   Calendar,
@@ -15,6 +16,8 @@ import {
   ChevronDown,
   Trophy,
   Target,
+  Briefcase,
+  Goal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -32,6 +35,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const [mounted, setMounted] = useState(false);
   const [analyticsExpanded, setAnalyticsExpanded] = useState(false);
   const [tradeChallengeExpanded, setTradeChallengeExpanded] = useState(false);
+  const [tradeManageExpanded, setTradeManageExpanded] = useState(false);
 
   useEffect(() => {
     // Add a slight delay for mounting animation
@@ -45,6 +49,9 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     }
     if (currentPath.includes('/trade-challenge')) {
       setTradeChallengeExpanded(true);
+    }
+    if (currentPath.includes('/trade-manage')) {
+      setTradeManageExpanded(true);
     }
   }, [currentPath]);
 
@@ -63,6 +70,11 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     { icon: History, label: "Trade History", path: "/trade-analytics/history" },
   ];
 
+  const tradeManageSubItems = [
+    { icon: Target, label: "Trade Goals", path: "/trade-manage/goals" },
+    { icon: Goal, label: "Trade Target", path: "/trade-manage/target" },
+  ];
+
   const tradeChallengeSubItems = [
     { icon: Calendar, label: "Daily Trades", path: "/trade-challenge/daily-trades" },
     { icon: Trophy, label: "30 Day Trade", path: "/trade-challenge/30-day-trade" },
@@ -74,6 +86,10 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
 
   const toggleTradeChallenge = () => {
     setTradeChallengeExpanded(!tradeChallengeExpanded);
+  };
+
+  const toggleTradeManage = () => {
+    setTradeManageExpanded(!tradeManageExpanded);
   };
 
   return (
@@ -115,6 +131,50 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
             {isOpen && <span className={cn("ml-4 transition-opacity", isOpen ? "opacity-100" : "opacity-0")}>{item.label}</span>}
           </Link>
         ))}
+        
+        {/* Trade Manage Menu Item */}
+        <div>
+          <div
+            onClick={isOpen ? toggleTradeManage : undefined}
+            className={cn(
+              "flex items-center px-4 py-3 text-gray-100 hover:bg-teal-800 transition-all duration-200 cursor-pointer",
+              (currentPath.includes('/trade-manage')) && "bg-teal-700 border-l-4 border-white",
+              !isOpen && "justify-center"
+            )}
+          >
+            <Briefcase className={cn("h-5 w-5", !isOpen && "h-6 w-6")} />
+            {isOpen && (
+              <>
+                <span className="ml-4 flex-1">Trade Manage</span>
+                <ChevronDown 
+                  className={cn(
+                    "h-4 w-4 transition-transform duration-200",
+                    tradeManageExpanded && "rotate-180"
+                  )}
+                />
+              </>
+            )}
+          </div>
+          
+          {/* Trade Manage Sub Items */}
+          {isOpen && tradeManageExpanded && (
+            <div className="bg-teal-800">
+              {tradeManageSubItems.map((subItem, subIndex) => (
+                <Link
+                  key={subIndex}
+                  to={subItem.path}
+                  className={cn(
+                    "flex items-center px-8 py-2 text-gray-200 hover:bg-teal-700 transition-all duration-200 text-sm",
+                    currentPath === subItem.path && "bg-teal-600 text-white"
+                  )}
+                >
+                  <subItem.icon className="h-4 w-4" />
+                  <span className="ml-3">{subItem.label}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
         
         {/* Trade Challenge Menu Item */}
         <div>
