@@ -21,11 +21,14 @@ export interface TradeFormData {
 
 interface CalculatedStats {
   netProfit: number;
-  dailyProfit: number;
+  dailyProfit: number; // Profit for the current day
   bestTrade: number;
   worstTrade: number;
   winRate: string;
   totalTrades: number; // Added totalTrades to stats
+  dailyProfitsByDate: { [date: string]: number }; // New: Profit for each day
+  bestDayProfit: number; // New: The highest daily profit
+  profitableDaysCount: number; // New: Count of days with positive profit
 }
 
 interface TradeDataContextType {
@@ -195,18 +198,16 @@ export const TradeDataProvider = ({ children }: { children: ReactNode }) => {
 // Helper function to calculate stats for a given list of trades
 export const calculateStats = (trades: TradeFormData[]): CalculatedStats => {
   let totalProfit = 0;
-  let dailyProfit = 0;
+  let dailyProfit = 0; // Profit for the current day
   let bestTrade = 0;
   let worstTrade = 0;
   let wins = 0;
+  const dailyProfitsByDate: { [date: string]: number } = {}; // Store profit for each day
 
-  // console.log("Calculating stats for trades:", trades); // Log the trades array
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set today's date to midnight
 
   if (trades.length > 0) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set today's date to midnight
-    // console.log("Today's date (midnight):", today.toISOString()); // Log today's date
-
     trades.forEach(trade => {
       const profit = parseFloat(trade.netProfit || '0');
 
@@ -224,19 +225,16 @@ export const calculateStats = (trades: TradeFormData[]): CalculatedStats => {
         wins++;
       }
 
-      // Attempt to parse the date string
+      // Calculate daily profit for each day
       const tradeDate = new Date(trade.openTime);
-
-      // Check if the parsed date is valid before using it
       if (!isNaN(tradeDate.getTime())) {
+        const dateKey = tradeDate.toISOString().split('T')[0]; // Use YYYY-MM-DD as key
+        dailyProfitsByDate[dateKey] = (dailyProfitsByDate[dateKey] || 0) + profit;
+
+        // Also calculate profit for the current day
         tradeDate.setHours(0, 0, 0, 0); // Set trade date to midnight for comparison
-
-        // console.log(`Trade ID: ${trade.id}, Open Time String: "${trade.openTime}", Parsed Trade Date (midnight): ${tradeDate.toISOString()}, Profit: ${profit}`); // Log trade details
-        // console.log(`Date comparison (tradeDate === today): ${tradeDate.getTime() === today.getTime()}`); // Log comparison result
-
-        if (tradeDate.getTime() === today.getTime()) { // Compare timestamps at midnight
+        if (tradeDate.getTime() === today.getTime()) {
           dailyProfit += profit;
-          // console.log("Adding to daily profit. Current dailyProfit:", dailyProfit); // Log daily profit update
         }
       } else {
         console.warn(`Trade ID: ${trade.id} has an invalid openTime: "${trade.openTime}". Skipping daily profit calculation for this trade.`);
@@ -246,14 +244,18 @@ export const calculateStats = (trades: TradeFormData[]): CalculatedStats => {
 
   const winRate = trades.length > 0 ? ((wins / trades.length) * 100).toFixed(0) : '0';
 
-  // console.log("Final calculated stats:", {
-  //   netProfit: totalProfit,
-  //   dailyProfit,
-  //   bestTrade,
-  //   worstTrade,
-  //   winRate: `${winRate}%`,
-  //   totalTrades: trades.length,
-  // }); // Log final stats
+  // Calculate best day profit and profitable days count
+  let bestDayProfit = 0;
+  let profitableDaysCount = 0;
+  Object.values(dailyProfitsByDate).forEach(profit => {
+    if (profit > bestDayProfit) {
+      bestDayProfit = profit;
+    }
+    if (profit > 0) {
+      profitableDaysCount++;
+    }
+  });
+
 
   return {
     netProfit: totalProfit,
@@ -262,5 +264,8 @@ export const calculateStats = (trades: TradeFormData[]): CalculatedStats => {
     worstTrade,
     winRate: `${winRate}%`,
     totalTrades: trades.length,
+    dailyProfitsByDate, // Include daily profits by date
+    bestDayProfit, // Include best day profit
+    profitableDaysCount, // Include profitable days count
   };
 };

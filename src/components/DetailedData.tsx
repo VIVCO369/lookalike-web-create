@@ -77,7 +77,7 @@ const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeC
     <div className="mt-8">
       <div className="flex items-center justify-between mb-4">
         <span className="text-xl font-medium text-gray-700 flex items-center gap-1">
-          {accountType === 'real' ? 'Real Trading Detail' : accountType === 'demo' ? 'Demo Trading Detail' : 'Trade Tools Detail'} {/* Dynamic title */}
+          {accountType === 'real' ? 'Real Trading Detail' : accountType === 'demo' ? 'Trade Details' : 'Trade Tools Detail'} {/* Dynamic title - Changed 'Demo Trading Detail' to 'Trade Details' */}
         </span>
         <div className="flex gap-2"> {/* Flex container for buttons */}
           {showAddTrade && (
@@ -93,7 +93,7 @@ const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeC
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" className="bg-red-500 hover:bg-red-600 text-white">
-                  <Trash2 className="mr-2 h-4 w-4" /> Reset Trades {/* Changed button text */}
+                  <Trash2 className="mr-2 h-4 w-4" /> Reset  Trades {/* Changed button text here */}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>

@@ -56,7 +56,6 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
 
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/" },
-    { icon: Calendar, label: "Schedule", path: "/schedule" },
     { icon: BookOpen, label: "Trade Rules", path: "/trading-rules" },
     { icon: BarChart3, label: "Trade Demo", path: "/trades" },
     { icon: Target, label: "Trade Goals", path: "/trade-goals" },
@@ -130,6 +129,20 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
             {isOpen && <span className={cn("ml-4 transition-opacity", isOpen ? "opacity-100" : "opacity-0")}>{item.label}</span>}
           </Link>
         ))}
+
+        {/* Schedule Link - Moved here */}
+        <Link
+          to="/schedule"
+          className={cn(
+            "flex items-center px-4 py-3 text-gray-100 hover:bg-teal-800 transition-all duration-200",
+            currentPath === "/schedule" && "bg-teal-700 border-l-4 border-white",
+            !isOpen && "justify-center"
+          )}
+        >
+          <Calendar className={cn("h-5 w-5", !isOpen && "h-6 w-6")} />
+          {isOpen && <span className={cn("ml-4 transition-opacity", isOpen ? "opacity-100" : "opacity-0")}>Schedule</span>}
+        </Link>
+
 
         {/* Trade Manage Menu Item */}
         <div>
@@ -263,6 +276,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
           )}
         </div>
 
+        {/* Settings Link - Moved here */}
         <Link
           to="/settings"
           className={cn(

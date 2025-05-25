@@ -67,6 +67,10 @@ const DailyTradesPage = () => {
   const [isSettingDailyTarget, setIsSettingDailyTarget] = useState(false);
   const [newDailyTarget, setNewDailyTarget] = useLocalStorage<string>("newDailyTargetInput", "");
 
+  // State for Challenge Milestones
+  const [challengeStarted, setChallengeStarted] = useLocalStorage<boolean>("challengeStarted", false);
+  const [daysRemaining, setDaysRemaining] = useLocalStorage<number>("daysRemaining", 0);
+
   const { toast } = useToast();
 
   const toggleSidebar = () => {
@@ -201,6 +205,26 @@ const DailyTradesPage = () => {
     };
   });
 
+  // Handle Start Challenge
+  const handleStartChallenge = () => {
+    setChallengeStarted(true);
+    setDaysRemaining(30); // Start with 30 days
+    toast({
+      title: "Challenge Started!",
+      description: "Your 30-day trading challenge has begun.",
+    });
+  };
+
+  // Handle Reset Challenge
+  const handleResetChallenge = () => {
+    setChallengeStarted(false);
+    setDaysRemaining(0); // Reset days remaining
+    toast({
+      title: "Challenge Reset",
+      description: "Your 30-day trading challenge has been reset.",
+    });
+  };
+
 
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: "#F8F5F0" }}>
@@ -256,7 +280,21 @@ const DailyTradesPage = () => {
             {/* Challenge Milestones - Moved from 30 Day Trade Page */}
             <AnimatedContainer delay={0.1}>
               <div className="bg-white rounded-lg shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Challenge Milestones</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Challenge Milestones</h3>
+                  {/* Start/Reset Buttons */}
+                  <div>
+                    {!challengeStarted ? (
+                      <Button className="bg-green-500 hover:bg-green-600 text-white" onClick={handleStartChallenge}>
+                        Start Challenge
+                      </Button>
+                    ) : (
+                      <Button variant="outline" className="bg-red-500 hover:bg-red-600 text-white" onClick={handleResetChallenge}>
+                        Reset Challenge
+                      </Button>
+                    )}
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="border rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
@@ -264,7 +302,7 @@ const DailyTradesPage = () => {
                       <span className="font-medium">Profitable Days</span>
                     </div>
                     <p className="text-2xl font-bold text-green-600">
-                      {thirtyDayData.filter(day => day.profit > 0).length}/30
+                      {stats.profitableDaysCount}/30 {/* Use calculated profitableDaysCount */}
                     </p>
                   </div>
 
@@ -274,7 +312,7 @@ const DailyTradesPage = () => {
                       <span className="font-medium">Best Day</span>
                     </div>
                     <p className="text-2xl font-bold text-blue-600">
-                      ${Math.max(...thirtyDayData.map(day => day.profit))}
+                      {formatCurrency(stats.bestDayProfit)} {/* Use calculated bestDayProfit */}
                     </p>
                   </div>
 
@@ -284,7 +322,7 @@ const DailyTradesPage = () => {
                       <span className="font-medium">Days Remaining</span>
                     </div>
                     <p className="text-2xl font-bold text-gray-600">
-                      0/30
+                      {daysRemaining}/30 {/* Display daysRemaining state */}
                     </p>
                   </div>
                 </div>
@@ -295,7 +333,7 @@ const DailyTradesPage = () => {
             <AnimatedContainer delay={0.2}>
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-medium text-gray-700">Demo Account</h2> {/* Updated title */}
+                  <h2 className="text-xl font-medium text-gray-700">Daily Trade</h2> {/* Changed text here */}
                   <div className="flex gap-2">
                     {isSettingBalance ? (
                       <div className="flex gap-2 items-center">
