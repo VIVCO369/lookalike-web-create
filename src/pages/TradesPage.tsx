@@ -233,7 +233,7 @@ const TradesPage = () => {
           <AnimatedContainer delay={0.1}>
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-medium text-gray-700">Demo Account</h2> {/* Updated title */}
+                <h2 className="text-xl font-medium text-gray-700">Backtesting</h2> {/* Updated title */}
                 <div className="flex gap-2">
                   {isSettingBalance ? (
                     <div className="flex gap-2 items-center">

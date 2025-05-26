@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react"; // Import useMemo
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import {
 import AnimatedContainer from "@/components/AnimatedContainer"; // Import AnimatedContainer
 import { motion } from "framer-motion"; // Import motion
 import { cn } from "@/lib/utils"; // Import cn utility
+import useLocalStorage from "@/hooks/useLocalStorage"; // Import useLocalStorage
 
 
 interface Rule {
@@ -36,62 +37,78 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
   const [newRuleName, setNewRuleName] = useState("");
   const [newStrategyName, setNewStrategyName] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [rules, setRules] = useState<Rule[]>([
-    { id: "G1", name: "Morning Meditation", strategy: "General Rules" },
-    { id: "G2", name: "Drink 8 Glasses of Water", strategy: "General Rules" },
-    { id: "G3", name: "Read for 20 Minutes", strategy: "General Rules" },
-    { id: "G4", name: "Exercise", strategy: "General Rules", completed: true },
-    { id: "A1", name: "Rule A1", strategy: "Strategy A" },
-    { id: "A2", name: "Rule A2", strategy: "Strategy A" },
-    { id: "A3", name: "Rule A3", strategy: "Strategy A", completed: true },
-    { id: "B1", name: "Rule B1", strategy: "Strategy B" },
-    { id: "B2", name: "Rule B2", strategy: "Strategy B" },
-  ]);
+  // Use useLocalStorage for persistent storage of rules
+  const [rules, setRules] = useLocalStorage<Rule[]>('tradingRules', []);
 
-  const itemsPerPage = 7;
+  const itemsPerPage = 2; // Paginate by 2 strategies per page
 
   // State for selected strategy in dashboard view
   const [selectedStrategy, setSelectedStrategy] = useState<string | undefined>(undefined);
 
-  // Determine which rules to display based on view and selection
-  const rulesToDisplay = dashboardView
-    ? rules.filter(rule => rule.strategy === selectedStrategy)
-    : showLastEntryOnly // Keep showLastEntryOnly logic for non-dashboard use if needed
-      ? rules.length > 0
-        ? rules.filter(rule => rule.strategy === rules[rules.length - 1].strategy)
-        : []
-      : rules;
+  // Get unique strategy names for the select dropdown and pagination
+  const uniqueStrategies = useMemo(() => {
+    const strategies = Array.from(new Set(rules.map(rule => rule.strategy))).filter(Boolean) as string[];
+    // Sort strategies alphabetically for consistent pagination order
+    return strategies.sort();
+  }, [rules]);
 
-  const paginatedRules = dashboardView ? rulesToDisplay : rulesToDisplay.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-  const totalPages = dashboardView ? 1 : Math.ceil(rulesToDisplay.length / itemsPerPage);
+
+  // Determine which strategies to display based on view and selection
+  const strategiesToDisplay = useMemo(() => {
+    if (dashboardView) {
+      return uniqueStrategies.filter(strategy => strategy === selectedStrategy);
+    } else if (showLastEntryOnly && rules.length > 0) {
+      // Find the strategy of the last added rule
+      const lastStrategy = rules[rules.length - 1].strategy;
+      return lastStrategy ? [lastStrategy] : [];
+    } else {
+      return uniqueStrategies;
+    }
+  }, [dashboardView, showLastEntryOnly, rules, selectedStrategy, uniqueStrategies]);
+
+
+  // Calculate total pages based on strategiesToDisplay
+  const totalPages = dashboardView ? 1 : Math.ceil(strategiesToDisplay.length / itemsPerPage);
+
+  // Get paginated strategies for the current page
+  const paginatedStrategies = useMemo(() => {
+    if (dashboardView) {
+      return strategiesToDisplay; // No pagination in dashboard view, show selected strategy
+    }
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return strategiesToDisplay.slice(startIndex, startIndex + itemsPerPage);
+  }, [strategiesToDisplay, currentPage, itemsPerPage, dashboardView]);
 
 
   // Calculate progress whenever rulesToDisplay change
   useEffect(() => {
     if (onProgressChange) {
-      const completedRules = rulesToDisplay.filter(rule => rule.completed).length;
-      const totalRules = rulesToDisplay.length;
+      // Calculate progress based on the rules currently being displayed (within the paginated strategies)
+      const rulesInView = rules.filter(rule => paginatedStrategies.includes(rule.strategy || "Uncategorized"));
+      const completedRules = rulesInView.filter(rule => rule.completed).length;
+      const totalRules = rulesInView.length;
       const progress = totalRules > 0 ? (completedRules / totalRules) * 100 : 0;
       onProgressChange(progress);
     }
-  }, [rulesToDisplay, onProgressChange]);
+  }, [paginatedStrategies, rules, onProgressChange]); // Depend on paginatedStrategies
+
 
   // Set initial selected strategy for dashboard view
   useEffect(() => {
-    if (dashboardView && rules.length > 0 && !selectedStrategy) {
-      // Set the last added strategy as the initial selected one
-      setSelectedStrategy(rules[rules.length - 1].strategy);
+    if (dashboardView && uniqueStrategies.length > 0 && !selectedStrategy) {
+      // Set the first strategy as the initial selected one
+      setSelectedStrategy(uniqueStrategies[0]);
     }
-  }, [dashboardView, rules, selectedStrategy]);
+  }, [dashboardView, uniqueStrategies, selectedStrategy]);
 
 
   const handleAddRule = () => {
     if (newRuleName.trim() === "" || newStrategyName.trim() === "") return;
 
-    const strategyPrefix = newStrategyName.trim().charAt(0).toUpperCase();
-    const countForStrategy = rules.filter(r => r.strategy === newStrategyName.trim()).length;
-    const id = `${strategyPrefix}${countForStrategy + 1}`;
+    // Generate a unique ID for the new rule
+    const id = Date.now().toString();
 
+    // Update rules using the setter from useLocalStorage
     setRules([...rules, { id, name: newRuleName.trim(), strategy: newStrategyName.trim() }]);
     setNewRuleName("");
     setNewStrategyName("");
@@ -99,10 +116,12 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
   };
 
   const handleRemoveRule = (id: string) => {
+    // Update rules using the setter from useLocalStorage
     setRules(rules.filter(rule => rule.id !== id));
   };
 
   const handleToggleComplete = (id: string) => {
+    // Update rules using the setter from useLocalStorage
     setRules(
       rules.map(rule =>
         rule.id === id ? { ...rule, completed: !rule.completed } : rule
@@ -111,18 +130,20 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
   };
 
   const handleDeleteStrategy = (strategyName: string) => {
+    // Update rules using the setter from useLocalStorage
     setRules(rules.filter(rule => rule.strategy !== strategyName));
+    // If the deleted strategy was the selected one in dashboard view, reset selection
+    if (dashboardView && selectedStrategy === strategyName) {
+        setSelectedStrategy(uniqueStrategies.filter(s => s !== strategyName)[0] || undefined);
+    }
   };
-
-  // Get unique strategy names for the select dropdown
-  const uniqueStrategies = Array.from(new Set(rules.map(rule => rule.strategy))).filter(Boolean) as string[];
 
 
   const displayRulesByStrategy = () => {
     const grouped: { [key: string]: Rule[] } = {};
 
-    // Group rulesToDisplay by strategy
-    rulesToDisplay.forEach(rule => {
+    // Group ALL rules by strategy first
+    rules.forEach(rule => {
       const strategy = rule.strategy || "Uncategorized";
       if (!grouped[strategy]) {
         grouped[strategy] = [];
@@ -130,64 +151,68 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
       grouped[strategy].push(rule);
     });
 
-    return Object.entries(grouped).map(([strategy, rules], index) => (
-      <AnimatedContainer key={strategy} delay={0.2 + index * 0.1}>
-        <div className="mb-6 border rounded p-4 bg-gray-50">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-green-500 font-medium">{strategy}</h3>
-            {/* Conditionally render Delete Strategy button */}
-            {!dashboardView && !showLastEntryOnly && ( // Hide delete button in dashboard view and when showing only last entry
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-red-500 hover:bg-red-600 text-white"
-                onClick={() => handleDeleteStrategy(strategy)}
-              >
-                <Trash2 className="h-4 w-4 mr-1" /> Delete Strategy
-              </Button>
-            )}
-          </div>
-          <div className="space-y-2">
-            {rules.map(rule => (
-              <div key={rule.id} className="flex items-center justify-between border rounded p-3 bg-white">
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-700">{rule.name}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  {/* Improved Checkbox Button Styling */}
-                  <button
-                    className={cn(
-                      "w-6 h-6 flex items-center justify-center rounded-full border-2 transition-colors",
-                      rule.completed
-                        ? "bg-green-500 border-green-500 hover:bg-green-600 hover:border-green-600"
-                        : "bg-white border-gray-300 hover:bg-gray-100"
+    // Now, only display the groups for the paginated strategies
+    return paginatedStrategies.map((strategy, index) => {
+      const rulesForStrategy = grouped[strategy] || [];
+      return (
+        <AnimatedContainer key={strategy} delay={0.2 + index * 0.1}>
+          <div className="mb-6 border rounded p-4 bg-gray-50">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-green-500 font-medium">{strategy}</h3>
+              {/* Conditionally render Delete Strategy button */}
+              {!dashboardView && !showLastEntryOnly && ( // Hide delete button in dashboard view and when showing only last entry
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-red-500 hover:bg-red-600 text-white"
+                  onClick={() => handleDeleteStrategy(strategy)}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" /> Delete Strategy
+                </Button>
+              )}
+            </div>
+            <div className="space-y-2">
+              {rulesForStrategy.map(rule => (
+                <div key={rule.id} className="flex items-center justify-between border rounded p-3 bg-white">
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-700">{rule.name}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {/* Improved Checkbox Button Styling */}
+                    <button
+                      className={cn(
+                        "w-6 h-6 flex items-center justify-center rounded-full border-2 transition-colors",
+                        rule.completed
+                          ? "bg-green-500 border-green-500 hover:bg-green-600 hover:border-green-600"
+                          : "bg-white border-gray-300 hover:bg-gray-100"
+                      )}
+                      onClick={() => handleToggleComplete(rule.id)}
+                    >
+                      {/* Check icon color changes based on completion */}
+                      <Check className={cn("h-4 w-4", rule.completed ? "text-white" : "text-gray-400")} />
+                    </button>
+                    {/* Hide edit/delete rule buttons in dashboard view */}
+                    {!dashboardView && (
+                      <>
+                        <button className="text-gray-400 p-1 rounded-full hover:bg-gray-100">
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          className="text-gray-400 p-1 rounded-full hover:bg-gray-100"
+                          onClick={() => handleRemoveRule(rule.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </>
                     )}
-                    onClick={() => handleToggleComplete(rule.id)}
-                  >
-                    {/* Check icon color changes based on completion */}
-                    <Check className={cn("h-4 w-4", rule.completed ? "text-white" : "text-gray-400")} />
-                  </button>
-                  {/* Hide edit/delete rule buttons in dashboard view */}
-                  {!dashboardView && (
-                    <>
-                      <button className="text-gray-400 p-1 rounded-full hover:bg-gray-100">
-                        <Pencil className="h-4 w-4" />
-                      </button>
-                      <button
-                        className="text-gray-400 p-1 rounded-full hover:bg-gray-100"
-                        onClick={() => handleRemoveRule(rule.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </>
-                  )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </AnimatedContainer>
-    ));
+        </AnimatedContainer>
+      );
+    });
   };
 
   return (
@@ -270,7 +295,7 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
         {totalPages > 1 && !dashboardView && (
           <div className="mt-6">
             <p className="text-sm text-gray-500 mb-2">
-              Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, rulesToDisplay.length)} of {rulesToDisplay.length} strategies
+              Showing strategies {Math.min((currentPage - 1) * itemsPerPage + 1, strategiesToDisplay.length)} to {Math.min(currentPage * itemsPerPage, strategiesToDisplay.length)} of {strategiesToDisplay.length}
             </p>
             <Pagination>
               <PaginationContent>
@@ -280,11 +305,35 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
                     className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
                   />
                 </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink isActive={true}>
-                    Page {currentPage} of {totalPages}
-                  </PaginationLink>
-                </PaginationItem>
+                {/* Render page numbers */}
+                {Array.from({ length: totalPages }).map((_, index) => {
+                  const pageNumber = index + 1;
+                   // Show current page and at most 2 pages before and after, plus first/last
+                   if (
+                    pageNumber === 1 ||
+                    pageNumber === totalPages ||
+                    (pageNumber >= currentPage - 2 && pageNumber <= currentPage + 2)
+                  ) {
+                    return (
+                      <PaginationItem key={pageNumber}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(pageNumber)}
+                          isActive={pageNumber === currentPage}
+                        >
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  }
+                  // Show ellipsis for skipped pages
+                  else if (
+                    (pageNumber === currentPage - 3 && currentPage > 3) ||
+                    (pageNumber === currentPage + 3 && currentPage < totalPages - 2)
+                  ) {
+                    return <PaginationItem key={pageNumber}>...</PaginationItem>;
+                  }
+                  return null;
+                })}
                 <PaginationItem>
                   <PaginationNext
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}

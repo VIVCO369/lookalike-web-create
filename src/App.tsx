@@ -9,14 +9,16 @@ import SchedulePage from "./pages/SchedulePage";
 import TradesPage from "./pages/TradesPage";
 import SettingsPage from "./pages/SettingsPage";
 // Removed AnalyticsPage import
-import TradeGoalsPage from "./pages/TradeGoalsPage";
+import TradeGoalsPage from "./pages/TradeGoalsPage"; // This page will now be the main Trade Goals page
 import TradeToolsPage from "./pages/TradeToolsPage";
 import TradeSummaryPage from "./pages/TradeSummaryPage";
 import TradeHistoryPage from "./pages/TradeHistoryPage";
 import DailyTradesPage from "./pages/DailyTradesPage";
 import ThirtyDayTradePage from "./pages/ThirtyDayTradePage";
-import TradeManageGoalsPage from "./pages/TradeManageGoalsPage";
-import TradeManageTargetPage from "./pages/TradeManageTargetPage";
+import TradeManageGoalsPage from "./pages/TradeManageGoalsPage"; // This page will be renamed/repurposed for managing goals
+import TradeManageTargetPage from "./pages/TradeManageTargetPage"; // This page will be renamed/repurposed for managing targets
+import ThirtyDaysProfitsPage from "./pages/TradeGoals/ThirtyDaysProfitsPage"; // Import new page from correct directory
+import ThirtyDaysTargetPage from "./pages/TradeGoals/ThirtyDaysTargetPage"; // Import new page from correct directory
 import NotFound from "./pages/NotFound";
 import { TradeDataProvider } from "./contexts/TradeDataContext";
 
@@ -35,10 +37,17 @@ const App = () => (
             <Route path="/schedule" element={<SchedulePage />} />
             <Route path="/trades" element={<TradesPage />} />
             {/* Removed AnalyticsPage route */}
-            <Route path="/trade-goals" element={<TradeGoalsPage />} />
+            {/* Updated Trade Goals routes */}
+            <Route path="/trade-goals" element={<TradeGoalsPage />} /> {/* Main Trade Goals page */}
+            <Route path="/trade-goals/30-days-profits" element={<ThirtyDaysProfitsPage />} /> {/* Moved route */}
+            <Route path="/trade-goals/target" element={<ThirtyDaysTargetPage />} /> {/* Moved route and linked to ThirtyDaysTargetPage */}
+
+            {/* Trade Manage routes */}
+            <Route path="/trade-manage/goals" element={<TradeManageGoalsPage />} /> {/* Moved route */}
+            <Route path="/trade-manage/target" element={<TradeManageTargetPage />} /> {/* Moved route */}
+
+
             <Route path="/trade-tools" element={<TradeToolsPage />} />
-            <Route path="/trade-manage/goals" element={<TradeManageGoalsPage />} />
-            <Route path="/trade-manage/target" element={<TradeManageTargetPage />} />
             <Route path="/trade-challenge/daily-trades" element={<DailyTradesPage />} />
             <Route path="/trade-challenge/30-day-trade" element={<ThirtyDayTradePage />} />
             <Route path="/trade-analytics/summary" element={<TradeSummaryPage />} />
