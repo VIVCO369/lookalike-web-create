@@ -76,7 +76,7 @@ const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeC
   return (
     <div className="mt-8">
       <div className="flex items-center justify-between mb-4">
-        <span className="text-xl font-medium text-gray-700 flex items-center gap-1">
+        <span className="text-xl font-medium text-gray-700 dark:text-gray-200 flex items-center gap-1">
           {accountType === 'real' ? 'Real Trading Detail' : accountType === 'demo' ? 'Trade Details' : 'Trade Tools Detail'} {/* Dynamic title - Changed 'Demo Trading Detail' to 'Trade Details' */}
         </span>
         <div className="flex gap-2"> {/* Flex container for buttons */}
@@ -120,26 +120,27 @@ const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeC
           <Card className="mb-6">
             <CardContent className="pt-6">
               {/* Changed form title */}
-              <h3 className="text-lg font-medium mb-4">Trade Entry ({accountType === 'real' ? 'Real' : accountType === 'demo' ? 'Demo' : 'Trade Tools'})</h3> {/* Dynamic form title */}
+              <h3 className="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200">Trade Entry ({accountType === 'real' ? 'Real' : accountType === 'demo' ? 'Demo' : 'Trade Tools'})</h3> {/* Dynamic form title and added dark mode text color */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm">Strategy</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Strategy</label>
                   <Input
                     placeholder="Strategy"
                     value={formData.strategy}
                     onChange={(e) => handleInputChange("strategy", e.target.value)}
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Pair</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Pair</label>
                   <Select
                     value={formData.pair}
                     onValueChange={(value) => handleInputChange("pair", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
                       <SelectValue placeholder="Select Trading Pair" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
                       <SelectItem value="Boom 300 Index">Boom 300 Index</SelectItem>
                       <SelectItem value="Boom 500 Index">Boom 500 Index</SelectItem>
                       <SelectItem value="Boom 600 Index">Boom 600 Index</SelectItem>
@@ -153,15 +154,15 @@ const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeC
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Type</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Type</label>
                   <Select
                     value={formData.type}
                     onValueChange={(value) => handleInputChange("type", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
                       <SelectItem value="buy">Buy</SelectItem>
                       <SelectItem value="sell">Sell</SelectItem>
                     </SelectContent>
@@ -169,32 +170,34 @@ const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeC
                 </div>
                 <div className="space-y-2">
                   {/* Changed label to Date and input type to date */}
-                  <label className="text-sm">Date</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Date</label>
                   <Input
                     type="date"
                     value={formData.openTime}
                     onChange={(e) => handleInputChange("openTime", e.target.value)}
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                   />
                 </div>
                 <div className="space-y-2">
                   {/* Changed label to Trade Time and input type to time */}
-                  <label className="text-sm">Trade Time</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Trade Time</label>
                   <Input
                     type="time"
                     value={formData.tradeTime}
                     onChange={(e) => handleInputChange("tradeTime", e.target.value)}
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Timeframe</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Timeframe</label>
                   <Select
                     value={formData.timeframe}
                     onValueChange={(value) => handleInputChange("timeframe", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
                       <SelectValue placeholder="Select timeframe" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
                       {/* Updated Timeframe options */}
                       <SelectItem value="1m">1M</SelectItem>
                       <SelectItem value="5m">5M</SelectItem>
@@ -206,15 +209,15 @@ const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeC
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Trend</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Trend</label>
                   <Select
                     value={formData.trend}
                     onValueChange={(value) => handleInputChange("trend", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
                       <SelectValue placeholder="Select trend" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
                       <SelectItem value="up">Up</SelectItem>
                       <SelectItem value="down">Down</SelectItem>
                       <SelectItem value="sideways">Sideways</SelectItem>
@@ -222,61 +225,64 @@ const DetailedData = ({ showAddTrade = false, accountType, onResetTrades, tradeC
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Lot Size</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Lot Size</label>
                   <Input
                     type="number"
                     placeholder="0.01"
                     step="0.01"
                     value={formData.lotSize}
                     onChange={(e) => handleInputChange("lotSize", e.target.value)}
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Win/Loss</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Win/Loss</label>
                   <Select
                     value={formData.winLoss}
                     onValueChange={(value) => handleInputChange("winLoss", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
                       <SelectValue placeholder="Select result" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
                       <SelectItem value="win">Win</SelectItem>
                       <SelectItem value="loss">Loss</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Net Profit</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Net Profit</label>
                   <Input
                     type="number"
                     placeholder="0.00"
                     step="0.01"
                     value={formData.netProfit}
                     onChange={(e) => handleInputChange("netProfit", e.target.value)}
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Balance</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Balance</label>
                   <Input
                     type="number"
                     placeholder="0.00"
                     step="0.01"
                     value={formData.balance}
                     onChange={(e) => handleInputChange("balance", e.target.value)}
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                   />
                 </div>
                 {/* Changed Candles from Input to Select */}
                 <div className="space-y-2">
-                  <label className="text-sm">Candles</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Candles</label>
                   <Select
                     value={formData.candles}
                     onValueChange={(value) => handleInputChange("candles", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
                       <SelectValue placeholder="Select candles" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
                       {/* Updated Candles options */}
                       <SelectItem value="1">1 Candles</SelectItem>
                       <SelectItem value="2">2 Candles</SelectItem>

@@ -181,20 +181,20 @@ const TradesPage = () => {
 
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#F8F5F0" }}>
+    <div className="flex min-h-screen bg-background"> {/* Changed inline style to Tailwind class */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}>
         {/* Header */}
         <motion.header
-          className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm"
+          className="bg-white dark:bg-gray-800 border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm" // Added dark mode styles
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
           {/* Replaced "Detailed Data" headline with time and date */}
           <div>
-            <p className="text-black text-sm font-bold">{formatDate(currentDateTime)}</p>
+            <p className="text-black dark:text-white text-sm font-bold">{formatDate(currentDateTime)}</p> {/* Added dark mode text color */}
             <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
           {/* Timeframe buttons and Trend added here */}
@@ -233,7 +233,7 @@ const TradesPage = () => {
           <AnimatedContainer delay={0.1}>
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-medium text-gray-700">Backtesting</h2> {/* Updated title */}
+                <h2 className="text-xl font-medium text-gray-700 dark:text-gray-200">Backtesting</h2> {/* Updated title and added dark mode text color */}
                 <div className="flex gap-2">
                   {isSettingBalance ? (
                     <div className="flex gap-2 items-center">
@@ -242,7 +242,7 @@ const TradesPage = () => {
                         value={newBalance}
                         onChange={(e) => setNewBalance(e.target.value)}
                         placeholder="Enter new balance"
-                        className="border p-1 rounded text-sm"
+                        className="border p-1 rounded text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" // Added dark mode styles
                       />
                       <Button
                         size="sm"
@@ -277,7 +277,7 @@ const TradesPage = () => {
                         value={newDailyTarget}
                         onChange={(e) => setNewDailyTarget(e.target.value)}
                         placeholder="Enter daily target"
-                        className="border p-1 rounded text-sm"
+                        className="border p-1 rounded text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" // Added dark mode styles
                       />
                       <Button
                         size="sm"
@@ -311,31 +311,31 @@ const TradesPage = () => {
                   title="Balance"
                   value={`$${balance.toFixed(2)}`} // Using the local balance state for now
                   color="text-green-500"
-                  borderColor="border-green-500"
+                  borderColor="border-green-500 dark:border-green-700" // Added dark mode border color
                 />
                 <StatsCard
                   title="Net Profit"
                   value={formatCurrency(stats.netProfit)}
                   color={stats.netProfit >= 0 ? "text-green-500" : "text-red-500"}
-                  borderColor={stats.netProfit >= 0 ? "border-green-500" : "border-red-500"}
+                  borderColor={stats.netProfit >= 0 ? "border-green-500 dark:border-green-700" : "border-red-500 dark:border-red-700"} // Added dark mode border color
                 />
                 <StatsCard
                   title="Win Rate"
                   value={stats.winRate}
-                  color="text-gray-700"
-                  borderColor="border-gray-200"
+                  color="text-gray-700 dark:text-gray-200" // Added dark mode text color
+                  borderColor="border-gray-200 dark:border-gray-700" // Added dark mode border color
                 />
                 <StatsCard
                   title="Best Trade"
                   value={stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
                   color="text-green-500"
-                  borderColor="border-green-500"
+                  borderColor="border-green-500 dark:border-green-700" // Added dark mode border color
                 />
                 <StatsCard
                   title="Worst Trade"
                   value={formatCurrency(stats.worstTrade)}
                   color="text-red-500"
-                  borderColor="border-red-500"
+                  borderColor="border-red-500 dark:border-red-700" // Added dark mode border color
                 />
               </div>
 
@@ -344,20 +344,22 @@ const TradesPage = () => {
                   title="Total Trades"
                   value={stats.totalTrades.toString()} // Use totalTrades from calculated stats
                   labelPosition="below"
-                  borderColor="border-gray-200"
+                  color="text-gray-700 dark:text-gray-200" // Added dark mode text color
+                  borderColor="border-gray-200 dark:border-gray-700" // Added dark mode border color
                 />
                 <StatsCard
                   title="Daily Target" // Changed title from Avg. Duration
                   value={formatCurrency(dailyTarget)} // Use dailyTarget state
                   labelPosition="below"
-                  borderColor="border-gray-200"
+                  color="text-gray-700 dark:text-gray-200" // Added dark mode text color
+                  borderColor="border-gray-200 dark:border-gray-700" // Added dark mode border color
                 />
                 <StatsCard
                   title="Today's P&L"
                   value={stats.netProfit >= 0 ? `+${formatCurrency(stats.netProfit)}` : formatCurrency(stats.netProfit)} // Changed to use stats.netProfit
                   color={stats.netProfit >= 0 ? "text-green-500" : "text-red-500"} // Changed to use stats.netProfit
                   labelPosition="below"
-                  borderColor={stats.netProfit >= 0 ? "border-green-500" : "border-red-500"} // Changed to use stats.netProfit
+                  borderColor={stats.netProfit >= 0 ? "border-green-500 dark:border-green-700" : "border-red-500 dark:border-red-700"} // Added dark mode border color
                 />
               </div>
             </div>
@@ -377,27 +379,27 @@ const TradesPage = () => {
           {/* Trades Table - Updated to use demo trades with pagination */}
           <AnimatedContainer delay={0.3}>
             <motion.div
-              className="bg-white rounded-md shadow overflow-x-auto mt-4 hover:shadow-lg transition-shadow duration-300"
+              className="bg-white dark:bg-gray-800 rounded-md shadow overflow-x-auto mt-4 hover:shadow-lg transition-shadow duration-300" // Added dark mode styles
               whileHover={{ y: -2 }}
               transition={{ duration: 0.2 }}
             >
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[80px]">TRADE</TableHead>
-                    <TableHead>STRATEGY</TableHead>
-                    <TableHead>PAIR</TableHead>
-                    <TableHead>TYPE</TableHead>
-                    <TableHead>OPEN TIME</TableHead>
-                    <TableHead>TRADE TIME</TableHead>
-                    <TableHead>TIMEFRAME</TableHead>
-                    <TableHead>TREND</TableHead>
-                    <TableHead>LOT SIZE</TableHead>
-                    <TableHead>CANDLES</TableHead>
-                    <TableHead>W/L</TableHead>
-                    <TableHead>NET PROFIT</TableHead>
-                    <TableHead>BALANCE</TableHead>
-                    <TableHead>ACTIONS</TableHead>
+                    <TableHead className="w-[80px] text-gray-600 dark:text-gray-300">TRADE</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">STRATEGY</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">PAIR</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">TYPE</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">OPEN TIME</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">TRADE TIME</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">TIMEFRAME</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">TREND</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">LOT SIZE</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">CANDLES</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">W/L</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">NET PROFIT</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">BALANCE</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">ACTIONS</TableHead> {/* Added dark mode text color */}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -408,16 +410,17 @@ const TradesPage = () => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 + index * 0.05, duration: 0.3 }}
                       whileHover={{ backgroundColor: "#f8f9fa" }}
+                      className="dark:hover:bg-gray-700" // Added dark mode hover style
                     >
-                      <TableCell>{trade.id}</TableCell>
-                      <TableCell>{trade.strategy}</TableCell>
-                      <TableCell>{trade.pair}</TableCell>
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.id}</TableCell> {/* Added dark mode text color */}
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.strategy}</TableCell> {/* Added dark mode text color */}
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.pair}</TableCell> {/* Added dark mode text color */}
                       <TableCell className="text-blue-500">{trade.type}</TableCell>
-                      <TableCell>{trade.openTime}</TableCell>
-                      <TableCell>{trade.tradeTime}</TableCell>
-                      <TableCell>{trade.timeframe}</TableCell>
-                      <TableCell>{trade.trend}</TableCell>
-                      <TableCell>{trade.lotSize}</TableCell>
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.openTime}</TableCell> {/* Added dark mode text color */}
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.tradeTime}</TableCell> {/* Added dark mode text color */}
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.timeframe}</TableCell> {/* Added dark mode text color */}
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.trend}</TableCell> {/* Added dark mode text color */}
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.lotSize}</TableCell> {/* Added dark mode text color */}
                       <TableCell className="text-red-500">{trade.candles}</TableCell>
                       <TableCell className={trade.winLoss === "win" ? "text-green-500" : "text-red-500"}>
                         {trade.winLoss === "win" ? "Win" : "Loss"}
@@ -425,16 +428,16 @@ const TradesPage = () => {
                       <TableCell className={parseFloat(trade.netProfit) >= 0 ? "text-green-500" : "text-red-500"}>
                         {trade.netProfit}
                       </TableCell>
-                      <TableCell>{trade.balance}</TableCell>
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.balance}</TableCell> {/* Added dark mode text color */}
                       <TableCell>
                         <div className="flex space-x-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -446,8 +449,8 @@ const TradesPage = () => {
 
               {/* Added pagination UI */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200">
-                  <div className="text-sm text-gray-500">
+                <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200 dark:border-gray-700"> {/* Added dark mode border */}
+                  <div className="text-sm text-gray-500 dark:text-gray-400"> {/* Added dark mode text color */}
                     Showing {paginatedTrades.length > 0 ? ((currentPage - 1) * 5) + 1 : 0} to {Math.min(currentPage * 5, demoTrades.length)} of {demoTrades.length} results
                   </div>
                   <Pagination>

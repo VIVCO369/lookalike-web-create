@@ -10,19 +10,19 @@ interface StatsCardProps {
   borderColor?: string;
 }
 
-const StatsCard = ({ 
-  title, 
-  value, 
-  color = "text-gray-900", 
+const StatsCard = ({
+  title,
+  value,
+  color = "text-gray-900 dark:text-gray-100", // Added dark mode text color
   labelPosition = "above",
-  borderColor = "border-gray-200"
+  borderColor = "border-gray-200 dark:border-gray-700" // Added dark mode border color
 }: StatsCardProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      whileHover={{ 
+      whileHover={{
         y: -5,
         transition: { duration: 0.2 }
       }}
@@ -33,25 +33,25 @@ const StatsCard = ({
       )}>
         <CardContent className="p-4">
           {labelPosition === "above" && (
-            <motion.div 
+            <motion.div
               className="flex flex-col"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.3 }}
             >
-              <p className="text-sm text-gray-500">{title}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p> {/* Added dark mode text color */}
               <p className={cn("text-lg font-semibold", color)}>{value}</p>
             </motion.div>
           )}
           {labelPosition === "below" && (
-            <motion.div 
+            <motion.div
               className="flex flex-col"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.3 }}
             >
               <p className={cn("text-lg font-semibold", color)}>{value}</p>
-              <p className="text-sm text-gray-500">{title}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p> {/* Added dark mode text color */}
             </motion.div>
           )}
         </CardContent>

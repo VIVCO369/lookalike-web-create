@@ -55,7 +55,7 @@ const Index = () => {
   // New state for Trading Rules progress
   const [tradingRulesProgress, setTradingRulesProgress] = useState(0);
   // State for Trading Rules card color
-  const [tradingRulesCardColor, setTradingRulesCardColor] = useState("bg-white");
+  const [tradingRulesCardColor, setTradingRulesCardColor] = useState("bg-white dark:bg-gray-800"); // Added dark mode class
 
   const [selectedTimeframes, setSelectedTimeframes] = useLocalStorage<string[]>("selectedTimeframes", ["1M", "15M", "1H", "4H", "1D"]);
   const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
@@ -178,7 +178,7 @@ const Index = () => {
 
   // Handle click on Trading Rules card
   const handleTradingRulesClick = () => {
-    setTradingRulesCardColor("bg-green-100 border-green-500"); // Change color to green
+    setTradingRulesCardColor("bg-green-100 border-green-500 dark:bg-green-900 dark:border-green-700"); // Change color to green and add dark mode styles
     // You might want to revert the color after a delay or on another event
   };
 
@@ -255,19 +255,19 @@ const Index = () => {
 
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#F8F5F0" }}>
+    <div className="flex min-h-screen bg-background"> {/* Changed inline style to Tailwind class */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}>
         {/* Header */}
         <motion.header
-          className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm"
+          className="bg-white dark:bg-gray-800 border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm" // Added dark mode styles
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
           <div>
-            <p className="text-black text-sm font-bold">{formatDate(currentDateTime)}</p>
+            <p className="text-black dark:text-white text-sm font-bold">{formatDate(currentDateTime)}</p> {/* Added dark mode text color */}
             <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
           <div className="flex items-center gap-4"> {/* Adjusted gap */}
@@ -304,7 +304,7 @@ const Index = () => {
           <AnimatedContainer delay={0.1}>
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-medium text-gray-700">Dashboard</h2> {/* Changed text here */}
+                <h2 className="text-xl font-medium text-gray-700 dark:text-gray-200">Dashboard</h2> {/* Changed text here and added dark mode text color */}
                 <div className="flex gap-2">
                   {isSettingBalance ? (
                     <div className="flex gap-2 items-center">
@@ -313,7 +313,7 @@ const Index = () => {
                         value={newBalance}
                         onChange={(e) => setNewBalance(e.target.value)}
                         placeholder="Enter new balance"
-                        className="border p-1 rounded text-sm"
+                        className="border p-1 rounded text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" // Added dark mode styles
                       />
                       <Button
                         size="sm"
@@ -347,7 +347,7 @@ const Index = () => {
                         value={newDailyTarget}
                         onChange={(e) => setNewDailyTarget(e.target.value)}
                         placeholder="Enter daily target"
-                        className="border p-1 rounded text-sm"
+                        className="border p-1 rounded text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" // Added dark mode styles
                       />
                       <Button
                         size="sm"
@@ -381,31 +381,31 @@ const Index = () => {
                   title="Balance"
                   value={`$${balance.toFixed(2)}`}
                   color="text-green-500"
-                  borderColor="border-green-500"
+                  borderColor="border-green-500 dark:border-green-700" // Added dark mode border color
                 />
                 <StatsCard
                   title="Net Profit"
                   value={formatCurrency(stats.netProfit)}
                   color={stats.netProfit >= 0 ? "text-green-500" : "text-red-500"}
-                  borderColor={stats.netProfit >= 0 ? "border-green-500" : "border-red-500"}
+                  borderColor={stats.netProfit >= 0 ? "border-green-500 dark:border-green-700" : "border-red-500 dark:border-red-700"} // Added dark mode border color
                 />
                 <StatsCard
                   title="Win Rate"
                   value={stats.winRate}
-                  color="text-gray-700"
-                  borderColor="border-gray-200"
+                  color="text-gray-700 dark:text-gray-200" // Added dark mode text color
+                  borderColor="border-gray-200 dark:border-gray-700" // Added dark mode border color
                 />
                 <StatsCard
                   title="Best Trade"
                   value={stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
                   color="text-green-500"
-                  borderColor="border-green-500"
+                  borderColor="border-green-500 dark:border-green-700" // Added dark mode border color
                 />
                 <StatsCard
                   title="Worst Trade"
                   value={formatCurrency(stats.worstTrade)}
                   color="text-red-500"
-                  borderColor="border-red-500"
+                  borderColor="border-red-500 dark:border-red-700" // Added dark mode border color
                 />
               </div>
 
@@ -414,20 +414,22 @@ const Index = () => {
                   title="Total Trades"
                   value={stats.totalTrades.toString()} // Use totalTrades from calculated stats
                   labelPosition="below"
-                  borderColor="border-gray-200"
+                  color="text-gray-700 dark:text-gray-200" // Added dark mode text color
+                  borderColor="border-gray-200 dark:border-gray-700" // Added dark mode border color
                 />
                 <StatsCard
                   title="Daily Target"
                   value={formatCurrency(dailyTarget)} // Use dailyTarget from context
                   labelPosition="below"
-                  borderColor="border-gray-200"
+                  color="text-gray-700 dark:text-gray-200" // Added dark mode text color
+                  borderColor="border-gray-200 dark:border-gray-700" // Added dark mode border color
                 />
                 <StatsCard
                   title="Today's P&L" // Changed title here
                   value={stats.dailyProfit >= 0 ? `+${formatCurrency(stats.dailyProfit)}` : formatCurrency(stats.dailyProfit)}
                   color={stats.dailyProfit >= 0 ? "text-green-500" : "text-red-500"}
                   labelPosition="below"
-                  borderColor={stats.dailyProfit >= 0 ? "border-green-500" : "border-red-500"}
+                  borderColor={stats.dailyProfit >= 0 ? "border-green-500 dark:border-green-700" : "border-red-500 dark:border-red-700"} // Added dark mode border color
                 />
               </div>
             </div>
@@ -443,17 +445,17 @@ const Index = () => {
             <AnimatedContainer delay={0.3} className="md:col-span-1">
               <Card>
                 <CardContent className="pt-6">
-                  <h3 className="text-lg font-medium text-center mb-6">Signal Progress</h3>
+                  <h3 className="text-lg font-medium text-center mb-6 text-gray-800 dark:text-gray-200">Signal Progress</h3> {/* Added dark mode text color */}
                   <div className="flex justify-center mb-4">
                     <div className="relative h-32 w-32">
                       {/* Increased thickness of the progress bar */}
                       <Progress value={tradingRulesProgress} className="h-full w-full rounded-full [&>div]:!bg-green-500" /> {/* Use tradingRulesProgress and set color */}
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-2xl font-bold text-gray-800">{tradingRulesProgress.toFixed(0)}%</span> {/* Display progress with better contrast */}
+                        <span className="text-2xl font-bold text-gray-800 dark:text-gray-100">{tradingRulesProgress.toFixed(0)}%</span> {/* Display progress with better contrast */}
                       </div>
                     </div>
                   </div>
-                  <p className="text-center text-gray-600 mb-6">Trade Completed</p>
+                  <p className="text-center text-gray-600 dark:text-gray-300 mb-6">Trade Completed</p> {/* Added dark mode text color */}
                   <div className="flex justify-center">
                     {/* Conditional button text and color */}
                     <Button
@@ -486,7 +488,7 @@ const Index = () => {
           {/* Trades Table - Updated to use Dashboard Real trades with pagination */}
           <AnimatedContainer delay={0.6}>
             <motion.div
-              className="bg-white rounded-md shadow overflow-x-auto mt-4 hover:shadow-lg transition-shadow duration-300"
+              className="bg-white dark:bg-gray-800 rounded-md shadow overflow-x-auto mt-4 hover:shadow-lg transition-shadow duration-300" // Added dark mode styles
               whileHover={{ y: -2 }}
               transition={{ duration: 0.2 }}
             >
@@ -494,21 +496,21 @@ const Index = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[80px]">TRADE</TableHead>
-                    <TableHead>STRATEGY</TableHead>
-                    <TableHead>PAIR</TableHead>
-                    <TableHead>TYPE</TableHead>
+                    <TableHead className="w-[80px] text-gray-600 dark:text-gray-300">TRADE</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">STRATEGY</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">PAIR</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">TYPE</TableHead> {/* Added dark mode text color */}
                     {/* Updated table headers */}
-                    <TableHead>DATE</TableHead>
-                    <TableHead>TRADE TIME</TableHead>
-                    <TableHead>TIMEFRAME</TableHead>
-                    <TableHead>TREND</TableHead>
-                    <TableHead>LOT SIZE</TableHead>
-                    <TableHead>CANDLES</TableHead>
-                    <TableHead>W/L</TableHead>
-                    <TableHead>NET PROFIT</TableHead>
-                    <TableHead>BALANCE</TableHead>
-                    <TableHead>ACTIONS</TableHead>
+                    <TableHead className="text-gray-600 dark:text-gray-300">DATE</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">TRADE TIME</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">TIMEFRAME</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">TREND</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">LOT SIZE</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">CANDLES</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">W/L</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">NET PROFIT</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">BALANCE</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-600 dark:text-gray-300">ACTIONS</TableHead> {/* Added dark mode text color */}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -519,17 +521,18 @@ const Index = () => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 + index * 0.05, duration: 0.3 }}
                       whileHover={{ backgroundColor: "#f8f9fa" }}
+                      className="dark:hover:bg-gray-700" // Added dark mode hover style
                     >
-                      <TableCell>{trade.id}</TableCell>
-                      <TableCell>{trade.strategy}</TableCell>
-                      <TableCell>{trade.pair}</TableCell>
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.id}</TableCell> {/* Added dark mode text color */}
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.strategy}</TableCell> {/* Added dark mode text color */}
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.pair}</TableCell> {/* Added dark mode text color */}
                       <TableCell className="text-blue-500">{trade.type}</TableCell>
                       {/* Display Date and Trade Time separately */}
-                      <TableCell>{trade.openTime}</TableCell>
-                      <TableCell>{trade.tradeTime}</TableCell>
-                      <TableCell>{trade.timeframe}</TableCell>
-                      <TableCell>{trade.trend}</TableCell>
-                      <TableCell>{trade.lotSize}</TableCell>
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.openTime}</TableCell> {/* Added dark mode text color */}
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.tradeTime}</TableCell> {/* Added dark mode text color */}
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.timeframe}</TableCell> {/* Added dark mode text color */}
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.trend}</TableCell> {/* Added dark mode text color */}
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.lotSize}</TableCell> {/* Added dark mode text color */}
                       <TableCell className="text-red-500">{trade.candles}</TableCell>
                       <TableCell className={trade.winLoss === "win" ? "text-green-500" : "text-red-500"}>
                         {trade.winLoss === "win" ? "Win" : "Loss"}
@@ -537,16 +540,16 @@ const Index = () => {
                       <TableCell className={parseFloat(trade.netProfit) >= 0 ? "text-green-500" : "text-red-500"}>
                         {trade.netProfit}
                       </TableCell>
-                      <TableCell>{trade.balance}</TableCell>
+                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.balance}</TableCell> {/* Added dark mode text color */}
                       <TableCell>
                         <div className="flex space-x-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleViewTrade(trade)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => handleViewTrade(trade)}> {/* Added dark mode styles */}
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditTrade(trade)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => handleEditTrade(trade)}> {/* Added dark mode styles */}
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteTrade(trade)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => handleDeleteTrade(trade)}> {/* Added dark mode styles */}
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -559,8 +562,8 @@ const Index = () => {
 
               {/* Added pagination UI */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200">
-                  <div className="text-sm text-gray-500">
+                <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200 dark:border-gray-700"> {/* Added dark mode border */}
+                  <div className="text-sm text-gray-500 dark:text-gray-400"> {/* Added dark mode text color */}
                     Showing {paginatedTrades.length > 0 ? ((currentPage - 1) * 5) + 1 : 0} to {Math.min(currentPage * 5, dashboardRealTrades.length)} of {dashboardRealTrades.length} results
                   </div>
                   <Pagination>
@@ -640,7 +643,7 @@ const Index = () => {
               Details for Trade ID: {selectedTrade?.id}
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4 py-4 text-gray-800 dark:text-gray-200"> {/* Added dark mode text color */}
             {selectedTrade && (
               <>
                 <div><strong>Strategy:</strong> {selectedTrade.strategy}</div>
@@ -678,22 +681,23 @@ const Index = () => {
             {editFormData && (
               <>
                 <div className="space-y-2">
-                  <label className="text-sm">Strategy</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Strategy</label> {/* Added dark mode text color */}
                   <Input
                     value={editFormData.strategy}
                     onChange={(e) => setEditFormData({ ...editFormData, strategy: e.target.value })}
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white" // Added dark mode styles
                   />
                 </div>
                  <div className="space-y-2">
-                  <label className="text-sm">Pair</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Pair</label> {/* Added dark mode text color */}
                    <Select
                       value={editFormData.pair}
                       onValueChange={(value) => setEditFormData({ ...editFormData, pair: value })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"> {/* Added dark mode styles */}
                         <SelectValue placeholder="Select Trading Pair" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"> {/* Added dark mode styles */}
                         <SelectItem value="Boom 300 Index">Boom 300 Index</SelectItem>
                         <SelectItem value="Boom 500 Index">Boom 500 Index</SelectItem>
                         <SelectItem value="Boom 600 Index">Boom 600 Index</SelectItem>
@@ -707,15 +711,15 @@ const Index = () => {
                     </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Type</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Type</label> {/* Added dark mode text color */}
                    <Select
                       value={editFormData.type}
                       onValueChange={(value) => setEditFormData({ ...editFormData, type: value })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"> {/* Added dark mode styles */}
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"> {/* Added dark mode styles */}
                         <SelectItem value="buy">Buy</SelectItem>
                         <SelectItem value="sell">Sell</SelectItem>
                       </SelectContent>
@@ -723,32 +727,34 @@ const Index = () => {
                 </div>
                 <div className="space-y-2">
                   {/* Changed label to Date and input type to date */}
-                  <label className="text-sm">Date</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Date</label> {/* Added dark mode text color */}
                   <Input
                     type="date"
                     value={editFormData.openTime}
                     onChange={(e) => setEditFormData({ ...editFormData, openTime: e.target.value })}
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white" // Added dark mode styles
                   />
                 </div>
                 <div className="space-y-2">
                   {/* Changed label to Trade Time and input type to time */}
-                  <label className="text-sm">Trade Time</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Trade Time</label> {/* Added dark mode text color */}
                   <Input
                     type="time"
                     value={editFormData.tradeTime}
                     onChange={(e) => setEditFormData({ ...editFormData, tradeTime: e.target.value })}
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white" // Added dark mode styles
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Timeframe</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Timeframe</label> {/* Added dark mode text color */}
                    <Select
                       value={editFormData.timeframe}
                       onValueChange={(value) => setEditFormData({ ...editFormData, timeframe: value })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"> {/* Added dark mode styles */}
                         <SelectValue placeholder="Select timeframe" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"> {/* Added dark mode styles */}
                         <SelectItem value="m1">M1</SelectItem>
                         <SelectItem value="m5">M5</SelectItem>
                         <SelectItem value="m15">M15</SelectItem>
@@ -759,15 +765,15 @@ const Index = () => {
                     </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Trend</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Trend</label> {/* Added dark mode text color */}
                    <Select
                       value={editFormData.trend}
                       onValueChange={(value) => setEditFormData({ ...editFormData, trend: value })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"> {/* Added dark mode styles */}
                         <SelectValue placeholder="Select trend" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"> {/* Added dark mode styles */}
                         <SelectItem value="up">Up</SelectItem>
                         <SelectItem value="down">Down</SelectItem>
                         <SelectItem value="sideways">Sideways</SelectItem>
@@ -775,49 +781,53 @@ const Index = () => {
                     </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Lot Size</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Lot Size</label> {/* Added dark mode text color */}
                   <Input
                     type="number"
                     value={editFormData.lotSize}
                     onChange={(e) => setEditFormData({ ...editFormData, lotSize: e.target.value })}
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white" // Added dark mode styles
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Win/Loss</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Win/Loss</label> {/* Added dark mode text color */}
                    <Select
                       value={editFormData.winLoss}
                       onValueChange={(value) => setEditFormData({ ...editFormData, winLoss: value })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"> {/* Added dark mode styles */}
                         <SelectValue placeholder="Select result" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"> {/* Added dark mode styles */}
                         <SelectItem value="win">Win</SelectItem>
                         <SelectItem value="loss">Loss</SelectItem>
                       </SelectContent>
                     </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Net Profit</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Net Profit</label> {/* Added dark mode text color */}
                   <Input
                     type="number"
                     value={editFormData.netProfit}
                     onChange={(e) => setEditFormData({ ...editFormData, netProfit: e.target.value })}
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white" // Added dark mode styles
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Balance</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Balance</label> {/* Added dark mode text color */}
                   <Input
                     type="number"
                     value={editFormData.balance}
                     onChange={(e) => setEditFormData({ ...editFormData, balance: e.target.value })}
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white" // Added dark mode styles
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm">Candles</label>
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Candles</label> {/* Added dark mode text color */}
                   <Input
                     value={editFormData.candles}
                     onChange={(e) => setEditFormData({ ...editFormData, candles: e.target.value })}
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white" // Added dark mode styles
                   />
                 </div>
               </>

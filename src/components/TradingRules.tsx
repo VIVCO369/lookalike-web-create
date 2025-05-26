@@ -156,7 +156,7 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
       const rulesForStrategy = grouped[strategy] || [];
       return (
         <AnimatedContainer key={strategy} delay={0.2 + index * 0.1}>
-          <div className="mb-6 border rounded p-4 bg-gray-50">
+          <div className="mb-6 border rounded p-4 bg-gray-50 dark:bg-gray-700 dark:border-gray-600"> {/* Added dark mode styles */}
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-green-500 font-medium">{strategy}</h3>
               {/* Conditionally render Delete Strategy button */}
@@ -173,9 +173,9 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
             </div>
             <div className="space-y-2">
               {rulesForStrategy.map(rule => (
-                <div key={rule.id} className="flex items-center justify-between border rounded p-3 bg-white">
+                <div key={rule.id} className="flex items-center justify-between border rounded p-3 bg-white dark:bg-gray-800 dark:border-gray-700"> {/* Added dark mode styles */}
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-700">{rule.name}</span>
+                    <span className="text-gray-700 dark:text-gray-200">{rule.name}</span> {/* Added dark mode text color */}
                   </div>
                   <div className="flex items-center gap-1">
                     {/* Improved Checkbox Button Styling */}
@@ -184,21 +184,21 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
                         "w-6 h-6 flex items-center justify-center rounded-full border-2 transition-colors",
                         rule.completed
                           ? "bg-green-500 border-green-500 hover:bg-green-600 hover:border-green-600"
-                          : "bg-white border-gray-300 hover:bg-gray-100"
+                          : "bg-white border-gray-300 hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600" // Added dark mode styles
                       )}
                       onClick={() => handleToggleComplete(rule.id)}
                     >
                       {/* Check icon color changes based on completion */}
-                      <Check className={cn("h-4 w-4", rule.completed ? "text-white" : "text-gray-400")} />
+                      <Check className={cn("h-4 w-4", rule.completed ? "text-white" : "text-gray-400 dark:text-gray-500")} /> {/* Added dark mode text color */}
                     </button>
                     {/* Hide edit/delete rule buttons in dashboard view */}
                     {!dashboardView && (
                       <>
-                        <button className="text-gray-400 p-1 rounded-full hover:bg-gray-100">
+                        <button className="text-gray-400 dark:text-gray-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600"> {/* Added dark mode styles */}
                           <Pencil className="h-4 w-4" />
                         </button>
                         <button
-                          className="text-gray-400 p-1 rounded-full hover:bg-gray-100"
+                          className="text-gray-400 dark:text-gray-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600" // Added dark mode styles
                           onClick={() => handleRemoveRule(rule.id)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -220,8 +220,8 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
       <CardContent className="pt-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-gray-600" />
-            <h3 className="text-lg font-medium">Trading Rules</h3>
+            <BookOpen className="h-5 w-5 text-gray-600 dark:text-gray-400" /> {/* Added dark mode text color */}
+            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">Trading Rules</h3> {/* Added dark mode text color */}
           </div>
           {!hideAddButton && !dashboardView && ( // Hide add button in dashboard view
             <Button className="bg-green-500 hover:bg-green-600" onClick={() => setAddingRule(true)}>
@@ -233,13 +233,13 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
         {/* Strategy Select for Dashboard View */}
         {dashboardView && (
            <div className="mb-6">
-            <p className="text-sm text-gray-500 mb-1">Select Strategy</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Select Strategy</p> {/* Added dark mode text color */}
             <Select onValueChange={setSelectedStrategy} value={selectedStrategy}>
-              <SelectTrigger>
+              <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"> {/* Added dark mode styles */}
                 <SelectValue placeholder="Select a strategy" />
                 {/* Removed the SelectPrimitive.Icon component */}
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"> {/* Added dark mode styles */}
                 {uniqueStrategies.map(strategy => (
                   <SelectItem key={strategy} value={strategy}>
                     {strategy}
@@ -254,24 +254,26 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
         {/* Add Rule Form (Hidden in Dashboard View) */}
         {addingRule && !dashboardView && (
           <AnimatedContainer delay={0.1}>
-            <div className="border rounded-md p-4 mb-6 bg-gray-50">
-              <h4 className="font-medium mb-4">Add New Trading Rule</h4>
+            <div className="border rounded-md p-4 mb-6 bg-gray-50 dark:bg-gray-700 dark:border-gray-600"> {/* Added dark mode styles */}
+              <h4 className="font-medium mb-4 text-gray-800 dark:text-gray-200">Add New Trading Rule</h4> {/* Added dark mode text color */}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">Trading Rule Name</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Trading Rule Name</p> {/* Added dark mode text color */}
                   <Input
                     placeholder="Enter rule name"
                     value={newRuleName}
                     onChange={(e) => setNewRuleName(e.target.value)}
+                    className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400" // Added dark mode styles
                   />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">Trading Strategy Name</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Trading Strategy Name</p> {/* Added dark mode text color */}
                   <Input
                     placeholder="Enter strategy name"
                     value={newStrategyName}
                     onChange={(e) => setNewStrategyName(e.target.value)}
+                    className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400" // Added dark mode styles
                   />
                 </div>
               </div>
@@ -294,7 +296,7 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
         {/* Pagination (Hidden in Dashboard View) */}
         {totalPages > 1 && !dashboardView && (
           <div className="mt-6">
-            <p className="text-sm text-gray-500 mb-2">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2"> {/* Added dark mode text color */}
               Showing strategies {Math.min((currentPage - 1) * itemsPerPage + 1, strategiesToDisplay.length)} to {Math.min(currentPage * itemsPerPage, strategiesToDisplay.length)} of {strategiesToDisplay.length}
             </p>
             <Pagination>

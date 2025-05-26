@@ -79,7 +79,7 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#F8F5F0" }}> {/* Added inline style */}
+    <div className="flex min-h-screen bg-background"> {/* Changed inline style to Tailwind class */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}>
@@ -104,7 +104,7 @@ const SettingsPage = () => {
         {/* Main content */}
         <main className="flex-1 p-6">
           <div className="max-w-4xl mx-auto space-y-6">
-            <h2 className="text-2xl font-semibold mb-4 dark:text-white">Application Settings</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Application Settings</h2> {/* Added dark mode text color */}
 
             <Card className="dark:bg-gray-800 dark:border-gray-700">
               <CardHeader>

@@ -12,10 +12,10 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#F8F5F0" }}> {/* Added inline style */}
+    <div className="min-h-screen flex items-center justify-center bg-background"> {/* Changed inline style to Tailwind class */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
+        <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-gray-100">404</h1> {/* Added dark mode text color */}
+        <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">Oops! Page not found</p> {/* Added dark mode text color */}
         <a href="/" className="text-blue-500 hover:text-blue-700 underline">
           Return to Home
         </a>

@@ -91,18 +91,18 @@ const TradeGoalsPage = () => {
   ];
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#F8F5F0" }}>
+    <div className="flex min-h-screen bg-background"> {/* Changed inline style to Tailwind class */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}>
         {/* Header */}
-        <header className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10">
+        <header className="bg-white dark:bg-gray-800 border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10"> {/* Added dark mode styles */}
           <div className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-gray-500" />
-            <h1 className="text-xl font-medium text-gray-700">Trade Goals</h1>
+            <Target className="h-5 w-5 text-gray-500 dark:text-gray-400" /> {/* Added dark mode text color */}
+            <h1 className="text-xl font-medium text-gray-700 dark:text-gray-200">Trade Goals</h1> {/* Added dark mode text color */}
           </div>
           <div>
-            <p className="text-black text-sm font-bold">{formatDate(currentDateTime)}</p>
+            <p className="text-black dark:text-white text-sm font-bold">{formatDate(currentDateTime)}</p> {/* Added dark mode text color */}
             <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
         </header>
@@ -119,7 +119,7 @@ const TradeGoalsPage = () => {
             <div className="flex gap-6">
               {/* Main Challenge Table */}
               <div className="flex-1">
-                <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"> {/* Added dark mode styles */}
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs">
                       <thead className="bg-red-600 text-white">
@@ -143,39 +143,39 @@ const TradeGoalsPage = () => {
                       <tbody>
                         {challengeData.map((row, index) => (
                           <tr key={row.day} className={cn(
-                            "border-b",
-                            index < 5 ? "bg-red-100" : 
-                            index < 12 ? "bg-white" :
-                            index < 17 ? "bg-red-50" :
-                            index < 22 ? "bg-white" :
-                            "bg-red-50"
+                            "border-b dark:border-gray-700", // Added dark mode border
+                            index < 5 ? "bg-red-100 dark:bg-red-900" : // Added dark mode styles
+                            index < 12 ? "bg-white dark:bg-gray-800" : // Added dark mode styles
+                            index < 17 ? "bg-red-50 dark:bg-red-800" : // Added dark mode styles
+                            index < 22 ? "bg-white dark:bg-gray-800" : // Added dark mode styles
+                            "bg-red-50 dark:bg-red-800" // Added dark mode styles
                           )}>
-                            <td className="p-2 text-center font-bold border border-gray-300">{row.day}</td>
-                            <td className="p-2 text-center border border-gray-300">
+                            <td className="p-2 text-center font-bold border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">{row.day}</td> {/* Added dark mode styles */}
+                            <td className="p-2 text-center border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"> {/* Added dark mode styles */}
                               <div className="font-semibold">{row.balance}</div>
-                              <div className="text-xs text-gray-600">{row.perDay}</div>
+                              <div className="text-xs text-gray-600 dark:text-gray-400">{row.perDay}</div> {/* Added dark mode text color */}
                             </td>
-                            <td className="p-2 text-center border border-gray-300">${row.s1.toFixed(2)}</td>
-                            <td className="p-2 text-center border border-gray-300">${row.s2.toFixed(2)}</td>
-                            <td className="p-2 text-center border border-gray-300">${row.s3.toFixed(2)}</td>
-                            <td className="p-2 text-center border border-gray-300">${row.s4.toFixed(2)}</td>
-                            <td className="p-2 text-center border border-gray-300">${row.s5.toFixed(2)}</td>
-                            <td className="p-2 text-center border border-gray-300 font-semibold">${row.profit.toFixed(2)}</td>
-                            <td className="p-2 text-center border border-gray-300 text-red-600 font-semibold">{row.withdraw}</td>
-                            <td className="p-2 text-center border border-gray-300">{row.stAmount}</td>
-                            <td className="p-2 text-center border border-gray-300">{row.extraStake}</td>
-                            <td className="p-2 text-center border border-gray-300">
+                            <td className="p-2 text-center border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">${row.s1.toFixed(2)}</td> {/* Added dark mode styles */}
+                            <td className="p-2 text-center border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">${row.s2.toFixed(2)}</td> {/* Added dark mode styles */}
+                            <td className="p-2 text-center border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">${row.s3.toFixed(2)}</td> {/* Added dark mode styles */}
+                            <td className="p-2 text-center border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">${row.s4.toFixed(2)}</td> {/* Added dark mode styles */}
+                            <td className="p-2 text-center border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">${row.s5.toFixed(2)}</td> {/* Added dark mode styles */}
+                            <td className="p-2 text-center border border-gray-300 dark:border-gray-600 font-semibold text-gray-900 dark:text-gray-100">${row.profit.toFixed(2)}</td> {/* Added dark mode styles */}
+                            <td className="p-2 text-center border border-gray-300 dark:border-gray-600 text-red-600 font-semibold">{row.withdraw}</td> {/* Added dark mode border */}
+                            <td className="p-2 text-center border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">{row.stAmount}</td> {/* Added dark mode styles */}
+                            <td className="p-2 text-center border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">{row.extraStake}</td> {/* Added dark mode styles */}
+                            <td className="p-2 text-center border border-gray-300 dark:border-gray-600"> {/* Added dark mode border */}
                               <span className={cn(
                                 "px-2 py-1 rounded text-xs font-bold",
-                                row.reached === "Yes" ? "bg-green-100 text-green-800" :
-                                row.reached === "No" ? "bg-red-100 text-red-800" :
-                                "text-gray-500"
+                                row.reached === "Yes" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : // Added dark mode styles
+                                row.reached === "No" ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" : // Added dark mode styles
+                                "text-gray-500 dark:text-gray-400" // Added dark mode text color
                               )}>
                                 {row.reached}
                               </span>
                             </td>
-                            <td className="p-2 text-center border border-gray-300 font-semibold text-blue-600">{row.perTrade}</td>
-                            <td className="p-2 text-center border border-gray-300 font-semibold text-green-600">{row.profitPercent}</td>
+                            <td className="p-2 text-center border border-gray-300 dark:border-gray-600 font-semibold text-blue-600">{row.perTrade}</td> {/* Added dark mode border */}
+                            <td className="p-2 text-center border border-gray-300 dark:border-gray-600 font-semibold text-green-600">{row.profitPercent}</td> {/* Added dark mode border */}
                           </tr>
                         ))}
                       </tbody>
@@ -207,22 +207,22 @@ const TradeGoalsPage = () => {
                 </div>
 
                 {/* Sessions */}
-                <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"> {/* Added dark mode styles */}
                   <div className="bg-red-600 text-white py-3 px-4">
                     <h3 className="text-sm font-bold text-center">SESSIONS</h3>
                   </div>
                   <div className="max-h-96 overflow-y-auto">
                     {sessions.map((session, index) => (
                       <div key={index} className={cn(
-                        "flex justify-between items-center p-3 text-sm border-b border-gray-200",
-                        session.active === "Yes" ? "bg-red-600 text-white" : "bg-gray-50"
+                        "flex justify-between items-center p-3 text-sm border-b border-gray-200 dark:border-gray-700", // Added dark mode border
+                        session.active === "Yes" ? "bg-red-600 text-white" : "bg-gray-50 dark:bg-gray-700" // Added dark mode styles
                       )}>
-                        <span className="font-medium">{session.name}</span>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{session.name}</span> {/* Added dark mode text color */}
                         <div className="text-right">
-                          {session.time && <div className="text-xs">{session.time}</div>}
+                          {session.time && <div className="text-xs text-gray-700 dark:text-gray-300">{session.time}</div>} {/* Added dark mode text color */}
                           <div className={cn(
                             "text-xs font-bold",
-                            session.active === "Yes" ? "text-white" : "text-gray-600"
+                            session.active === "Yes" ? "text-white" : "text-gray-600 dark:text-gray-400" // Added dark mode text color
                           )}>
                             {session.active}
                           </div>

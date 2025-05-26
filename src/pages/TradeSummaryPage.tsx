@@ -54,20 +54,20 @@ const TradeSummaryPage = () => {
   ];
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#F8F5F0" }}>
+    <div className="flex min-h-screen bg-background"> {/* Changed inline style to Tailwind class */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}>
         {/* Header */}
         <motion.header
-          className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm"
+          className="bg-white dark:bg-gray-800 border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm" // Added dark mode styles
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-gray-500" />
-            <h1 className="text-xl font-medium text-gray-700">Trade Summary</h1>
+            <TrendingUp className="h-5 w-5 text-gray-500 dark:text-gray-400" /> {/* Added dark mode text color */}
+            <h1 className="text-xl font-medium text-gray-700 dark:text-gray-200">Trade Summary</h1> {/* Added dark mode text color */}
           </div>
         </motion.header>
 
@@ -80,13 +80,13 @@ const TradeSummaryPage = () => {
                 {summaryStats.map((stat, index) => (
                   <Card key={index}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-gray-600">
+                      <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300"> {/* Added dark mode text color */}
                         {stat.title}
                       </CardTitle>
                       <stat.icon className={cn("h-4 w-4", stat.color)} />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{stat.value}</div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stat.value}</div> {/* Added dark mode text color */}
                       <p className="text-xs text-green-600">
                         {stat.change} from last month
                       </p>
@@ -101,24 +101,24 @@ const TradeSummaryPage = () => {
               <AnimatedContainer delay={0.2}>
                 <Card>
                   <CardHeader>
-                    <CardTitle>Monthly Performance</CardTitle>
+                    <CardTitle className="text-gray-900 dark:text-gray-100">Monthly Performance</CardTitle> {/* Added dark mode text color */}
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">January 2024</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">January 2024</span> {/* Added dark mode text color */}
                         <span className="font-medium text-green-600">+$2,150</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">February 2024</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">February 2024</span> {/* Added dark mode text color */}
                         <span className="font-medium text-green-600">+$3,280</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">March 2024</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">March 2024</span> {/* Added dark mode text color */}
                         <span className="font-medium text-red-600">-$850</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">April 2024</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">April 2024</span> {/* Added dark mode text color */}
                         <span className="font-medium text-green-600">+$4,120</span>
                       </div>
                     </div>
@@ -129,24 +129,24 @@ const TradeSummaryPage = () => {
               <AnimatedContainer delay={0.3}>
                 <Card>
                   <CardHeader>
-                    <CardTitle>Best Performing Assets</CardTitle>
+                    <CardTitle className="text-gray-900 dark:text-gray-100">Best Performing Assets</CardTitle> {/* Added dark mode text color */}
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">EUR/USD</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">EUR/USD</span> {/* Added dark mode text color */}
                         <span className="font-medium text-green-600">+$1,850</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">GBP/USD</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">GBP/USD</span> {/* Added dark mode text color */}
                         <span className="font-medium text-green-600">+$1,420</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">USD/JPY</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">USD/JPY</span> {/* Added dark mode text color */}
                         <span className="font-medium text-green-600">+$980</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">AUD/USD</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">AUD/USD</span> {/* Added dark mode text color */}
                         <span className="font-medium text-red-600">-$320</span>
                       </div>
                     </div>
@@ -159,7 +159,7 @@ const TradeSummaryPage = () => {
             <AnimatedContainer delay={0.4}>
               <Card>
                 <CardHeader>
-                  <CardTitle>Daily Trade Summary</CardTitle>
+                  <CardTitle className="text-gray-900 dark:text-gray-100">Daily Trade Summary</CardTitle> {/* Added dark mode text color */}
                 </CardHeader>
                 <CardContent className="p-0"> {/* Remove default padding */}
                   {/* Removed the placeholder text paragraph */}
@@ -167,21 +167,21 @@ const TradeSummaryPage = () => {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="text-left">Date</TableHead>
-                          <TableHead className="text-left">Profit/Loss</TableHead>
-                          <TableHead className="text-left">Total Trades</TableHead>
-                          <TableHead className="text-left">Win Rate</TableHead>
+                          <TableHead className="text-left text-gray-600 dark:text-gray-300">Date</TableHead> {/* Added dark mode text color */}
+                          <TableHead className="text-left text-gray-600 dark:text-gray-300">Profit/Loss</TableHead> {/* Added dark mode text color */}
+                          <TableHead className="text-left text-gray-600 dark:text-gray-300">Total Trades</TableHead> {/* Added dark mode text color */}
+                          <TableHead className="text-left text-gray-600 dark:text-gray-300">Win Rate</TableHead> {/* Added dark mode text color */}
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {dailySummaryData.map((day, index) => (
-                          <TableRow key={index}>
-                            <TableCell className="font-medium">{day.date}</TableCell>
+                          <TableRow key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700"> {/* Added dark mode hover style */}
+                            <TableCell className="font-medium text-gray-900 dark:text-gray-100">{day.date}</TableCell> {/* Added dark mode text color */}
                             <TableCell className={day.profitLoss >= 0 ? "text-green-600" : "text-red-600"}>
                               {day.profitLoss >= 0 ? `+${day.profitLoss.toFixed(2)}` : day.profitLoss.toFixed(2)}
                             </TableCell>
-                            <TableCell>{day.totalTrades}</TableCell>
-                            <TableCell>{day.winRate}</TableCell>
+                            <TableCell className="text-gray-900 dark:text-gray-100">{day.totalTrades}</TableCell> {/* Added dark mode text color */}
+                            <TableCell className="text-gray-900 dark:text-gray-100">{day.winRate}</TableCell> {/* Added dark mode text color */}
                           </TableRow>
                         ))}
                       </TableBody>

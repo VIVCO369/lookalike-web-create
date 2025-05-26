@@ -41,24 +41,24 @@ const TradingRulesPage = () => {
 
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#F8F5F0" }}> {/* Added inline style */}
+    <div className="flex min-h-screen bg-background"> {/* Changed inline style to Tailwind class */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}> {/* Added dynamic padding */}
         {/* Header */}
         <motion.header
-          className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm"
+          className="bg-white dark:bg-gray-800 border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm" // Added dark mode styles
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
           <div className="flex items-center gap-2">
-            <LayoutDashboard className="h-5 w-5 text-gray-500" />
-            <h1 className="text-xl font-medium text-gray-700">Trading Rules</h1>
+            <LayoutDashboard className="h-5 w-5 text-gray-500 dark:text-gray-400" /> {/* Added dark mode text color */}
+            <h1 className="text-xl font-medium text-gray-700 dark:text-gray-200">Trading Rules</h1> {/* Added dark mode text color */}
           </div>
           {/* Display current date and time */}
           <div>
-            <p className="text-black text-sm font-bold">{formatDate(currentDateTime)}</p>
+            <p className="text-black dark:text-white text-sm font-bold">{formatDate(currentDateTime)}</p> {/* Added dark mode text color */}
             <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
         </motion.header>

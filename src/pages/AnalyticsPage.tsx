@@ -84,19 +84,19 @@ const AnalyticsPage = () => {
 
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#F8F5F0" }}> {/* Added inline style */}
+    <div className="flex min-h-screen bg-background"> {/* Changed inline style to Tailwind class */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}>
         {/* Header */}
-        <header className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10">
+        <header className="bg-white dark:bg-gray-800 border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10"> {/* Added dark mode styles */}
           <div className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-gray-500" />
-            <h1 className="text-xl font-medium text-gray-700">Analytics</h1>
+            <BarChart3 className="h-5 w-5 text-gray-500 dark:text-gray-400" /> {/* Added dark mode text color */}
+            <h1 className="text-xl font-medium text-gray-700 dark:text-gray-200">Analytics</h1> {/* Added dark mode text color */}
           </div>
           {/* Display current date and time */}
           <div>
-            <p className="text-black text-sm font-bold">{formatDate(currentDateTime)}</p>
+            <p className="text-black dark:text-white text-sm font-bold">{formatDate(currentDateTime)}</p> {/* Added dark mode text color */}
             <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
         </header>
@@ -104,7 +104,7 @@ const AnalyticsPage = () => {
         {/* Main content */}
         <main className="flex-1 p-6">
           <div className="max-w-full mx-auto">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-700">Real Account Analytics</h2> {/* Updated title */}
+            <h2 className="text-2xl font-semibold mb-6 text-gray-700 dark:text-gray-200">Real Account Analytics</h2> {/* Updated title and added dark mode text color */}
 
             {/* Analytics Stats Cards - Displaying Real Account Stats */}
             <div className="mb-8">
@@ -113,31 +113,31 @@ const AnalyticsPage = () => {
                   title="Balance"
                   value={`$${balance.toFixed(2)}`} // Using the local balance state
                   color="text-green-500"
-                  borderColor="border-green-500"
+                  borderColor="border-green-500 dark:border-green-700" // Added dark mode border color
                 />
                 <StatsCard
                   title="Net Profit"
                   value={formatCurrency(stats.netProfit)}
                   color={stats.netProfit >= 0 ? "text-green-500" : "text-red-500"}
-                  borderColor={stats.netProfit >= 0 ? "border-green-500" : "border-red-500"}
+                  borderColor={stats.netProfit >= 0 ? "border-green-500 dark:border-green-700" : "border-red-500 dark:border-red-700"} // Added dark mode border color
                 />
                 <StatsCard
                   title="Win Rate"
                   value={stats.winRate}
-                  color="text-gray-700"
-                  borderColor="border-gray-200"
+                  color="text-gray-700 dark:text-gray-200" // Added dark mode text color
+                  borderColor="border-gray-200 dark:border-gray-700" // Added dark mode border color
                 />
                 <StatsCard
                   title="Best Trade"
                   value={stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
                   color="text-green-500"
-                  borderColor="border-green-500"
+                  borderColor="border-green-500 dark:border-green-700" // Added dark mode border color
                 />
                 <StatsCard
                   title="Worst Trade"
                   value={formatCurrency(stats.worstTrade)}
                   color="text-red-500"
-                  borderColor="border-red-500"
+                  borderColor="border-red-500 dark:border-red-700" // Added dark mode border color
                 />
               </div>
 
@@ -146,20 +146,22 @@ const AnalyticsPage = () => {
                   title="Total Trades"
                   value={stats.totalTrades.toString()} // Using totalTrades from calculated stats
                   labelPosition="below"
-                  borderColor="border-gray-200"
+                  color="text-gray-700 dark:text-gray-200" // Added dark mode text color
+                  borderColor="border-gray-200 dark:border-gray-700" // Added dark mode border color
                 />
                 <StatsCard
                   title="Daily Target"
                   value="$0.00" // Placeholder value - Daily Target is currently shared
                   labelPosition="below"
-                  borderColor="border-gray-200"
+                  color="text-gray-700 dark:text-gray-200" // Added dark mode text color
+                  borderColor="border-gray-200 dark:border-gray-700" // Added dark mode border color
                 />
                  <StatsCard
                   title="Daily Profit"
                   value={stats.dailyProfit >= 0 ? `+${formatCurrency(stats.dailyProfit)}` : formatCurrency(stats.dailyProfit)}
                   color={stats.dailyProfit >= 0 ? "text-green-500" : "text-red-500"}
                   labelPosition="below"
-                  borderColor={stats.dailyProfit >= 0 ? "border-green-500" : "border-red-500"}
+                  borderColor={stats.dailyProfit >= 0 ? "border-green-500 dark:border-green-700" : "border-red-500 dark:border-red-700"} // Added dark mode border color
                 />
               </div>
             </div>
@@ -169,7 +171,7 @@ const AnalyticsPage = () => {
             <Card className="mb-8">
               <CardHeader>
                 <div className="flex items-center justify-between"> {/* Flex container for title and button */}
-                  <CardTitle className="text-xl font-medium text-gray-700">Real Account History</CardTitle> {/* Updated title */}
+                  <CardTitle className="text-xl font-medium text-gray-700 dark:text-gray-200">Real Account History</CardTitle> {/* Updated title and added dark mode text color */}
                   {/* Reset Analytics Trades Button with AlertDialog */}
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -197,35 +199,35 @@ const AnalyticsPage = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[80px]">TRADE</TableHead>
-                        <TableHead>STRATEGY</TableHead>
-                        <TableHead>PAIR</TableHead>
-                        <TableHead>TYPE</TableHead>
-                        <TableHead>OPEN TIME</TableHead>
-                        <TableHead>TRADE TIME</TableHead>
-                        <TableHead>TIMEFRAME</TableHead>
-                        <TableHead>TREND</TableHead>
-                        <TableHead>LOT SIZE</TableHead>
-                        <TableHead>CANDLES</TableHead>
-                        <TableHead>W/L</TableHead>
-                        <TableHead>NET PROFIT</TableHead>
-                        <TableHead>BALANCE</TableHead>
-                        <TableHead>ACTIONS</TableHead>
+                        <TableHead className="w-[80px] text-gray-600 dark:text-gray-300">TRADE</TableHead> {/* Added dark mode text color */}
+                        <TableHead className="text-gray-600 dark:text-gray-300">STRATEGY</TableHead> {/* Added dark mode text color */}
+                        <TableHead className="text-gray-600 dark:text-gray-300">PAIR</TableHead> {/* Added dark mode text color */}
+                        <TableHead className="text-gray-600 dark:text-gray-300">TYPE</TableHead> {/* Added dark mode text color */}
+                        <TableHead className="text-gray-600 dark:text-gray-300">OPEN TIME</TableHead> {/* Added dark mode text color */}
+                        <TableHead className="text-gray-600 dark:text-gray-300">TRADE TIME</TableHead> {/* Added dark mode text color */}
+                        <TableHead className="text-gray-600 dark:text-gray-300">TIMEFRAME</TableHead> {/* Added dark mode text color */}
+                        <TableHead className="text-gray-600 dark:text-gray-300">TREND</TableHead> {/* Added dark mode text color */}
+                        <TableHead className="text-gray-600 dark:text-gray-300">LOT SIZE</TableHead> {/* Added dark mode text color */}
+                        <TableHead className="text-gray-600 dark:text-gray-300">CANDLES</TableHead> {/* Added dark mode text color */}
+                        <TableHead className="text-gray-600 dark:text-gray-300">W/L</TableHead> {/* Added dark mode text color */}
+                        <TableHead className="text-gray-600 dark:text-gray-300">NET PROFIT</TableHead> {/* Added dark mode text color */}
+                        <TableHead className="text-gray-600 dark:text-gray-300">BALANCE</TableHead> {/* Added dark mode text color */}
+                        <TableHead className="text-gray-600 dark:text-gray-300">ACTIONS</TableHead> {/* Added dark mode text color */}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {/* Displaying analytics real trades */}
                       {analyticsRealTrades.map((trade) => (
                         <TableRow key={trade.id}>
-                          <TableCell>{trade.id}</TableCell>
-                          <TableCell>{trade.strategy}</TableCell>
-                          <TableCell>{trade.pair}</TableCell>
+                          <TableCell className="text-gray-900 dark:text-gray-100">{trade.id}</TableCell> {/* Added dark mode text color */}
+                          <TableCell className="text-gray-900 dark:text-gray-100">{trade.strategy}</TableCell> {/* Added dark mode text color */}
+                          <TableCell className="text-gray-900 dark:text-gray-100">{trade.pair}</TableCell> {/* Added dark mode text color */}
                           <TableCell className="text-blue-500">{trade.type}</TableCell>
-                          <TableCell>{trade.openTime}</TableCell>
-                          <TableCell>{trade.tradeTime}</TableCell>
-                          <TableCell>{trade.timeframe}</TableCell>
-                          <TableCell>{trade.trend}</TableCell>
-                          <TableCell>{trade.lotSize}</TableCell>
+                          <TableCell className="text-gray-900 dark:text-gray-100">{trade.openTime}</TableCell> {/* Added dark mode text color */}
+                          <TableCell className="text-gray-900 dark:text-gray-100">{trade.tradeTime}</TableCell> {/* Added dark mode text color */}
+                          <TableCell className="text-gray-900 dark:text-gray-100">{trade.timeframe}</TableCell> {/* Added dark mode text color */}
+                          <TableCell className="text-gray-900 dark:text-gray-100">{trade.trend}</TableCell> {/* Added dark mode text color */}
+                          <TableCell className="text-gray-900 dark:text-gray-100">{trade.lotSize}</TableCell> {/* Added dark mode text color */}
                           <TableCell className="text-red-500">{trade.candles}</TableCell>
                           <TableCell className={trade.winLoss === "win" ? "text-green-500" : "text-red-500"}>
                             {trade.winLoss === "win" ? "Win" : "Loss"}
@@ -233,16 +235,16 @@ const AnalyticsPage = () => {
                           <TableCell className={parseFloat(trade.netProfit) >= 0 ? "text-green-500" : "text-red-500"}>
                             {trade.netProfit}
                           </TableCell>
-                          <TableCell>{trade.balance}</TableCell>
+                          <TableCell className="text-gray-900 dark:text-gray-100">{trade.balance}</TableCell> {/* Added dark mode text color */}
                           <TableCell>
                             <div className="flex space-x-1">
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
@@ -251,7 +253,7 @@ const AnalyticsPage = () => {
                       ))}
                     </TableBody>
                   </Table>
-                  <div className="px-4 py-3 text-xs text-gray-500">
+                  <div className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400"> {/* Added dark mode text color */}
                     Showing 1 to {analyticsRealTrades.length} of {analyticsRealTrades.length} results
                   </div>
                 </div>

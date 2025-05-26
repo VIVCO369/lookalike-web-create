@@ -37,8 +37,8 @@ const DailyPerformanceTracker = ({ accountType, onResetDay }: DailyPerformanceTr
   return (
     <Card className="mb-6"> {/* Removed dark background/border classes */}
       <CardHeader className="pb-4">
-        <CardTitle className="text-xl font-medium text-gray-700 flex items-center gap-2"> {/* Changed title style */}
-           <BarChart3 className="h-5 w-5 text-gray-500" /> {/* Changed icon style */}
+        <CardTitle className="text-xl font-medium text-gray-700 dark:text-gray-200 flex items-center gap-2"> {/* Changed title style and added dark mode text color */}
+           <BarChart3 className="h-5 w-5 text-gray-500 dark:text-gray-400" /> {/* Changed icon style and added dark mode text color */}
            Daily Performance Tracker
         </CardTitle>
       </CardHeader>
@@ -50,23 +50,23 @@ const DailyPerformanceTracker = ({ accountType, onResetDay }: DailyPerformanceTr
               <p className={cn("text-lg font-bold", stats.dailyProfit >= 0 ? "text-green-500" : "text-red-500")}>
                 {stats.dailyProfit >= 0 ? `+${formatCurrency(stats.dailyProfit)}` : formatCurrency(stats.dailyProfit)}
               </p> {/* Changed text color based on profit */}
-              <p className="text-sm text-gray-500">Today's P&L</p> {/* Changed label color */}
+              <p className="text-sm text-gray-500 dark:text-gray-400">Today's P&L</p> {/* Changed label color and added dark mode text color */}
             </CardContent>
           </Card>
 
           {/* Trades Today Card */}
           <Card className="text-center"> {/* Removed dark background/border classes */}
             <CardContent className="p-4">
-              <p className="text-lg font-bold text-gray-900">{stats.totalTrades}</p> {/* Changed to use totalTrades from stats */}
-              <p className="text-sm text-gray-500">Trades Today</p> {/* Changed label color */}
+              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{stats.totalTrades}</p> {/* Changed to use totalTrades from stats and added dark mode text color */}
+              <p className="text-sm text-gray-500 dark:text-gray-400">Trades Today</p> {/* Changed label color and added dark mode text color */}
             </CardContent>
           </Card>
 
           {/* Win Rate Card */}
           <Card className="text-center"> {/* Removed dark background/border classes */}
             <CardContent className="p-4">
-              <p className="text-lg font-bold text-gray-900">{stats.winRate}</p> {/* Changed to use winRate from stats */}
-              <p className="text-sm text-gray-500">Win Rate</p> {/* Changed label color */}
+              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{stats.winRate}</p> {/* Changed to use winRate from stats and added dark mode text color */}
+              <p className="text-sm text-gray-500 dark:text-gray-400">Win Rate</p> {/* Changed label color and added dark mode text color */}
             </CardContent>
           </Card>
 
@@ -76,7 +76,7 @@ const DailyPerformanceTracker = ({ accountType, onResetDay }: DailyPerformanceTr
                <p className="text-lg font-bold text-green-500">
                 {stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
               </p> {/* Changed text color to green */}
-              <p className="text-sm text-gray-500">Best Trade</p> {/* Changed label color */}
+              <p className="text-sm text-gray-500 dark:text-gray-400">Best Trade</p> {/* Changed label color and added dark mode text color */}
             </CardContent>
           </Card>
         </div>

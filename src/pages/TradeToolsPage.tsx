@@ -88,24 +88,24 @@ const TradeToolsPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#F8F5F0" }}>
+    <div className="flex min-h-screen bg-background"> {/* Changed inline style to Tailwind class */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}>
         {/* Header */}
-        <motion.header 
-          className="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm"
+        <motion.header
+          className="bg-white dark:bg-gray-800 border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm" // Added dark mode styles
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
           <div className="flex items-center gap-2">
-            <Wrench className="h-5 w-5 text-gray-500" />
-            <h1 className="text-xl font-medium text-gray-700">Trade Tools</h1>
+            <Wrench className="h-5 w-5 text-gray-500 dark:text-gray-400" /> {/* Added dark mode text color */}
+            <h1 className="text-xl font-medium text-gray-700 dark:text-gray-200">Trade Tools</h1> {/* Added dark mode text color */}
           </div>
           {/* Display current date and time */}
           <div>
-            <p className="text-black text-sm font-bold">{formatDate(currentDateTime)}</p>
+            <p className="text-black dark:text-white text-sm font-bold">{formatDate(currentDateTime)}</p> {/* Added dark mode text color */}
             <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
         </motion.header>
@@ -115,15 +115,15 @@ const TradeToolsPage = () => {
           <div className="max-w-6xl mx-auto">
             {/* Daily Performance Tracker */}
             <AnimatedContainer delay={0.1}>
-              <DailyPerformanceTracker 
-                accountType="trade-tools" 
+              <DailyPerformanceTracker
+                accountType="trade-tools"
                 onResetDay={handleResetDay}
               />
             </AnimatedContainer>
 
             {/* Trade Tracker Section */}
             <AnimatedContainer delay={0.2}>
-              <DetailedData 
+              <DetailedData
                 accountType="trade-tools"
                 showAddTrade={true}
               />
@@ -131,19 +131,19 @@ const TradeToolsPage = () => {
 
             {/* Trades Table */}
             <AnimatedContainer delay={0.3}>
-              <motion.div 
-                className="bg-white rounded-lg shadow-lg border mt-6 hover:shadow-xl transition-shadow duration-300"
+              <motion.div
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border mt-6 hover:shadow-xl transition-shadow duration-300 dark:border-gray-700" // Added dark mode styles
                 whileHover={{ y: -2 }}
                 transition={{ duration: 0.2 }}
               >
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-medium text-gray-700">Trade History</h3>
+                    <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">Trade History</h3> {/* Added dark mode text color */}
                   </div>
-                  
+
                   {tradeToolsTrades.length === 0 ? (
-                    <motion.div 
-                      className="text-center py-8 text-gray-500"
+                    <motion.div
+                      className="text-center py-8 text-gray-500 dark:text-gray-400" // Added dark mode text color
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.5, duration: 0.3 }}
@@ -160,39 +160,40 @@ const TradeToolsPage = () => {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead>TRADE</TableHead>
-                              <TableHead>PAIR</TableHead>
-                              <TableHead>TYPE</TableHead>
-                              <TableHead>TIMEFRAME</TableHead>
-                              <TableHead>TREND</TableHead>
-                              <TableHead>LOT SIZE</TableHead>
-                              <TableHead>CANDLES</TableHead>
-                              <TableHead>W/L</TableHead>
-                              <TableHead>NET PROFIT</TableHead>
-                              <TableHead>BALANCE</TableHead>
-                              <TableHead>ACTIONS</TableHead>
+                              <TableHead className="text-gray-600 dark:text-gray-300">TRADE</TableHead> {/* Added dark mode text color */}
+                              <TableHead className="text-gray-600 dark:text-gray-300">PAIR</TableHead> {/* Added dark mode text color */}
+                              <TableHead className="text-gray-600 dark:text-gray-300">TYPE</TableHead> {/* Added dark mode text color */}
+                              <TableHead className="text-gray-600 dark:text-gray-300">TIMEFRAME</TableHead> {/* Added dark mode text color */}
+                              <TableHead className="text-gray-600 dark:text-gray-300">TREND</TableHead> {/* Added dark mode text color */}
+                              <TableHead className="text-gray-600 dark:text-gray-300">LOT SIZE</TableHead> {/* Added dark mode text color */}
+                              <TableHead className="text-gray-600 dark:text-gray-300">CANDLES</TableHead> {/* Added dark mode text color */}
+                              <TableHead className="text-gray-600 dark:text-gray-300">W/L</TableHead> {/* Added dark mode text color */}
+                              <TableHead className="text-gray-600 dark:text-gray-300">NET PROFIT</TableHead> {/* Added dark mode text color */}
+                              <TableHead className="text-gray-600 dark:text-gray-300">BALANCE</TableHead> {/* Added dark mode text color */}
+                              <TableHead className="text-gray-600 dark:text-gray-300">ACTIONS</TableHead> {/* Added dark mode text color */}
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {paginatedTrades.map((trade, index) => (
-                              <motion.tr 
+                              <motion.tr
                                 key={trade.id}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.5 + index * 0.1, duration: 0.3 }}
                                 whileHover={{ backgroundColor: "#f8f9fa" }}
+                                className="dark:hover:bg-gray-700" // Added dark mode hover style
                               >
-                                <TableCell>{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
-                                <TableCell>{trade.pair}</TableCell>
+                                <TableCell className="text-gray-900 dark:text-gray-100">{(currentPage - 1) * itemsPerPage + index + 1}</TableCell> {/* Added dark mode text color */}
+                                <TableCell className="text-gray-900 dark:text-gray-100">{trade.pair}</TableCell> {/* Added dark mode text color */}
                                 <TableCell>
                                   <span className={trade.type === 'buy' ? 'text-blue-600' : 'text-red-600'}>
                                     {trade.type}
                                   </span>
                                 </TableCell>
-                                <TableCell>{trade.timeframe}</TableCell>
-                                <TableCell>{trade.trend}</TableCell>
-                                <TableCell>{trade.lotSize}</TableCell>
-                                <TableCell>{trade.candles}</TableCell>
+                                <TableCell className="text-gray-900 dark:text-gray-100">{trade.timeframe}</TableCell> {/* Added dark mode text color */}
+                                <TableCell className="text-gray-900 dark:text-gray-100">{trade.trend}</TableCell> {/* Added dark mode text color */}
+                                <TableCell className="text-gray-900 dark:text-gray-100">{trade.lotSize}</TableCell> {/* Added dark mode text color */}
+                                <TableCell className="text-gray-900 dark:text-gray-100">{trade.candles}</TableCell> {/* Added dark mode text color */}
                                 <TableCell>
                                   <span className={trade.winLoss === 'win' ? 'text-green-600' : 'text-red-600'}>
                                     {trade.winLoss === 'win' ? 'Win' : 'Loss'}
@@ -201,16 +202,16 @@ const TradeToolsPage = () => {
                                 <TableCell className={parseFloat(trade.netProfit) >= 0 ? 'text-green-600' : 'text-red-600'}>
                                   {parseFloat(trade.netProfit) >= 0 ? '+' : ''}{parseFloat(trade.netProfit).toFixed(2)}
                                 </TableCell>
-                                <TableCell>{parseFloat(trade.balance).toFixed(2)}</TableCell>
+                                <TableCell className="text-gray-900 dark:text-gray-100">{parseFloat(trade.balance).toFixed(2)}</TableCell> {/* Added dark mode text color */}
                                 <TableCell>
                                   <div className="flex gap-2">
-                                    <Button variant="ghost" size="sm">
+                                    <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
                                       <Eye className="h-4 w-4" />
                                     </Button>
-                                    <Button variant="ghost" size="sm">
+                                    <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
                                       <Edit className="h-4 w-4" />
                                     </Button>
-                                    <Button variant="ghost" size="sm">
+                                    <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
                                       <Trash2 className="h-4 w-4" />
                                     </Button>
                                   </div>
@@ -223,7 +224,7 @@ const TradeToolsPage = () => {
 
                       {/* Pagination */}
                       {totalPages > 1 && (
-                        <motion.div 
+                        <motion.div
                           className="mt-4"
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -232,7 +233,7 @@ const TradeToolsPage = () => {
                           <Pagination>
                             <PaginationContent>
                               <PaginationItem>
-                                <PaginationPrevious 
+                                <PaginationPrevious
                                   onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                                   className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                                 />
@@ -249,7 +250,7 @@ const TradeToolsPage = () => {
                                 </PaginationItem>
                               ))}
                               <PaginationItem>
-                                <PaginationNext 
+                                <PaginationNext
                                   onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                                   className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                                 />
