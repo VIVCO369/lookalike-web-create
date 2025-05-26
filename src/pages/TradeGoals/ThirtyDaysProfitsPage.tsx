@@ -1,17 +1,73 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
-import { DollarSign } from "lucide-react";
 import AnimatedContainer from "@/components/AnimatedContainer";
 import { cn } from "@/lib/utils"; // Import cn utility
+import { motion } from "framer-motion"; // Import motion
+import { DollarSign, Plus, Trash2, Edit } from "lucide-react"; // Import DollarSign, Plus, Trash2, Edit icons
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"; // Import Table components
+import { Button } from "@/components/ui/button"; // Import Button component
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"; // Import Dialog components - Keep import for now, might remove later if not needed elsewhere
+import { Input } from "@/components/ui/input"; // Import Input component
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select components
+import useLocalStorage from "@/hooks/useLocalStorage"; // Import useLocalStorage
+
+// Define the type for a custom profits row
+interface CustomProfitRow {
+  id: string; // Unique ID for each row
+  day: number | string;
+  perDay: string;
+  balance: number | string;
+  session1: number | string;
+  session2: number | string;
+  session3: number | string;
+  session4: number | string;
+  session5: number | string;
+  tfProfit: number | string;
+  withdraw: number | string;
+  stAmount: number | string;
+  lotSize: number | string; // Changed from extraStake to Lot Size
+  reached: string;
+}
 
 const ThirtyDaysProfitsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Sample data that matches the Excel structure
+  // Update the current date and time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
+  // Helper function to format the date
+  const formatDate = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+  };
+
+  // Helper function to format the time
+  const formatTime = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+    return date.toLocaleTimeString('en-US', options);
+  };
+
+  // Sample data that matches the Excel structure for the first table
   const challengeData = [
     { day: 1, balance: 100.00, perDay: "15%", session1: 0.30, session2: 0.30, session3: 0.30, session4: 0.30, session5: 0.30, tfProfit: 1.50, withdraw: 0, stAmount: 1.50, extraStake: 0.20, reached: "Yes", superTrade: "", profit: "15%" },
     { day: 2, balance: 11.50, perDay: "15%", session1: 0.35, session2: 0.35, session3: 0.35, session4: 0.35, session5: 0.35, tfProfit: 1.73, withdraw: 0, stAmount: 1.73, extraStake: 0.20, reached: "Yes", superTrade: "", profit: "15%" },
@@ -26,7 +82,7 @@ const ThirtyDaysProfitsPage = () => {
     { day: 11, balance: 36.43, perDay: "15%", session1: 1.09, session2: 1.09, session3: 1.09, session4: 1.09, session5: 1.09, tfProfit: 5.46, withdraw: 0, stAmount: 5.46, extraStake: 0.40, reached: "No", superTrade: "", profit: "" },
     { day: 12, balance: 41.90, perDay: "15%", session1: 1.26, session2: 1.26, session3: 1.26, session4: 1.26, session5: 1.26, tfProfit: 6.28, withdraw: 6.00, stAmount: 6.28, extraStake: 0.40, reached: "No", superTrade: "", profit: "" },
     { day: 13, balance: 48.18, perDay: "15%", session1: 1.45, session2: 1.45, session3: 1.45, session4: 1.45, session5: 1.45, tfProfit: 7.23, withdraw: 0, stAmount: 7.23, extraStake: 0.40, reached: "No", superTrade: "", profit: "" },
-    { day: 14, balance: 55.41, perDay: "15%", session1: 1.66, session2: 1.66, session3: 1.66, session4: 1.66, session5: 1.66, tfProfit: 8.31, withdraw: 0, stAmount: 8.31, extraStake: 0, reached: "Yes", superTrade: "", profit: "" },
+    { day: 14, balance: 55.41, perDay: "15%", session1: 1.66, session2: 1.66, session3: 1.66, session4: 1.66, session5: 1.66, tfProfit: 8.31, withdraw: 0, stAmount: 8.31, extraStake: 0.40, reached: "Yes", superTrade: "", profit: "" },
     { day: 15, balance: 63.72, perDay: "15%", session1: 1.91, session2: 1.91, session3: 1.91, session4: 1.91, session5: 1.91, tfProfit: 9.56, withdraw: 0, stAmount: 9.56, extraStake: 0.40, reached: "", superTrade: "", profit: "" },
     { day: 16, balance: 73.28, perDay: "15%", session1: 2.20, session2: 2.20, session3: 2.20, session4: 2.20, session5: 2.20, tfProfit: 10.99, withdraw: 0, stAmount: 10.99, extraStake: 0.40, reached: "", superTrade: "", profit: "" },
     { day: 17, balance: 84.27, perDay: "15%", session1: 2.53, session2: 2.53, session3: 2.53, session4: 2.53, session5: 2.53, tfProfit: 12.64, withdraw: 20.00, stAmount: 12.64, extraStake: 0.40, reached: "", superTrade: "", profit: "" },
@@ -67,25 +123,169 @@ const ThirtyDaysProfitsPage = () => {
     { session: "News Filter", time: "", status: "Yes", balance: "", withdrawal: "" }
   ];
 
+  // State for the new custom profits table data, persisted with useLocalStorage
+  const [customProfitsData, setCustomProfitsData] = useLocalStorage<CustomProfitRow[]>("customProfitsData", []);
+
+  // State for managing the add/edit modal for custom profits
+  const [isProfitModalOpen, setIsProfitModalOpen] = useState(false);
+  const [profitFormData, setProfitFormData] = useState<Omit<CustomProfitRow, 'id'>>({
+    day: "",
+    perDay: "",
+    balance: "",
+    session1: "",
+    session2: "",
+    session3: "",
+    session4: "",
+    session5: "",
+    tfProfit: "",
+    withdraw: "",
+    stAmount: "",
+    lotSize: "",
+    reached: "",
+  });
+  const [editingProfitId, setEditingProfitId] = useState<string | null>(null); // State to track which row is being edited
+
+  // State for selected rows to delete in the custom profits table
+  const [selectedProfitRows, setSelectedProfitRows] = useState<string[]>([]);
+
+
+  // Handle input changes in the custom profits form
+  const handleProfitFormInputChange = (field: keyof Omit<CustomProfitRow, 'id'>, value: string) => {
+    setProfitFormData({ ...profitFormData, [field]: value });
+  };
+
+  // Handle adding or saving a row in the custom profits table
+  const handleSaveProfitRow = () => {
+    if (editingProfitId) {
+      // Update existing row
+      setCustomProfitsData(customProfitsData.map(row =>
+        row.id === editingProfitId ? { ...row, ...profitFormData, id: editingProfitId } : row
+      ));
+      setEditingProfitId(null);
+    } else {
+      // Add new row
+      const newRow: CustomProfitRow = {
+        id: Date.now().toString(), // Simple unique ID
+        ...profitFormData,
+        day: parseInt(profitFormData.day as string) || profitFormData.day, // Convert to number if possible
+        balance: parseFloat(profitFormData.balance as string) || profitFormData.balance, // Convert to number if possible
+        session1: parseFloat(profitFormData.session1 as string) || profitFormData.session1, // Convert to number if possible
+        session2: parseFloat(profitFormData.session2 as string) || profitFormData.session2, // Convert to number if possible
+        session3: parseFloat(profitFormData.session3 as string) || profitFormData.session3, // Convert to number if possible
+        session4: parseFloat(profitFormData.session4 as string) || profitFormData.session4, // Convert to number if possible
+        session5: parseFloat(profitFormData.session5 as string) || profitFormData.session5, // Convert to number if possible
+        tfProfit: parseFloat(profitFormData.tfProfit as string) || profitFormData.tfProfit, // Convert to number if possible
+        withdraw: parseFloat(profitFormData.withdraw as string) || profitFormData.withdraw, // Convert to number if possible
+        stAmount: parseFloat(profitFormData.stAmount as string) || profitFormData.stAmount, // Convert to number if possible
+        lotSize: parseFloat(profitFormData.lotSize as string) || profitFormData.lotSize, // Convert to number if possible
+      };
+      setCustomProfitsData([...customProfitsData, newRow]);
+    }
+
+    // Reset form and hide it
+    setProfitFormData({
+      day: "",
+      perDay: "",
+      balance: "",
+      session1: "",
+      session2: "",
+      session3: "",
+      session4: "",
+      session5: "",
+      tfProfit: "",
+      withdraw: "",
+      stAmount: "",
+      lotSize: "",
+      reached: "",
+    });
+    setIsProfitModalOpen(false);
+  };
+
+  // Handle opening the Add Profit Row modal
+  const handleOpenAddProfitModal = () => {
+    setProfitFormData({
+      day: "",
+      perDay: "",
+      balance: "",
+      session1: "",
+      session2: "",
+      session3: "",
+      session4: "",
+      session5: "",
+      tfProfit: "",
+      withdraw: "",
+      stAmount: "",
+      lotSize: "",
+      reached: "",
+    });
+    setEditingProfitId(null);
+    setIsProfitModalOpen(true);
+  };
+
+  // Handle opening the Edit Profit Row modal
+  const handleOpenEditProfitModal = (row: CustomProfitRow) => {
+    setProfitFormData(row);
+    setEditingProfitId(row.id);
+    setIsProfitModalOpen(true);
+  };
+
+  // Handle selecting/deselecting a row in the custom profits table
+  const handleSelectProfitRow = (rowId: string) => {
+    if (selectedProfitRows.includes(rowId)) {
+      setSelectedProfitRows(selectedProfitRows.filter(id => id !== rowId));
+    } else {
+      setSelectedProfitRows([...selectedProfitRows, rowId]);
+    }
+  };
+
+  // Handle deleting selected rows in the custom profits table
+  const handleDeleteSelectedProfitRows = () => {
+    setCustomProfitsData(customProfitsData.filter(row => !selectedProfitRows.includes(row.id)));
+    setSelectedProfitRows([]); // Clear selection after deleting
+  };
+
+
   return (
     <div className="min-h-screen bg-background flex w-full"> {/* Changed inline style to Tailwind class */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       <div
-        className={`flex-1 transition-all duration-300 ${
+        className={cn(
+          "flex-1 transition-all duration-300 flex flex-col", // Added flex flex-col
           sidebarOpen ? "ml-64" : "ml-20"
-        }`}
+        )}
       >
-        <div className="p-6">
+        {/* Header - Made fixed */}
+        <motion.header
+          className="fixed top-0 left-0 right-0 z-10 h-16 flex items-center justify-between px-6 shadow-sm bg-white dark:bg-gray-800 border-b dark:border-gray-700" // Added fixed positioning and dark mode styles
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+           {/* Page Title (Left) */}
+           <div className="flex items-center gap-2"> {/* Added container for icon and title */}
+            <DollarSign className="h-5 w-5 text-gray-500 dark:text-gray-400" /> {/* Added icon and dark mode text color */}
+            <h1 className="text-xl font-medium text-gray-700 dark:text-gray-200">30 Days Profits</h1> {/* Added title and dark mode text color */}
+          </div>
+          {/* Display current date and time (Right) */}
+          <div>
+            <p className="text-black dark:text-white text-sm font-bold">{formatDate(currentDateTime)}</p>
+            <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
+          </div>
+          {/* Removed Timeframe buttons and Trend */}
+        </motion.header>
+
+        {/* Main content - Added pt-16 for header clearance and overflow-y-auto */}
+        <div className="p-6 pt-24 overflow-y-auto flex-1"> {/* Added pt-24 and overflow-y-auto */}
           <AnimatedContainer>
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">META CASH 30 DAYS CASH CHALLENGE</h1> {/* Added dark mode text color */}
-              <p className="text-gray-600 dark:text-gray-400">MONEY MANAGEMENT - Track your 30-day cash challenge progress.</p> {/* Added dark mode text color */}
+              {/* Removed the h1 and p tags */}
             </div>
           </AnimatedContainer>
 
+          {/* First Table: META CASH 30 DAYS CASH CHALLENGE */}
           <AnimatedContainer delay={0.2}>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"> {/* Added dark mode styles */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden mb-8"> {/* Added margin-bottom */}
               {/* Header */}
               <div className="bg-black text-white text-center py-3">
                 <h2 className="text-xl font-bold">META CASH 30 DAYS CASH CHALLENGE</h2>
@@ -210,8 +410,261 @@ const ThirtyDaysProfitsPage = () => {
               </div>
             </div>
           </AnimatedContainer>
+
+          {/* New Custom Profits Table */}
+          <AnimatedContainer delay={0.3}>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+              {/* Header with Title and Buttons */}
+              <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 px-6 py-3 border-b dark:border-gray-600">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Custom Profits Table</h2>
+                <div className="flex gap-2">
+                  <Button className="bg-green-500 hover:bg-green-600 text-white" onClick={handleOpenAddProfitModal}>
+                    <Plus className="mr-2 h-4 w-4" /> Add
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="bg-red-500 hover:bg-red-600 text-white disabled:opacity-50"
+                    onClick={handleDeleteSelectedProfitRows}
+                    disabled={selectedProfitRows.length === 0}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete ({selectedProfitRows.length})
+                  </Button>
+                </div>
+              </div>
+
+              {/* Add/Edit Profit Row Form (Inline) */}
+              {isProfitModalOpen && (
+                <div className="p-6 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
+                  <h3 className="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200">{editingProfitId !== null ? "Edit Profit Row" : "Add New Profit Row"}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-700 dark:text-gray-300">Day</label>
+                      <Input
+                        type="number"
+                        placeholder="Day"
+                        value={profitFormData.day}
+                        onChange={(e) => handleProfitFormInputChange("day", e.target.value)}
+                        className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-700 dark:text-gray-300">% Per Day</label>
+                      <Input
+                        placeholder="% Per Day"
+                        value={profitFormData.perDay}
+                        onChange={(e) => handleProfitFormInputChange("perDay", e.target.value)}
+                        className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-700 dark:text-gray-300">Balance</label>
+                      <Input
+                        type="number"
+                        placeholder="Balance"
+                        step="0.01"
+                        value={profitFormData.balance}
+                        onChange={(e) => handleProfitFormInputChange("balance", e.target.value)}
+                        className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-700 dark:text-gray-300">Session 1</label>
+                      <Input
+                        type="number"
+                        placeholder="Session 1"
+                        step="0.01"
+                        value={profitFormData.session1}
+                        onChange={(e) => handleProfitFormInputChange("session1", e.target.value)}
+                        className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-700 dark:text-gray-300">Session 2</label>
+                      <Input
+                        type="number"
+                        placeholder="Session 2"
+                        step="0.01"
+                        value={profitFormData.session2}
+                        onChange={(e) => handleProfitFormInputChange("session2", e.target.value)}
+                        className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-700 dark:text-gray-300">Session 3</label>
+                      <Input
+                        type="number"
+                        placeholder="Session 3"
+                        step="0.01"
+                        value={profitFormData.session3}
+                        onChange={(e) => handleProfitFormInputChange("session3", e.target.value)}
+                        className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-700 dark:text-gray-300">Session 4</label>
+                      <Input
+                        type="number"
+                        placeholder="Session 4"
+                        step="0.01"
+                        value={profitFormData.session4}
+                        onChange={(e) => handleProfitFormInputChange("session4", e.target.value)}
+                        className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-700 dark:text-gray-300">Session 5</label>
+                      <Input
+                        type="number"
+                        placeholder="Session 5"
+                        step="0.01"
+                        value={profitFormData.session5}
+                        onChange={(e) => handleProfitFormInputChange("session5", e.target.value)}
+                        className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-700 dark:text-gray-300">T/Profit</label>
+                      <Input
+                        type="number"
+                        placeholder="T/Profit"
+                        step="0.01"
+                        value={profitFormData.tfProfit}
+                        onChange={(e) => handleProfitFormInputChange("tfProfit", e.target.value)}
+                        className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-700 dark:text-gray-300">Withdraw</label>
+                      <Input
+                        type="number"
+                        placeholder="Withdraw"
+                        step="0.01"
+                        value={profitFormData.withdraw}
+                        onChange={(e) => handleProfitFormInputChange("withdraw", e.target.value)}
+                        className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-700 dark:text-gray-300">ST/Amount</label>
+                      <Input
+                        type="number"
+                        placeholder="ST/Amount"
+                        step="0.01"
+                        value={profitFormData.stAmount}
+                        onChange={(e) => handleProfitFormInputChange("stAmount", e.target.value)}
+                        className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-700 dark:text-gray-300">Lot Size</label>
+                      <Input
+                        type="number"
+                        placeholder="Lot Size"
+                        step="0.01"
+                        value={profitFormData.lotSize}
+                        onChange={(e) => handleProfitFormInputChange("lotSize", e.target.value)}
+                        className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-700 dark:text-gray-300">Reached</label>
+                      <Select
+                        value={profitFormData.reached}
+                        onValueChange={(value) => handleProfitFormInputChange("reached", value)}
+                      >
+                        <SelectTrigger className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                          <SelectItem value="Yes">Yes</SelectItem>
+                          <SelectItem value="No">No</SelectItem>
+                          <SelectItem value="N/A">N/A</SelectItem> {/* Changed value from "" to "N/A" */}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2 mt-4">
+                    <Button variant="outline" onClick={() => setIsProfitModalOpen(false)}>Cancel</Button>
+                    <Button className="bg-blue-500 hover:bg-blue-600 text-white" onClick={handleSaveProfitRow}>
+                      {editingProfitId !== null ? "Save Changes" : "Add Row"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader className="bg-teal-900"> {/* Header background color */}
+                    <TableRow>
+                      <TableHead className="w-[40px] text-white font-bold"></TableHead> {/* Checkbox column */}
+                      <TableHead className="text-white font-bold">DAYS</TableHead>
+                      <TableHead className="text-white font-bold">% PER DAY</TableHead>
+                      <TableHead className="text-white font-bold">BALANCE</TableHead>
+                      <TableHead className="text-white font-bold">SESSION 1</TableHead>
+                      <TableHead className="text-white font-bold">SESSION 2</TableHead>
+                      <TableHead className="text-white font-bold">SESSION 3</TableHead>
+                      <TableHead className="text-white font-bold">SESSION 4</TableHead>
+                      <TableHead className="text-white font-bold">SESSION 5</TableHead>
+                      <TableHead className="text-white font-bold">T/PROFIT</TableHead>
+                      <TableHead className="text-white font-bold">WITHDRAW</TableHead>
+                      <TableHead className="text-white font-bold">ST/AMOUNT</TableHead>
+                      <TableHead className="text-white font-bold">Lot Size</TableHead>
+                      <TableHead className="text-white font-bold">REACHED</TableHead>
+                      <TableHead className="text-white font-bold">ACTIONS</TableHead> {/* Actions column */}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {/* Render rows from customProfitsData */}
+                    {customProfitsData.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={15} className="text-center text-gray-500 dark:text-gray-400 py-4">
+                          No data available. Click "Add" to add a row.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      customProfitsData.map((row) => (
+                        <TableRow key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                           <TableCell>
+                            <input
+                              type="checkbox"
+                              checked={selectedProfitRows.includes(row.id)}
+                              onChange={() => handleSelectProfitRow(row.id)}
+                              className="form-checkbox h-4 w-4 text-blue-600 rounded dark:bg-gray-700 dark:border-gray-600"
+                            />
+                          </TableCell>
+                          <TableCell className="text-gray-900 dark:text-gray-100">{row.day}</TableCell>
+                          <TableCell className="text-gray-900 dark:text-gray-100">{row.perDay}</TableCell>
+                          <TableCell className="text-gray-900 dark:text-gray-100">{typeof row.balance === "number" ? `$${row.balance.toFixed(2)}` : row.balance}</TableCell>
+                          <TableCell className="text-gray-900 dark:text-gray-100">{typeof row.session1 === "number" ? row.session1.toFixed(2) : row.session1}</TableCell>
+                          <TableCell className="text-gray-900 dark:text-gray-100">{typeof row.session2 === "number" ? row.session2.toFixed(2) : row.session2}</TableCell>
+                          <TableCell className="text-gray-900 dark:text-gray-100">{typeof row.session3 === "number" ? row.session3.toFixed(2) : row.session3}</TableCell>
+                          <TableCell className="text-gray-900 dark:text-gray-100">{typeof row.session4 === "number" ? row.session4.toFixed(2) : row.session4}</TableCell>
+                          <TableCell className="text-gray-900 dark:text-gray-100">{typeof row.session5 === "number" ? row.session5.toFixed(2) : row.session5}</TableCell>
+                          <TableCell className="text-gray-900 dark:text-gray-100">{typeof row.tfProfit === "number" ? `$${row.tfProfit.toFixed(2)}` : row.tfProfit}</TableCell>
+                          <TableCell className="text-gray-900 dark:text-gray-100">{typeof row.withdraw === "number" ? `$${row.withdraw.toFixed(2)}` : row.withdraw}</TableCell>
+                          <TableCell className="text-gray-900 dark:text-gray-100">{typeof row.stAmount === "number" ? `$${row.stAmount.toFixed(2)}` : row.stAmount}</TableCell>
+                          <TableCell className="text-gray-900 dark:text-gray-100">{typeof row.lotSize === "number" ? row.lotSize.toFixed(2) : row.lotSize}</TableCell>
+                          <TableCell className="text-gray-900 dark:text-gray-100">{row.reached}</TableCell>
+                           <TableCell>
+                            <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => handleOpenEditProfitModal(row)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </AnimatedContainer>
         </div>
       </div>
+
+      {/* Add/Edit Profit Row Modal */}
+      {/* Removed Dialog component */}
+
     </div>
   );
 };

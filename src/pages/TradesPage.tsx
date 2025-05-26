@@ -2,7 +2,7 @@ import { Eye, Trash2, Edit, Plus, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Sidebar from "../components/Sidebar";
 import { useState, useEffect, useMemo } from "react";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,21 +24,41 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"; // Import AlertDialog components
-import DetailedData from "../components/DetailedData"; // Import DetailedData
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription, // Import DialogDescription here
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"; // Import Dialog components
 import AnimatedContainer from "@/components/AnimatedContainer"; // Import AnimatedContainer
 import { motion } from "framer-motion"; // Import motion
 
 
-// Removed initialTradeFormData as it's now only used within DetailedData
+// Initial form data for adding/editing trades
+const initialTradeFormData: Omit<TradeFormData, 'id'> = {
+  strategy: "",
+  pair: "",
+  type: "buy",
+  openTime: "", // This will now store the date string (YYYY-MM-DD)
+  tradeTime: "", // This will now store the time string (HH:mm)
+  timeframe: "1m", // Changed default to lowercase for consistency with new values
+  trend: "up",
+  lotSize: "0.01",
+  winLoss: "win",
+  netProfit: "0.00",
+  balance: "0.00",
+  candles: ""
+};
+
 
 const TradesPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
-  // Removed showAddTrade state as it's handled by DetailedData
-  // Removed formData state as it's handled by DetailedData
 
   // Use the shared context for demo trades and daily target
-  const { demoTrades, dailyTarget, setDailyTarget, clearDemoTrades } = useTradeData(); // Get clearDemoTrades
+  const { demoTrades, dailyTarget, setDailyTarget, addTrade, updateTrade, deleteTrade, clearDemoTrades } = useTradeData(); // Get all necessary functions
 
   // Calculate stats for demo trades
   const stats = useMemo(() => calculateStats(demoTrades), [demoTrades]);
@@ -46,6 +66,14 @@ const TradesPage = () => {
   // Pagination state for demo trades
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 5; // Show 5 trades per page
+
+  // State for managing the add/edit trade modal
+  const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
+  const [tradeFormData, setTradeFormData] = useState<Omit<TradeFormData, 'id'>>(initialTradeFormData);
+  const [editingTradeId, setEditingTradeId] = useState<number | null>(null); // State to track which trade is being edited
+
+  // State for selected trades to delete
+  const [selectedTrades, setSelectedTrades] = useState<number[]>([]);
 
   // Calculate total pages for demo trades
   const totalPages = Math.ceil(demoTrades.length / itemsPerPage);
@@ -72,8 +100,6 @@ const TradesPage = () => {
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
-
-  // Removed toggleAddTrade function as it's handled by DetailedData
 
   // Update the current date and time every second
   useEffect(() => {
@@ -152,7 +178,70 @@ const TradesPage = () => {
     });
   };
 
-  // Removed handleInputChange and handleSubmit as they are handled by DetailedData
+  // Handle input changes in the trade form
+  const handleTradeFormInputChange = (field: keyof Omit<TradeFormData, 'id'>, value: string) => {
+    setTradeFormData({ ...tradeFormData, [field]: value });
+  };
+
+  // Handle submitting the trade form (Add or Edit)
+  const handleSaveTrade = () => {
+    if (editingTradeId !== null) {
+      // Update existing trade
+      updateTrade(editingTradeId, { ...tradeFormData, id: editingTradeId }, 'demo');
+      toast({
+        title: "Trade Updated",
+        description: `Trade ${editingTradeId} has been updated.`,
+      });
+    } else {
+      // Add new trade
+      addTrade(tradeFormData as TradeFormData, 'demo'); // Cast to TradeFormData as addTrade expects it
+      toast({
+        title: "Trade Added",
+        description: "Your demo trade has been successfully saved",
+      });
+    }
+
+    // Reset form and close modal
+    setTradeFormData(initialTradeFormData);
+    setEditingTradeId(null);
+    setIsTradeModalOpen(false);
+  };
+
+  // Handle opening the Add Trade modal
+  const handleOpenAddTradeModal = () => {
+    setTradeFormData(initialTradeFormData);
+    setEditingTradeId(null);
+    setIsTradeModalOpen(true);
+  };
+
+  // Handle opening the Edit Trade modal
+  const handleOpenEditTradeModal = (trade: TradeFormData) => {
+    setTradeFormData(trade);
+    setEditingTradeId(trade.id || null); // Use trade.id for editing
+    setIsTradeModalOpen(true);
+  };
+
+  // Handle selecting/deselecting a trade for deletion
+  const handleSelectTrade = (tradeId: number) => {
+    if (selectedTrades.includes(tradeId)) {
+      setSelectedTrades(selectedTrades.filter(id => id !== tradeId));
+    } else {
+      setSelectedTrades([...selectedTrades, tradeId]);
+    }
+  };
+
+  // Handle deleting selected trades
+  const handleDeleteSelectedTrades = () => {
+    selectedTrades.forEach(tradeId => {
+      deleteTrade(tradeId, 'demo');
+    });
+    setSelectedTrades([]); // Clear selection after deleting
+    toast({
+      title: "Trades Deleted",
+      description: `${selectedTrades.length} trade(s) have been removed.`,
+    });
+  };
+
 
   // Format currency values for display
   const formatCurrency = (value: number) => {
@@ -167,16 +256,6 @@ const TradesPage = () => {
   // Handle page changes
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-  };
-
-  // Handle reset demo trades (This function is now called from AlertDialog in DetailedData)
-  const handleResetDemoTrades = () => {
-    clearDemoTrades();
-    toast({
-      title: "Demo Trades Cleared",
-      description: "All demo trade history has been removed.",
-    });
-    setCurrentPage(1); // Reset to the first page after clearing
   };
 
 
@@ -365,41 +444,49 @@ const TradesPage = () => {
             </div>
           </AnimatedContainer>
 
-          {/* Use the DetailedData component for adding DEMO trades */}
-          {/* Pass the reset function and trade count */}
-          <AnimatedContainer delay={0.2}>
-            <DetailedData
-              showAddTrade={true}
-              accountType="demo"
-              onResetTrades={handleResetDemoTrades}
-              tradeCount={demoTrades.length}
-            />
-          </AnimatedContainer>
-
-          {/* Trades Table - Updated to use demo trades with pagination */}
+          {/* Trades Table - Updated to use demo trades with pagination and new header style */}
           <AnimatedContainer delay={0.3}>
             <motion.div
-              className="bg-white dark:bg-gray-800 rounded-md shadow overflow-x-auto mt-4 hover:shadow-lg transition-shadow duration-300" // Added dark mode styles
+              className="bg-white dark:bg-gray-800 rounded-md shadow overflow-hidden mt-4 hover:shadow-lg transition-shadow duration-300" // Added dark mode styles
               whileHover={{ y: -2 }}
               transition={{ duration: 0.2 }}
             >
+              {/* Top header bar with title and buttons */}
+              <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 px-6 py-3 border-b dark:border-gray-600">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Trade Details</h2>
+                <div className="flex gap-2">
+                  <Button className="bg-green-500 hover:bg-green-600 text-white" onClick={handleOpenAddTradeModal}>
+                    <Plus className="mr-2 h-4 w-4" /> Add
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="bg-red-500 hover:bg-red-600 text-white disabled:opacity-50"
+                    onClick={handleDeleteSelectedTrades}
+                    disabled={selectedTrades.length === 0}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete ({selectedTrades.length})
+                  </Button>
+                </div>
+              </div>
+
               <Table>
-                <TableHeader>
+                <TableHeader className="bg-teal-900"> {/* Changed background to teal-900 */}
                   <TableRow>
-                    <TableHead className="w-[80px] text-gray-600 dark:text-gray-300">TRADE</TableHead> {/* Added dark mode text color */}
-                    <TableHead className="text-gray-600 dark:text-gray-300">STRATEGY</TableHead> {/* Added dark mode text color */}
-                    <TableHead className="text-gray-600 dark:text-gray-300">PAIR</TableHead> {/* Added dark mode text color */}
-                    <TableHead className="text-gray-600 dark:text-gray-300">TYPE</TableHead> {/* Added dark mode text color */}
-                    <TableHead className="text-gray-600 dark:text-gray-300">OPEN TIME</TableHead> {/* Added dark mode text color */}
-                    <TableHead className="text-gray-600 dark:text-gray-300">TRADE TIME</TableHead> {/* Added dark mode text color */}
-                    <TableHead className="text-gray-600 dark:text-gray-300">TIMEFRAME</TableHead> {/* Added dark mode text color */}
-                    <TableHead className="text-gray-600 dark:text-gray-300">TREND</TableHead> {/* Added dark mode text color */}
-                    <TableHead className="text-gray-600 dark:text-gray-300">LOT SIZE</TableHead> {/* Added dark mode text color */}
-                    <TableHead className="text-gray-600 dark:text-gray-300">CANDLES</TableHead> {/* Added dark mode text color */}
-                    <TableHead className="text-gray-600 dark:text-gray-300">W/L</TableHead> {/* Added dark mode text color */}
-                    <TableHead className="text-gray-600 dark:text-gray-300">NET PROFIT</TableHead> {/* Added dark mode text color */}
-                    <TableHead className="text-gray-600 dark:text-gray-300">BALANCE</TableHead> {/* Added dark mode text color */}
-                    <TableHead className="text-gray-600 dark:text-gray-300">ACTIONS</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="w-[40px] text-white font-bold"></TableHead> {/* Checkbox column */}
+                    <TableHead className="w-[80px] text-white font-bold">TRADE</TableHead> {/* Changed text color and added bold */}
+                    <TableHead className="text-white font-bold">STRATEGY</TableHead> {/* Changed text color and added bold */}
+                    <TableHead className="text-white font-bold">PAIR</TableHead> {/* Changed text color and added bold */}
+                    <TableHead className="text-white font-bold">TYPE</TableHead> {/* Changed text color and added bold */}
+                    <TableHead className="text-white font-bold">OPEN TIME</TableHead> {/* Changed text color and added bold */}
+                    <TableHead className="text-white font-bold">TRADE TIME</TableHead> {/* Changed text color and added bold */}
+                    <TableHead className="text-white font-bold">TIMEFRAME</TableHead> {/* Changed text color and added bold */}
+                    <TableHead className="text-white font-bold">TREND</TableHead> {/* Changed text color and added bold */}
+                    <TableHead className="text-white font-bold">LOT SIZE</TableHead> {/* Changed text color and added bold */}
+                    <TableHead className="text-white font-bold">CANDLES</TableHead> {/* Changed text color and added bold */}
+                    <TableHead className="text-white font-bold">W/L</TableHead> {/* Changed text color and added bold */}
+                    <TableHead className="text-white font-bold">NET PROFIT</TableHead> {/* Changed text color and added bold */}
+                    <TableHead className="text-white font-bold">BALANCE</TableHead> {/* Changed text color and added bold */}
+                    <TableHead className="text-white font-bold">ACTIONS</TableHead> {/* Actions column - Changed text color */}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -412,6 +499,14 @@ const TradesPage = () => {
                       whileHover={{ backgroundColor: "#f8f9fa" }}
                       className="dark:hover:bg-gray-700" // Added dark mode hover style
                     >
+                      <TableCell>
+                        <input
+                          type="checkbox"
+                          checked={selectedTrades.includes(trade.id || 0)} // Use trade.id for selection
+                          onChange={() => handleSelectTrade(trade.id || 0)} // Use trade.id for selection
+                          className="form-checkbox h-4 w-4 text-blue-600 rounded dark:bg-gray-700 dark:border-gray-600"
+                        />
+                      </TableCell>
                       <TableCell className="text-gray-900 dark:text-gray-100">{trade.id}</TableCell> {/* Added dark mode text color */}
                       <TableCell className="text-gray-900 dark:text-gray-100">{trade.strategy}</TableCell> {/* Added dark mode text color */}
                       <TableCell className="text-gray-900 dark:text-gray-100">{trade.pair}</TableCell> {/* Added dark mode text color */}
@@ -434,12 +529,10 @@ const TradesPage = () => {
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => handleOpenEditTradeModal(trade)}> {/* Added dark mode styles */}
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          {/* Removed individual delete button */}
                         </div>
                       </TableCell>
                     </motion.tr>
@@ -497,31 +590,222 @@ const TradesPage = () => {
                           pageNumber === currentPage + 2
                         ) {
                           return <PaginationItem key={pageNumber}>...</PaginationItem>;
-                        }
-                        return null;
-                      })}
+                          }
+                          return null;
+                        })}
 
-                      {currentPage < totalPages && (
-                        <PaginationItem>
-                          <PaginationNext
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handlePageChange(currentPage + 1);
-                            }}
-                          />
-                        </PaginationItem>
-                      )}
-                    </PaginationContent>
-                  </Pagination>
-                </div>
-              )}
-            </motion.div>
-          </AnimatedContainer>
-        </main>
+                        {currentPage < totalPages && (
+                          <PaginationItem>
+                            <PaginationNext
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handlePageChange(currentPage + 1);
+                              }}
+                            />
+                          </PaginationItem>
+                        )}
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
+              </motion.div>
+            </AnimatedContainer>
+          </main>
+        </div>
+
+        {/* Add/Edit Trade Modal */}
+        <Dialog open={isTradeModalOpen} onOpenChange={setIsTradeModalOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>{editingTradeId !== null ? "Edit Trade" : "Add New Trade"}</DialogTitle>
+              <DialogDescription>
+                {editingTradeId !== null ? `Edit details for Trade ID: ${editingTradeId}` : "Enter the details for your new demo trade."}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm text-gray-700 dark:text-gray-300">Strategy</label>
+                <Input
+                  placeholder="Strategy"
+                  value={tradeFormData.strategy}
+                  onChange={(e) => handleTradeFormInputChange("strategy", e.target.value)}
+                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-gray-700 dark:text-gray-300">Pair</label>
+                <Select
+                  value={tradeFormData.pair}
+                  onValueChange={(value) => handleTradeFormInputChange("pair", value)}
+                >
+                  <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
+                    <SelectValue placeholder="Select Trading Pair" />
+                  </SelectTrigger>
+                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
+                    <SelectItem value="Boom 300 Index">Boom 300 Index</SelectItem>
+                    <SelectItem value="Boom 500 Index">Boom 500 Index</SelectItem>
+                    <SelectItem value="Boom 600 Index">Boom 600 Index</SelectItem>
+                    <SelectItem value="Boom 900 Index">Boom 900 Index</SelectItem>
+                    <SelectItem value="Boom 1000 Index">Boom 1000 Index</SelectItem>
+                    <SelectItem value="Crash 300 Index">Crash 300 Index</SelectItem>
+                    <SelectItem value="Crash 500 Index">Crash 500 Index</SelectItem>
+                    <SelectItem value="Crash 600 Index">Crash 600 Index</SelectItem>
+                    <SelectItem value="Crash 1000 Index">Crash 1000 Index</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-gray-700 dark:text-gray-300">Type</label>
+                <Select
+                  value={tradeFormData.type}
+                  onValueChange={(value) => handleTradeFormInputChange("type", value)}
+                >
+                  <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
+                    <SelectItem value="buy">Buy</SelectItem>
+                    <SelectItem value="sell">Sell</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-gray-700 dark:text-gray-300">Date</label>
+                <Input
+                  type="date"
+                  value={tradeFormData.openTime}
+                  onChange={(e) => handleTradeFormInputChange("openTime", e.target.value)}
+                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-gray-700 dark:text-gray-300">Trade Time</label>
+                <Input
+                  type="time"
+                  value={tradeFormData.tradeTime}
+                  onChange={(e) => handleTradeFormInputChange("tradeTime", e.target.value)}
+                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-gray-700 dark:text-gray-300">Timeframe</label>
+                <Select
+                  value={tradeFormData.timeframe}
+                  onValueChange={(value) => handleTradeFormInputChange("timeframe", value)}
+                >
+                  <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
+                    <SelectValue placeholder="Select timeframe" />
+                  </SelectTrigger>
+                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
+                    <SelectItem value="1m">1M</SelectItem>
+                    <SelectItem value="5m">5M</SelectItem>
+                    <SelectItem value="15m">15M</SelectItem>
+                    <SelectItem value="1h">1H</SelectItem>
+                    <SelectItem value="4h">4H</SelectItem>
+                    <SelectItem value="1d">1D</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-gray-700 dark:text-gray-300">Trend</label>
+                <Select
+                  value={tradeFormData.trend}
+                  onValueChange={(value) => handleTradeFormInputChange("trend", value)}
+                >
+                  <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
+                    <SelectValue placeholder="Select trend" />
+                  </SelectTrigger>
+                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
+                    <SelectItem value="up">Up</SelectItem>
+                    <SelectItem value="down">Down</SelectItem>
+                    <SelectItem value="sideways">Sideways</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-gray-700 dark:text-gray-300">Lot Size</label>
+                <Input
+                  type="number"
+                  placeholder="0.01"
+                  step="0.01"
+                  value={tradeFormData.lotSize}
+                  onChange={(e) => handleTradeFormInputChange("lotSize", e.target.value)}
+                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-gray-700 dark:text-gray-300">Win/Loss</label>
+                <Select
+                  value={tradeFormData.winLoss}
+                  onValueChange={(value) => handleTradeFormInputChange("winLoss", value)}
+                >
+                  <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
+                    <SelectValue placeholder="Select result" />
+                  </SelectTrigger>
+                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
+                    <SelectItem value="win">Win</SelectItem>
+                    <SelectItem value="loss">Loss</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-gray-700 dark:text-gray-300">Net Profit</label>
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  step="0.01"
+                  value={tradeFormData.netProfit}
+                  onChange={(e) => handleTradeFormInputChange("netProfit", e.target.value)}
+                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-gray-700 dark:text-gray-300">Balance</label>
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  step="0.01"
+                  value={tradeFormData.balance}
+                  onChange={(e) => handleTradeFormInputChange("balance", e.target.value)}
+                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-gray-700 dark:text-gray-300">Candles</label>
+                <Select
+                  value={tradeFormData.candles}
+                  onValueChange={(value) => handleTradeFormInputChange("candles", value)}
+                >
+                  <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
+                    <SelectValue placeholder="Select candles" />
+                  </SelectTrigger>
+                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
+                    <SelectItem value="1">1 Candles</SelectItem>
+                    <SelectItem value="2">2 Candles</SelectItem>
+                    <SelectItem value="3">3 Candles</SelectItem>
+                    <SelectItem value="4">4 Candles</SelectItem>
+                    <SelectItem value="5">5 Candles</SelectItem>
+                    <SelectItem value="10">10 Candles</SelectItem>
+                    <SelectItem value="15">15 Candles</SelectItem>
+                    <SelectItem value="20">20 Candles</SelectItem>
+                    <SelectItem value="25">25 Candles</SelectItem>
+                    <SelectItem value="30">30 Candles</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsTradeModalOpen(false)}>Cancel</Button>
+              <Button onClick={handleSaveTrade}>
+                {editingTradeId !== null ? "Save Changes" : "Add Trade"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
       </div>
-    </div>
-  );
-};
+    );
+  };
 
-export default TradesPage;
+  export default TradesPage;

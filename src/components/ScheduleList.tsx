@@ -25,13 +25,14 @@ interface ScheduleListProps {
 }
 
 const colorOptions = [
-  { label: "Yellow", value: "yellow", bgColor: "bg-yellow-100 border-l-4 border-yellow-400 dark:bg-yellow-900 dark:border-yellow-600" }, // Added dark mode classes
-  { label: "Blue", value: "blue", bgColor: "bg-blue-50 border-l-4 border-blue-400 dark:bg-blue-900 dark:border-blue-600" }, // Added dark mode classes
-  { label: "Green", value: "green", bgColor: "bg-green-50 border-l-4 border-green-400 dark:bg-green-900 dark:border-green-600" }, // Added dark mode classes
-  { label: "Purple", value: "purple", bgColor: "bg-purple-50 border-l-4 border-purple-400 dark:bg-purple-900 dark:border-purple-600" }, // Added dark mode classes
-  { label: "Red", value: "red", bgColor: "bg-red-50 border-l-4 border-red-400 dark:bg-red-900 dark:border-red-600" }, // Added dark mode classes
-  { label: "Indigo", value: "indigo", bgColor: "bg-indigo-50 border-l-4 border-indigo-400 dark:bg-indigo-900 dark:border-indigo-600" }, // Added dark mode classes
-  { label: "Pink", value: "pink", bgColor: "bg-pink-50 border-l-4 border-pink-400 dark:bg-pink-900 dark:border-pink-600" }, // Added dark mode classes
+  // Adjusted dark mode classes to better match the image
+  { label: "Yellow", value: "yellow", bgColor: "bg-yellow-100 border-l-4 border-yellow-400 dark:bg-[#3a301a] dark:border-yellow-600" },
+  { label: "Blue", value: "blue", bgColor: "bg-blue-50 border-l-4 border-blue-400 dark:bg-[#1a2b4d] dark:border-blue-600" },
+  { label: "Green", value: "green", bgColor: "bg-green-50 border-l-4 border-green-400 dark:bg-[#1a3a2a] dark:border-green-600" },
+  { label: "Purple", value: "purple", bgColor: "bg-purple-50 border-l-4 border-purple-400 dark:bg-[#3a1a4d] dark:border-purple-600" },
+  { label: "Red", value: "red", bgColor: "bg-red-50 border-l-4 border-red-400 dark:bg-[#4d1a1a] dark:border-red-600" },
+  { label: "Indigo", value: "indigo", bgColor: "bg-indigo-50 border-l-4 border-indigo-400 dark:bg-[#2a1a4d] dark:border-indigo-600" },
+  { label: "Pink", value: "pink", bgColor: "bg-pink-50 border-l-4 border-pink-400 dark:bg-[#4d1a3a] dark:border-pink-600" },
 ];
 
 const ScheduleList = ({ hideAddButton = false, hideActions = false }: ScheduleListProps) => {
@@ -50,7 +51,7 @@ const ScheduleList = ({ hideAddButton = false, hideActions = false }: ScheduleLi
       time: "07:00 - 08:00",
       title: "Morning Routine",
       type: "Personal",
-      color: "bg-yellow-100 border-l-4 border-yellow-400 dark:bg-yellow-900 dark:border-yellow-600" // Added dark mode classes
+      color: "bg-yellow-100 border-l-4 border-yellow-400 dark:bg-[#3a301a] dark:border-yellow-600" // Updated dark mode classes
     },
     {
       id: "2",
@@ -59,7 +60,7 @@ const ScheduleList = ({ hideAddButton = false, hideActions = false }: ScheduleLi
       time: "08:30 - 12:00",
       title: "Deep Work Session",
       type: "Work",
-      color: "bg-blue-50 border-l-4 border-blue-400 dark:bg-blue-900 dark:border-blue-600" // Added dark mode classes
+      color: "bg-blue-50 border-l-4 border-blue-400 dark:bg-[#1a2b4d] dark:border-blue-600" // Updated dark mode classes
     },
     {
       id: "3",
@@ -68,7 +69,7 @@ const ScheduleList = ({ hideAddButton = false, hideActions = false }: ScheduleLi
       time: "12:30 - 13:30",
       title: "Lunch & Quick Walk",
       type: "Fitness",
-      color: "bg-green-50 border-l-4 border-green-400 dark:bg-green-900 dark:border-green-600" // Added dark mode classes
+      color: "bg-green-50 border-l-4 border-green-400 dark:bg-[#1a3a2a] dark:border-green-600" // Updated dark mode classes
     },
     {
       id: "4",
@@ -77,7 +78,7 @@ const ScheduleList = ({ hideAddButton = false, hideActions = false }: ScheduleLi
       time: "14:00 - 16:30",
       title: "Team Meetings",
       type: "Work",
-      color: "bg-blue-50 border-l-4 border-blue-400 dark:bg-blue-900 dark:border-blue-600" // Added dark mode classes
+      color: "bg-blue-50 border-l-4 border-blue-400 dark:bg-[#1a2b4d] dark:border-blue-600" // Updated dark mode classes
     },
     {
       id: "5",
@@ -86,7 +87,7 @@ const ScheduleList = ({ hideAddButton = false, hideActions = false }: ScheduleLi
       time: "17:00 - 19:00",
       title: "Family Dinner",
       type: "Family",
-      color: "bg-purple-50 border-l-4 border-purple-400 dark:bg-purple-900 dark:border-purple-600" // Added dark mode classes
+      color: "bg-purple-50 border-l-4 border-purple-400 dark:bg-[#3a1a4d] dark:border-purple-600" // Updated dark mode classes
     },
   ]);
 
@@ -265,9 +266,7 @@ const ScheduleList = ({ hideAddButton = false, hideActions = false }: ScheduleLi
                       </span>
                     </div>
                     <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{newTitle || "Task name"}</p> {/* Added dark mode text color */}
-                    <span className="text-xs text-gray-500 dark:text-gray-400"> {/* Added dark mode text color */}
-                      {colorOptions.find(c => c.value === selectedColor)?.label || "Color"}
-                    </span>
+                    {/* Removed the span for the color label */}
                   </div>
                 </div>
               )}
@@ -294,15 +293,16 @@ const ScheduleList = ({ hideAddButton = false, hideActions = false }: ScheduleLi
           {displayedScheduleItems.map((item, index) => (
             <AnimatedContainer key={item.id} delay={0.2 + index * 0.05}>
               <div className={cn("p-3 rounded", item.color)}> {/* Use cn for dynamic class */}
-                <div className="flex items-center gap-1 text-gray-600 dark:text-gray-300 mb-1"> {/* Added dark mode text color */}
-                  <Clock className="h-3 w-3" />
-                  <span className="text-xs">{item.time}</span>
-                </div>
-                <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{item.title}</p> {/* Added dark mode text color */}
-                <div className="flex justify-between items-center mt-1">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{item.type}</span> {/* Added dark mode text color */}
+                <div className="flex justify-between items-center"> {/* Use flex to align time/task and icons */}
+                  <div> {/* Container for time and task */}
+                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-300 mb-1"> {/* Added dark mode text color */}
+                      <Clock className="h-3 w-3" />
+                      <span className="text-xs">{item.time}</span>
+                    </div>
+                    <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{item.title}</p> {/* Added dark mode text color */}
+                  </div>
                   {!hideActions && (
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1"> {/* Container for icons */}
                       <button
                         className="text-gray-400 dark:text-gray-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600" // Added dark mode styles
                         onClick={() => handleEditSchedule(item)}
