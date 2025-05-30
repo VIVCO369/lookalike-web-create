@@ -27,14 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"; // Import AlertDialog components
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"; // Import Dialog components
+// Removed Dialog imports as we are using an inline form
 import AnimatedContainer from "@/components/AnimatedContainer"; // Import AnimatedContainer
 import { motion } from "framer-motion"; // Import motion
 
@@ -94,8 +87,8 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 5; // Show 5 trades per page
 
-  // State for managing the add/edit trade modal for REAL trades
-  const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
+  // State for managing the inline add/edit trade form for REAL trades
+  const [showInlineForm, setShowInlineForm] = useState(false); // State to control inline form visibility
   const [tradeFormData, setTradeFormData] = useState<Omit<TradeFormData, 'id'>>(initialTradeFormData);
   const [editingTradeId, setEditingTradeId] = useState<number | null>(null); // State to track which trade is being edited
 
@@ -249,25 +242,33 @@ const Index = () => {
       });
     }
 
-    // Reset form and close modal
+    // Reset form and hide inline form
     setTradeFormData(initialTradeFormData);
     setEditingTradeId(null);
-    setIsTradeModalOpen(false);
+    setShowInlineForm(false); // Hide the inline form
   };
 
-  // Handle opening the Add Trade modal (for the modal on this page)
-  const handleOpenAddTradeModal = () => {
-    setTradeFormData(initialTradeFormData);
-    setEditingTradeId(null);
-    setIsTradeModalOpen(true);
+  // Handle opening the Add Trade inline form (for the modal on this page)
+  const handleOpenAddTradeForm = () => {
+    setTradeFormData(initialTradeFormData); // Clear form data
+    setEditingTradeId(null); // Ensure not in editing mode
+    setShowInlineForm(true); // Show the inline form
   };
 
-  // Handle opening the Edit Trade modal (for the modal on this page)
-  const handleOpenEditTradeModal = (trade: TradeFormData) => {
-    setTradeFormData(trade);
-    setEditingTradeId(trade.id || null); // Use trade.id for editing
-    setIsTradeModalOpen(true);
+  // Handle opening the Edit Trade inline form (for the modal on this page)
+  const handleOpenEditTradeForm = (trade: TradeFormData) => {
+    setTradeFormData(trade); // Pre-fill form data
+    setEditingTradeId(trade.id || null); // Set editing ID
+    setShowInlineForm(true); // Show the inline form
   };
+
+  // Handle canceling the inline form
+  const handleCancelInlineForm = () => {
+    setTradeFormData(initialTradeFormData); // Clear form data
+    setEditingTradeId(null); // Ensure not in editing mode
+    setShowInlineForm(false); // Hide the inline form
+  };
+
 
   // Handle selecting/deselecting a trade for deletion
   const handleSelectTrade = (tradeId: number) => {
@@ -520,9 +521,9 @@ const Index = () => {
             >
               {/* Top header bar with title and buttons */}
               <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 px-6 py-3 border-b dark:border-gray-600">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Real Trading Detail</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Trade Details</h2> {/* Changed title to match picture */}
                 <div className="flex gap-2">
-                  <Button className="bg-green-500 hover:bg-green-600 text-white" onClick={handleOpenAddTradeModal}>
+                  <Button className="bg-green-500 hover:bg-green-600 text-white" onClick={handleOpenAddTradeForm}> {/* Updated onClick */}
                     <Plus className="mr-2 h-4 w-4" /> Add
                   </Button>
                   {/* Reset Trades Button with AlertDialog */}
@@ -549,25 +550,215 @@ const Index = () => {
                 </div>
               </div>
 
+              {/* Inline Add/Edit Trade Form */}
+              {showInlineForm && (
+                <AnimatedContainer delay={0.1}>
+                  <div className="p-6 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600 mb-4"> {/* Added margin-bottom */}
+                    <h3 className="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200">
+                      {editingTradeId !== null ? "Edit Trade" : "Add New Trade"}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm text-gray-700 dark:text-gray-300">Strategy</label>
+                        <Input
+                          placeholder="Strategy"
+                          value={tradeFormData.strategy}
+                          onChange={(e) => handleTradeFormInputChange("strategy", e.target.value)}
+                          className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm text-gray-700 dark:text-gray-300">Pair</label>
+                        <Select
+                          value={tradeFormData.pair}
+                          onValueChange={(value) => handleTradeFormInputChange("pair", value)}
+                        >
+                          <SelectTrigger className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400">
+                            <SelectValue placeholder="Select Trading Pair" />
+                          </SelectTrigger>
+                          <SelectContent className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                            <SelectItem value="Boom 300 Index">Boom 300 Index</SelectItem>
+                            <SelectItem value="Boom 500 Index">Boom 500 Index</SelectItem>
+                            <SelectItem value="Boom 600 Index">Boom 600 Index</SelectItem>
+                            <SelectItem value="Boom 900 Index">Boom 900 Index</SelectItem>
+                            <SelectItem value="Boom 1000 Index">Boom 1000 Index</SelectItem>
+                            <SelectItem value="Crash 300 Index">Crash 300 Index</SelectItem>
+                            <SelectItem value="Crash 500 Index">Crash 500 Index</SelectItem>
+                            <SelectItem value="Crash 600 Index">Crash 600 Index</SelectItem>
+                            <SelectItem value="Crash 1000 Index">Crash 1000 Index</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm text-gray-700 dark:text-gray-300">Type</label>
+                        <Select
+                          value={tradeFormData.type}
+                          onValueChange={(value) => handleTradeFormInputChange("type", value)}
+                        >
+                          <SelectTrigger className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400">
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                            <SelectItem value="buy">Buy</SelectItem>
+                            <SelectItem value="sell">Sell</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm text-gray-700 dark:text-gray-300">Date</label>
+                        <Input
+                          type="date"
+                          value={tradeFormData.openTime}
+                          onChange={(e) => handleTradeFormInputChange("openTime", e.target.value)}
+                          className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm text-gray-700 dark:text-gray-300">Trade Time</label>
+                        <Input
+                          type="time"
+                          value={tradeFormData.tradeTime}
+                          onChange={(e) => handleTradeFormInputChange("tradeTime", e.target.value)}
+                          className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm text-gray-700 dark:text-gray-300">Timeframe</label>
+                        <Select
+                          value={tradeFormData.timeframe}
+                          onValueChange={(value) => handleTradeFormInputChange("timeframe", value)}
+                        >
+                          <SelectTrigger className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400">
+                            <SelectValue placeholder="Select timeframe" />
+                          </SelectTrigger>
+                          <SelectContent className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                            <SelectItem value="1m">1M</SelectItem>
+                            <SelectItem value="5m">5M</SelectItem>
+                            <SelectItem value="15m">15M</SelectItem>
+                            <SelectItem value="1h">1H</SelectItem>
+                            <SelectItem value="4h">4H</SelectItem>
+                            <SelectItem value="1d">1D</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm text-gray-700 dark:text-gray-300">Trend</label>
+                        <Select
+                          value={tradeFormData.trend}
+                          onValueChange={(value) => handleTradeFormInputChange("trend", value)}
+                        >
+                          <SelectTrigger className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400">
+                            <SelectValue placeholder="Select trend" />
+                          </SelectTrigger>
+                          <SelectContent className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                            <SelectItem value="up">Up</SelectItem>
+                            <SelectItem value="down">Down</SelectItem>
+                            <SelectItem value="sideways">Sideways</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm text-gray-700 dark:text-gray-300">Lot Size</label>
+                        <Input
+                          type="number"
+                          placeholder="0.01"
+                          step="0.01"
+                          value={tradeFormData.lotSize}
+                          onChange={(e) => handleTradeFormInputChange("lotSize", e.target.value)}
+                          className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm text-gray-700 dark:text-gray-300">Win/Loss</label>
+                        <Select
+                          value={tradeFormData.winLoss}
+                          onValueChange={(value) => handleTradeFormInputChange("winLoss", value)}
+                        >
+                          <SelectTrigger className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400">
+                            <SelectValue placeholder="Select result" />
+                          </SelectTrigger>
+                          <SelectContent className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                            <SelectItem value="win">Win</SelectItem>
+                            <SelectItem value="loss">Loss</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm text-gray-700 dark:text-gray-300">Net Profit</label>
+                        <Input
+                          type="number"
+                          placeholder="0.00"
+                          step="0.01"
+                          value={tradeFormData.netProfit}
+                          onChange={(e) => handleTradeFormInputChange("netProfit", e.target.value)}
+                          className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm text-gray-700 dark:text-gray-300">Balance</label>
+                        <Input
+                          type="number"
+                          placeholder="0.00"
+                          step="0.01"
+                          value={tradeFormData.balance}
+                          onChange={(e) => handleTradeFormInputChange("balance", e.target.value)}
+                          className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm text-gray-700 dark:text-gray-300">Candles</label>
+                        <Select
+                          value={tradeFormData.candles}
+                          onValueChange={(value) => handleTradeFormInputChange("candles", value)}
+                        >
+                          <SelectTrigger className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400">
+                            <SelectValue placeholder="Select candles" />
+                          </SelectTrigger>
+                          <SelectContent className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                            <SelectItem value="1">1 Candles</SelectItem>
+                            <SelectItem value="2">2 Candles</SelectItem>
+                            <SelectItem value="3">3 Candles</SelectItem>
+                            <SelectItem value="4">4 Candles</SelectItem>
+                            <SelectItem value="5">5 Candles</SelectItem>
+                            <SelectItem value="10">10 Candles</SelectItem>
+                            <SelectItem value="15">15 Candles</SelectItem>
+                            <SelectItem value="20">20 Candles</SelectItem>
+                            <SelectItem value="25">25 Candles</SelectItem>
+                            <SelectItem value="30">30 Candles</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2 mt-4">
+                      <Button variant="outline" onClick={handleCancelInlineForm}>Cancel</Button> {/* Added Cancel button */}
+                      <Button onClick={handleSaveTrade}>
+                        {editingTradeId !== null ? "Save Changes" : "Add Trade"}
+                      </Button>
+                    </div>
+                  </div>
+                </AnimatedContainer>
+              )}
+
+
               <Table>
-                <TableHeader className="bg-teal-900"> {/* Changed background to teal-900 */}
+                <TableHeader className="bg-[#e6e6e6]"> {/* Changed background to light gray */}
                   <TableRow>
-                    <TableHead className="w-[40px] text-white font-bold"></TableHead> {/* Checkbox column */}
-                    <TableHead className="w-[80px] text-white font-bold">TRADE</TableHead> {/* Changed text color and added bold */}
-                    <TableHead className="text-white font-bold">STRATEGY</TableHead> {/* Changed text color and added bold */}
-                    <TableHead className="text-white font-bold">PAIR</TableHead> {/* Changed text color and added bold */}
-                    <TableHead className="text-white font-bold">TYPE</TableHead> {/* Changed text color and added bold */}
+                    <TableHead className="w-[40px] text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700"></TableHead> {/* Checkbox column - Changed text color and added border */}
+                    <TableHead className="w-[80px] text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">TRADE</TableHead> {/* Changed text color and added border */}
+                    <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">STRATEGY</TableHead> {/* Changed text color and added border */}
+                    <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">PAIR</TableHead> {/* Changed text color and added border */}
+                    <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">TYPE</TableHead> {/* Changed text color and added border */}
                     {/* Updated table headers */}
-                    <TableHead className="text-white font-bold">DATE</TableHead> {/* Changed text color and added bold */}
-                    <TableHead className="text-white font-bold">TRADE TIME</TableHead> {/* Changed text color and added bold */}
-                    <TableHead className="text-white font-bold">TIMEFRAME</TableHead> {/* Changed text color and added bold */}
-                    <TableHead className="text-white font-bold">TREND</TableHead> {/* Changed text color and added bold */}
-                    <TableHead className="text-white font-bold">LOT SIZE</TableHead> {/* Changed text color and added bold */}
-                    <TableHead className="text-white font-bold">CANDLES</TableHead> {/* Changed text color and added bold */}
-                    <TableHead className="text-white font-bold">W/L</TableHead> {/* Changed text color and added bold */}
-                    <TableHead className="text-white font-bold">NET PROFIT</TableHead> {/* Changed text color and added bold */}
-                    <TableHead className="text-white font-bold">BALANCE</TableHead> {/* Changed text color and added bold */}
-                    <TableHead className="text-white font-bold">ACTIONS</TableHead> {/* Added dark mode text color */}
+                    <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">OPEN TIME</TableHead> {/* Changed text color and added border */}
+                    <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">TRADE TIME</TableHead> {/* Changed text color and added border */}
+                    <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">TIMEFRAME</TableHead> {/* Changed text color and added border */}
+                    <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">TREND</TableHead> {/* Changed text color and added border */}
+                    <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">LOT SIZE</TableHead> {/* Changed text color and added border */}
+                    <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">CANDLES</TableHead> {/* Changed text color and added border */}
+                    <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">W/L</TableHead> {/* Changed text color and added border */}
+                    <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">NET PROFIT</TableHead> {/* Changed text color and added border */}
+                    <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">BALANCE</TableHead> {/* Changed text color and added border */}
+                    <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">ACTIONS</TableHead> {/* Added dark mode text color and border */}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -580,7 +771,7 @@ const Index = () => {
                       whileHover={{ backgroundColor: "#f8f9fa" }}
                       className="dark:hover:bg-gray-700" // Added dark mode hover style
                     >
-                      <TableCell>
+                      <TableCell className="border-b border-gray-200 dark:border-gray-700"> {/* Added border */}
                         <input
                           type="checkbox"
                           checked={selectedTrades.includes(trade.id || 0)} // Use trade.id for selection
@@ -588,30 +779,30 @@ const Index = () => {
                           className="form-checkbox h-4 w-4 text-blue-600 rounded dark:bg-gray-700 dark:border-gray-600"
                         />
                       </TableCell>
-                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.id}</TableCell> {/* Added dark mode text color */}
-                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.strategy}</TableCell> {/* Added dark mode text color */}
-                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.pair}</TableCell> {/* Added dark mode text color */}
-                      <TableCell className="text-blue-500">{trade.type}</TableCell>
+                      <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.id}</TableCell> {/* Added dark mode text color and border */}
+                      <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.strategy}</TableCell> {/* Added dark mode text color and border */}
+                      <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.pair}</TableCell> {/* Added dark mode text color and border */}
+                      <TableCell className="text-blue-500 border-b border-gray-200 dark:border-gray-700">{trade.type}</TableCell> {/* Added border */}
                       {/* Display Date and Trade Time separately */}
-                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.openTime}</TableCell> {/* Added dark mode text color */}
-                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.tradeTime}</TableCell> {/* Added dark mode text color */}
-                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.timeframe}</TableCell> {/* Added dark mode text color */}
-                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.trend}</TableCell> {/* Added dark mode text color */}
-                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.lotSize}</TableCell> {/* Added dark mode text color */}
-                      <TableCell className="text-red-500">{trade.candles}</TableCell>
-                      <TableCell className={trade.winLoss === "win" ? "text-green-500" : "text-red-500"}>
+                      <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.openTime}</TableCell> {/* Added dark mode text color and border */}
+                      <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.tradeTime}</TableCell> {/* Added dark mode text color and border */}
+                      <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.timeframe}</TableCell> {/* Added dark mode text color and border */}
+                      <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.trend}</TableCell> {/* Added dark mode text color and border */}
+                      <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.lotSize}</TableCell> {/* Added dark mode text color and border */}
+                      <TableCell className="text-red-500 border-b border-gray-200 dark:border-gray-700">{trade.candles}</TableCell> {/* Added border */}
+                      <TableCell className={cn(trade.winLoss === "win" ? "text-green-500" : "text-red-500", "border-b border-gray-200 dark:border-gray-700")}> {/* Added border */}
                         {trade.winLoss === "win" ? "Win" : "Loss"}
                       </TableCell>
-                      <TableCell className={parseFloat(trade.netProfit) >= 0 ? "text-green-500" : "text-red-500"}>
+                      <TableCell className={cn(parseFloat(trade.netProfit) >= 0 ? "text-green-500" : "text-red-500", "border-b border-gray-200 dark:border-gray-700")}> {/* Added border */}
                         {trade.netProfit}
                       </TableCell>
-                      <TableCell className="text-gray-900 dark:text-gray-100">{trade.balance}</TableCell> {/* Added dark mode text color */}
-                      <TableCell>
+                      <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.balance}</TableCell> {/* Added dark mode text color and border */}
+                      <TableCell className="border-b border-gray-200 dark:border-gray-700"> {/* Added border */}
                         <div className="flex space-x-1">
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => handleOpenEditTradeModal(trade)}> {/* Added dark mode styles */}
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => handleOpenEditTradeForm(trade)}> {/* Updated onClick */}
                             <Edit className="h-4 w-4" />
                           </Button>
                           {/* Removed individual delete button */}
@@ -696,195 +887,7 @@ const Index = () => {
           </main>
         </div>
 
-        {/* Add/Edit Trade Modal (for Real Trades) */}
-        <Dialog open={isTradeModalOpen} onOpenChange={setIsTradeModalOpen}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>{editingTradeId !== null ? "Edit Trade" : "Add New Trade"}</DialogTitle>
-              <DialogDescription>
-                {editingTradeId !== null ? `Edit details for Trade ID: ${editingTradeId}` : "Enter the details for your new real trade."}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <label className="text-sm text-gray-700 dark:text-gray-300">Strategy</label>
-                <Input
-                  placeholder="Strategy"
-                  value={tradeFormData.strategy}
-                  onChange={(e) => handleTradeFormInputChange("strategy", e.target.value)}
-                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-gray-700 dark:text-gray-300">Pair</label>
-                <Select
-                  value={tradeFormData.pair}
-                  onValueChange={(value) => handleTradeFormInputChange("pair", value)}
-                >
-                  <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
-                    <SelectValue placeholder="Select Trading Pair" />
-                  </SelectTrigger>
-                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
-                    <SelectItem value="Boom 300 Index">Boom 300 Index</SelectItem>
-                    <SelectItem value="Boom 500 Index">Boom 500 Index</SelectItem>
-                    <SelectItem value="Boom 600 Index">Boom 600 Index</SelectItem>
-                    <SelectItem value="Boom 900 Index">Boom 900 Index</SelectItem>
-                    <SelectItem value="Boom 1000 Index">Boom 1000 Index</SelectItem>
-                    <SelectItem value="Crash 300 Index">Crash 300 Index</SelectItem>
-                    <SelectItem value="Crash 500 Index">Crash 500 Index</SelectItem>
-                    <SelectItem value="Crash 600 Index">Crash 600 Index</SelectItem>
-                    <SelectItem value="Crash 1000 Index">Crash 1000 Index</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-gray-700 dark:text-gray-300">Type</label>
-                <Select
-                  value={tradeFormData.type}
-                  onValueChange={(value) => handleTradeFormInputChange("type", value)}
-                >
-                  <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
-                    <SelectItem value="buy">Buy</SelectItem>
-                    <SelectItem value="sell">Sell</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-gray-700 dark:text-gray-300">Date</label>
-                <Input
-                  type="date"
-                  value={tradeFormData.openTime}
-                  onChange={(e) => handleTradeFormInputChange("openTime", e.target.value)}
-                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-gray-700 dark:text-gray-300">Trade Time</label>
-                <Input
-                  type="time"
-                  value={tradeFormData.tradeTime}
-                  onChange={(e) => handleTradeFormInputChange("tradeTime", e.target.value)}
-                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-gray-700 dark:text-gray-300">Timeframe</label>
-                <Select
-                  value={tradeFormData.timeframe}
-                  onValueChange={(value) => handleTradeFormInputChange("timeframe", value)}
-                >
-                  <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
-                    <SelectValue placeholder="Select timeframe" />
-                  </SelectTrigger>
-                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
-                    <SelectItem value="1m">1M</SelectItem>
-                    <SelectItem value="5m">5M</SelectItem>
-                    <SelectItem value="15m">15M</SelectItem>
-                    <SelectItem value="1h">1H</SelectItem>
-                    <SelectItem value="4h">4H</SelectItem>
-                    <SelectItem value="1d">1D</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-gray-700 dark:text-gray-300">Trend</label>
-                <Select
-                  value={tradeFormData.trend}
-                  onValueChange={(value) => handleTradeFormInputChange("trend", value)}
-                >
-                  <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
-                    <SelectValue placeholder="Select trend" />
-                  </SelectTrigger>
-                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
-                    <SelectItem value="up">Up</SelectItem>
-                    <SelectItem value="down">Down</SelectItem>
-                    <SelectItem value="sideways">Sideways</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-gray-700 dark:text-gray-300">Lot Size</label>
-                <Input
-                  type="number"
-                  placeholder="0.01"
-                  step="0.01"
-                  value={tradeFormData.lotSize}
-                  onChange={(e) => handleTradeFormInputChange("lotSize", e.target.value)}
-                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-gray-700 dark:text-gray-300">Win/Loss</label>
-                <Select
-                  value={tradeFormData.winLoss}
-                  onValueChange={(value) => handleTradeFormInputChange("winLoss", value)}
-                >
-                  <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
-                    <SelectValue placeholder="Select result" />
-                  </SelectTrigger>
-                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
-                    <SelectItem value="win">Win</SelectItem>
-                    <SelectItem value="loss">Loss</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-gray-700 dark:text-gray-300">Net Profit</label>
-                <Input
-                  type="number"
-                  placeholder="0.00"
-                  step="0.01"
-                  value={tradeFormData.netProfit}
-                  onChange={(e) => handleTradeFormInputChange("netProfit", e.target.value)}
-                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-gray-700 dark:text-gray-300">Balance</label>
-                <Input
-                  type="number"
-                  placeholder="0.00"
-                  step="0.01"
-                  value={tradeFormData.balance}
-                  onChange={(e) => handleTradeFormInputChange("balance", e.target.value)}
-                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-gray-700 dark:text-gray-300">Candles</label>
-                <Select
-                  value={tradeFormData.candles}
-                  onValueChange={(value) => handleTradeFormInputChange("candles", value)}
-                >
-                  <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
-                    <SelectValue placeholder="Select candles" />
-                  </SelectTrigger>
-                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
-                    <SelectItem value="1">1 Candles</SelectItem>
-                    <SelectItem value="2">2 Candles</SelectItem>
-                    <SelectItem value="3">3 Candles</SelectItem>
-                    <SelectItem value="4">4 Candles</SelectItem>
-                    <SelectItem value="5">5 Candles</SelectItem>
-                    <SelectItem value="10">10 Candles</SelectItem>
-                    <SelectItem value="15">15 Candles</SelectItem>
-                    <SelectItem value="20">20 Candles</SelectItem>
-                    <SelectItem value="25">25 Candles</SelectItem>
-                    <SelectItem value="30">30 Candles</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsTradeModalOpen(false)}>Cancel</Button>
-              <Button onClick={handleSaveTrade}>
-                {editingTradeId !== null ? "Save Changes" : "Add Trade"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {/* Removed Add/Edit Trade Modal (for Real Trades) */}
 
       </div>
     );

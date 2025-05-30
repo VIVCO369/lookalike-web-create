@@ -8,7 +8,7 @@ import { useTradeData, calculateStats, TradeFormData } from "@/contexts/TradeDat
 import { useToast } from "@/components/ui/use-toast";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import DailyPerformanceTracker from "../components/DailyPerformanceTracker";
-import DetailedData from "../components/DetailedData";
+// Removed DetailedData import
 import AnimatedContainer from "../components/AnimatedContainer";
 import { motion } from "framer-motion";
 // Removed Dialog imports as we are using an inline form
@@ -220,14 +220,13 @@ const TradeToolsPage = () => {
               />
             </AnimatedContainer>
 
-            {/* Trade Tracker Section */}
-            <AnimatedContainer delay={0.2}>
-              {/* Hide the Add Trade button in DetailedData as it's now in the table header */}
+            {/* Trade Tracker Section - Removed DetailedData component */}
+            {/* <AnimatedContainer delay={0.2}>
               <DetailedData
                 accountType="trade-tools"
-                showAddTrade={false} // Hide the button here
+                showAddTrade={false}
               />
-            </AnimatedContainer>
+            </AnimatedContainer> */}
 
             {/* Trades Table */}
             <AnimatedContainer delay={0.3}>
@@ -455,19 +454,19 @@ const TradeToolsPage = () => {
                         <Table>
                           <TableHeader className="bg-[#e6e6e6]"> {/* Changed background to #e6e6e6 */}
                             <TableRow>
-                              <TableHead className="text-gray-900 dark:text-gray-100">TRADE</TableHead> {/* Added dark mode text color */}
-                              <TableHead className="text-gray-900 dark:text-gray-100">DATE</TableHead> {/* Added Date header */}
-                              <TableHead className="text-gray-900 dark:text-gray-100">TIME</TableHead> {/* Added Time header */}
-                              <TableHead className="text-gray-900 dark:text-gray-100">PAIR</TableHead> {/* Added dark mode text color */}
-                              <TableHead className="text-gray-900 dark:text-gray-100">TYPE</TableHead> {/* Added dark mode text color */}
-                              <TableHead className="text-gray-900 dark:text-gray-100">TIMEFRAME</TableHead> {/* Added dark mode text color */}
-                              <TableHead className="text-gray-900 dark:text-gray-100">TREND</TableHead> {/* Added dark mode text color */}
-                              <TableHead className="text-gray-900 dark:text-gray-100">LOT SIZE</TableHead> {/* Added dark mode text color */}
-                              <TableHead className="text-gray-900 dark:text-gray-100">CANDLES</TableHead> {/* Added dark mode text color */}
-                              <TableHead className="text-gray-900 dark:text-gray-100">W/L</TableHead> {/* Added dark mode text color */}
-                              <TableHead className="text-gray-900 dark:text-gray-100">NET PROFIT</TableHead> {/* Added dark mode text color */}
-                              <TableHead className="text-gray-900 dark:text-gray-100">BALANCE</TableHead> {/* Added dark mode text color */}
-                              <TableHead className="text-gray-900 dark:text-gray-100">ACTIONS</TableHead> {/* Added dark mode text color */}
+                              <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">TRADE</TableHead> {/* Added dark mode text color and border */}
+                              <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">DATE</TableHead> {/* Added Date header and border */}
+                              <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">TIME</TableHead> {/* Added Time header and border */}
+                              <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">PAIR</TableHead> {/* Added dark mode text color and border */}
+                              <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">TYPE</TableHead> {/* Added dark mode text color and border */}
+                              <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">TIMEFRAME</TableHead> {/* Added dark mode text color and border */}
+                              <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">TREND</TableHead> {/* Added dark mode text color and border */}
+                              <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">LOT SIZE</TableHead> {/* Added dark mode text color and border */}
+                              <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">CANDLES</TableHead> {/* Added dark mode text color and border */}
+                              <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">W/L</TableHead> {/* Added dark mode text color and border */}
+                              <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">NET PROFIT</TableHead> {/* Added dark mode text color and border */}
+                              <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">BALANCE</TableHead> {/* Added dark mode text color and border */}
+                              <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">ACTIONS</TableHead> {/* Added dark mode text color and border */}
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -480,29 +479,29 @@ const TradeToolsPage = () => {
                                 whileHover={{ backgroundColor: "#f8f9fa" }}
                                 className="dark:hover:bg-gray-700" // Added dark mode hover style
                               >
-                                <TableCell className="text-gray-900 dark:text-gray-100">{(currentPage - 1) * itemsPerPage + index + 1}</TableCell> {/* Added dark mode text color */}
-                                <TableCell className="text-gray-900 dark:text-gray-100">{trade.openTime}</TableCell> {/* Display Date */}
-                                <TableCell className="text-gray-900 dark:text-gray-100">{trade.tradeTime}</TableCell> {/* Display Time */}
-                                <TableCell className="text-gray-900 dark:text-gray-100">{trade.pair}</TableCell> {/* Added dark mode text color */}
-                                <TableCell>
+                                <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{(currentPage - 1) * itemsPerPage + index + 1}</TableCell> {/* Added dark mode text color and border */}
+                                <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.openTime}</TableCell> {/* Display Date and added border */}
+                                <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.tradeTime}</TableCell> {/* Display Time and added border */}
+                                <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.pair}</TableCell> {/* Added dark mode text color and border */}
+                                <TableCell className="border-b border-gray-200 dark:border-gray-700"> {/* Added border */}
                                   <span className={trade.type === 'buy' ? 'text-blue-600' : 'text-red-600'}>
                                     {trade.type}
                                   </span>
                                 </TableCell>
-                                <TableCell className="text-gray-900 dark:text-gray-100">{trade.timeframe}</TableCell> {/* Added dark mode text color */}
-                                <TableCell className="text-gray-900 dark:text-gray-100">{trade.trend}</TableCell> {/* Added dark mode text color */}
-                                <TableCell className="text-gray-900 dark:text-gray-100">{trade.lotSize}</TableCell> {/* Added dark mode text color */}
-                                <TableCell className="text-gray-900 dark:text-gray-100">{trade.candles}</TableCell> {/* Added dark mode text color */}
-                                <TableCell>
+                                <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.timeframe}</TableCell> {/* Added dark mode text color and border */}
+                                <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.trend}</TableCell> {/* Added dark mode text color and border */}
+                                <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.lotSize}</TableCell> {/* Added dark mode text color and border */}
+                                <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.candles}</TableCell> {/* Added dark mode text color and border */}
+                                <TableCell className="border-b border-gray-200 dark:border-gray-700"> {/* Added border */}
                                   <span className={trade.winLoss === 'win' ? 'text-green-600' : 'text-red-600'}>
                                     {trade.winLoss === 'win' ? 'Win' : 'Loss'}
                                   </span>
                                 </TableCell>
-                                <TableCell className={parseFloat(trade.netProfit) >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                <TableCell className={cn(parseFloat(trade.netProfit) >= 0 ? 'text-green-600' : 'text-red-600', "border-b border-gray-200 dark:border-gray-700")}> {/* Added border */}
                                   {parseFloat(trade.netProfit) >= 0 ? '+' : ''}{parseFloat(trade.netProfit).toFixed(2)}
                                 </TableCell>
-                                <TableCell className="text-gray-900 dark:text-gray-100">{parseFloat(trade.balance).toFixed(2)}</TableCell> {/* Added dark mode text color */}
-                                <TableCell>
+                                <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{parseFloat(trade.balance).toFixed(2)}</TableCell> {/* Added dark mode text color and border */}
+                                <TableCell className="border-b border-gray-200 dark:border-gray-700"> {/* Added border */}
                                   <div className="flex gap-2">
                                     <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
                                       <Eye className="h-4 w-4" />
