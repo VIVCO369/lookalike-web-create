@@ -4,6 +4,7 @@ import { BarChart3 } from "lucide-react"; // Using BarChart3 for the icon
 import { useTradeData, calculateStats } from "@/contexts/TradeDataContext"; // Import useTradeData and calculateStats
 import { useMemo } from "react"; // Import useMemo
 import { cn } from "@/lib/utils"; // Import cn utility
+import StatsCard from "./StatsCard"; // Import StatsCard
 
 interface DailyPerformanceTrackerProps {
   accountType: 'real' | 'demo' | 'trade-tools'; // Add accountType prop
@@ -43,42 +44,40 @@ const DailyPerformanceTracker = ({ accountType, onResetDay }: DailyPerformanceTr
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"> {/* Grid for stats cards */}
+        {/* Updated grid to 5 columns to accommodate the new card */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6"> {/* Grid for stats cards */}
           {/* Today's P&L Card */}
-          <Card className="text-center"> {/* Removed dark background/border classes */}
-            <CardContent className="p-4">
-              <p className={cn("text-lg font-bold", stats.dailyProfit >= 0 ? "text-green-500" : "text-red-500")}>
-                {stats.dailyProfit >= 0 ? `+${formatCurrency(stats.dailyProfit)}` : formatCurrency(stats.dailyProfit)}
-              </p> {/* Changed text color based on profit */}
-              <p className="text-sm text-gray-500 dark:text-gray-400">Today's P&L</p> {/* Changed label color and added dark mode text color */}
-            </CardContent>
-          </Card>
+          <StatsCard
+            title="Today's P&L"
+            value={stats.dailyProfit >= 0 ? `+${formatCurrency(stats.dailyProfit)}` : formatCurrency(stats.dailyProfit)}
+            color={stats.dailyProfit >= 0 ? "text-green-500" : "text-red-500"}
+          />
 
           {/* Trades Today Card */}
-          <Card className="text-center"> {/* Removed dark background/border classes */}
-            <CardContent className="p-4">
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{stats.totalTrades}</p> {/* Changed to use totalTrades from stats and added dark mode text color */}
-              <p className="text-sm text-gray-500 dark:text-gray-400">Trades Today</p> {/* Changed label color and added dark mode text color */}
-            </CardContent>
-          </Card>
+          <StatsCard
+            title="Trades Today"
+            value={stats.totalTrades.toString()}
+          />
 
           {/* Win Rate Card */}
-          <Card className="text-center"> {/* Removed dark background/border classes */}
-            <CardContent className="p-4">
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{stats.winRate}</p> {/* Changed to use winRate from stats and added dark mode text color */}
-              <p className="text-sm text-gray-500 dark:text-gray-400">Win Rate</p> {/* Changed label color and added dark mode text color */}
-            </CardContent>
-          </Card>
+          <StatsCard
+            title="Win Rate"
+            value={stats.winRate}
+          />
 
           {/* Best Trade Card */}
-          <Card className="text-center"> {/* Removed dark background/border classes */}
-            <CardContent className="p-4">
-               <p className="text-lg font-bold text-green-500">
-                {stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
-              </p> {/* Changed text color to green */}
-              <p className="text-sm text-gray-500 dark:text-gray-400">Best Trade</p> {/* Changed label color and added dark mode text color */}
-            </CardContent>
-          </Card>
+          <StatsCard
+            title="Best Trade"
+            value={stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
+            color="text-green-500"
+          />
+
+          {/* Worst Trade Card - Added */}
+          <StatsCard
+            title="Worst Trade"
+            value={formatCurrency(stats.worstTrade)}
+            color="text-red-500"
+          />
         </div>
 
         {/* Buttons - Removed "Log New Trade" as it's handled by DetailedData, kept "Reset Day" */}
