@@ -50,11 +50,14 @@ const TradesPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
-  // Use the shared context for demo trades and daily target
-  const { demoTrades, dailyTarget, setDailyTarget, addTrade, updateTrade, deleteTrade, clearDemoTrades } = useTradeData(); // Get all necessary functions
+  // Use the backtesting context for backtesting trades (removed dailyTarget from context)
+  const { backtestingTrades, addTrade, updateTrade, deleteTrade, clearBacktestingTrades } = useTradeData(); // Get all necessary functions
 
-  // Calculate stats for demo trades
-  const stats = useMemo(() => calculateStats(demoTrades), [demoTrades]);
+  // Backtesting specific Daily Target
+  const [dailyTarget, setDailyTarget] = useLocalStorage<number>("backtestingDailyTarget", 0.00);
+
+  // Calculate stats for backtesting trades
+  const stats = useMemo(() => calculateStats(backtestingTrades), [backtestingTrades]);
 
   // Pagination state for demo trades
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -68,25 +71,25 @@ const TradesPage = () => {
   // State for selected trades to delete
   const [selectedTrades, setSelectedTrades] = useState<number[]>([]);
 
-  // Calculate total pages for demo trades
-  const totalPages = Math.ceil(demoTrades.length / itemsPerPage);
+  // Calculate total pages for backtesting trades
+  const totalPages = Math.ceil(backtestingTrades.length / itemsPerPage);
 
-  // Get paginated demo trades for current page
+  // Get paginated backtesting trades for current page
   const paginatedTrades = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return demoTrades.slice(startIndex, startIndex + itemsPerPage);
-  }, [demoTrades, currentPage, itemsPerPage]);
+    return backtestingTrades.slice(startIndex, startIndex + itemsPerPage);
+  }, [backtestingTrades, currentPage, itemsPerPage]);
 
   // Use localStorage for timeframes and balance
   const [selectedTimeframes, setSelectedTimeframes] = useLocalStorage<string[]>("selectedTimeframes", ["1M", "15M", "1H", "4H", "1D"]);
   const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
 
-  const [balance, setBalance] = useLocalStorage<number>("userBalance", 10.00); // This balance might need to be separated for demo/real too
+  const [balance, setBalance] = useLocalStorage<number>("backtestingBalance", 10.00); // Backtesting specific balance
   const [isSettingBalance, setIsSettingBalance] = useState(false);
-  const [newBalance, setNewBalance] = useLocalStorage<string>("newBalanceInput", "");
+  const [newBalance, setNewBalance] = useLocalStorage<string>("backtestingNewBalanceInput", "");
 
   const [isSettingDailyTarget, setIsSettingDailyTarget] = useState(false);
-  const [newDailyTarget, setNewDailyTarget] = useLocalStorage<string>("newDailyTargetInput", "");
+  const [newDailyTarget, setNewDailyTarget] = useLocalStorage<string>("backtestingNewDailyTargetInput", "");
 
   const { toast } = useToast();
 
@@ -180,17 +183,17 @@ const TradesPage = () => {
   const handleSaveTrade = () => {
     if (editingTradeId !== null) {
       // Update existing trade
-      updateTrade(editingTradeId, { ...tradeFormData, id: editingTradeId }, 'demo');
+      updateTrade(editingTradeId, { ...tradeFormData, id: editingTradeId }, 'backtesting');
       toast({
         title: "Trade Updated",
         description: `Trade ${editingTradeId} has been updated.`,
       });
     } else {
       // Add new trade
-      addTrade(tradeFormData as TradeFormData, 'demo'); // Cast to TradeFormData as addTrade expects it
+      addTrade(tradeFormData as TradeFormData, 'backtesting'); // Cast to TradeFormData as addTrade expects it
       toast({
         title: "Trade Added",
-        description: "Your demo trade has been successfully saved",
+        description: "Your backtesting trade has been successfully saved",
       });
     }
 
@@ -234,7 +237,7 @@ const TradesPage = () => {
   // Handle deleting selected trades
   const handleDeleteSelectedTrades = () => {
     selectedTrades.forEach(tradeId => {
-      deleteTrade(tradeId, 'demo');
+      deleteTrade(tradeId, 'backtesting');
     });
     setSelectedTrades([]); // Clear selection after deleting
     toast({
@@ -243,14 +246,69 @@ const TradesPage = () => {
     });
   };
 
-  // Handle clicking the View icon
+  // Handle clicking the View icon - Enhanced backtesting version
   const handleViewTrade = (trade: TradeFormData) => {
-    console.log("Viewing Trade Details:", trade);
-    // TODO: Implement actual view functionality (e.g., open a modal with full details)
+    console.log("🧪 Viewing Backtesting Trade Details:", trade);
+
+    // Calculate trade performance metrics
+    const profit = parseFloat(trade.netProfit);
+    const isWin = trade.winLoss === "win";
+    const profitEmoji = profit > 0 ? "💰" : profit < 0 ? "📉" : "➖";
+    const resultEmoji = isWin ? "✅" : "❌";
+    const backtestEmoji = "🧪";
+
+    // Calculate risk metrics for backtesting analysis
+    const riskLevel = Math.abs(profit) > 50 ? "High" : Math.abs(profit) > 20 ? "Medium" : "Low";
+    const riskEmoji = riskLevel === "High" ? "🔥" : riskLevel === "Medium" ? "⚠️" : "🟢";
+
+    // Create an engaging and detailed backtesting analysis
+    const tradeDetails = `
+🧪 BACKTESTING TRADE ANALYSIS
+═══════════════════════════════════
+
+📊 Demo Trade Overview:
+   • Trade ID: #${trade.id}
+   • Strategy: ${trade.strategy}
+   • Trading Pair: ${trade.pair}
+   • Position Type: ${trade.type.toUpperCase()}
+   • Risk Level: ${riskLevel} ${riskEmoji}
+
+📅 Market Timing:
+   • Date: ${trade.openTime}
+   • Time: ${trade.tradeTime}
+   • Timeframe: ${trade.timeframe}
+   • Market Trend: ${trade.trend}
+
+⚙️ Trade Configuration:
+   • Lot Size: ${trade.lotSize}
+   • Candles Analyzed: ${trade.candles}
+   • Entry Strategy: Demo Testing
+
+📈 Performance Results:
+   • Outcome: ${trade.winLoss.toUpperCase()} ${resultEmoji}
+   • Net Profit: ${formatCurrency(profit)} ${profitEmoji}
+   • Demo Balance: ${formatCurrency(parseFloat(trade.balance))}
+
+🎯 Backtesting Insights:
+   ${isWin ?
+     "🎉 Successful demo trade! This strategy shows promise for live trading." :
+     "📚 Learning trade. Analyze this pattern to refine your strategy before going live."}
+
+💡 Strategy Notes:
+   • This is a demo trade for testing purposes
+   • Use these results to validate your trading strategy
+   • Consider risk management before live implementation
+    `.trim();
+
+    // Show engaging backtesting-specific toast notification
     toast({
-      title: "View Trade",
-      description: `Details for Trade ID ${trade.id} logged to console.`,
+      title: `${backtestEmoji} Backtest Trade #${trade.id} ${resultEmoji}`,
+      description: `Demo ${isWin ? "Win" : "Loss"} on ${trade.pair} • ${formatCurrency(profit)} • Risk: ${riskLevel}`,
+      duration: 7000,
     });
+
+    // Show detailed alert with formatted backtesting information
+    alert(`${tradeDetails}`);
   };
 
 
@@ -339,7 +397,7 @@ const TradesPage = () => {
                         onClick={handleSetBalance}
                         className="bg-blue-500 hover:bg-blue-600 text-white"
                       >
-                        Set
+                        Add Deposit
                       </Button>
                       <Button
                         size="sm"
@@ -355,7 +413,7 @@ const TradesPage = () => {
                       className="bg-blue-500 hover:bg-blue-600 text-white"
                       onClick={() => setIsSettingBalance(true)}
                     >
-                      <Plus className="h-4 w-4 mr-1" /> Set Balance
+                      <Plus className="h-4 w-4 mr-1" /> Add Deposit
                     </Button>
                   )}
 
@@ -398,7 +456,7 @@ const TradesPage = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <StatsCard
-                  title="Balance"
+                  title="Deposit"
                   value={`$${balance.toFixed(2)}`} // Using the local balance state for now
                   color="text-green-500"
                   borderColor="border-green-500 dark:border-green-700" // Added dark mode border color
@@ -429,7 +487,14 @@ const TradesPage = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                <StatsCard
+                  title="Account Balance"
+                  value={formatCurrency(balance + stats.netProfit)} // Deposit + Net Profit
+                  labelPosition="below"
+                  color={balance + stats.netProfit >= 0 ? "text-blue-500" : "text-red-500"}
+                  borderColor={balance + stats.netProfit >= 0 ? "border-blue-500 dark:border-blue-700" : "border-red-500 dark:border-red-700"}
+                />
                 <StatsCard
                   title="Total Trades"
                   value={stats.totalTrades.toString()} // Use totalTrades from calculated stats
@@ -729,8 +794,14 @@ const TradesPage = () => {
                       <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.balance}</TableCell> {/* Added dark mode text color and border */}
                       <TableCell className="border-b border-gray-200 dark:border-gray-700"> {/* Added border */}
                         <div className="flex space-x-1">
-                          {/* Added onClick handler to the View button */}
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => handleViewTrade(trade)}> {/* Added dark mode styles */}
+                          {/* Enhanced View button for backtesting */}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 hover:scale-105"
+                            onClick={() => handleViewTrade(trade)}
+                            title="View backtesting trade analysis"
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => handleOpenEditTradeForm(trade)}> {/* Updated onClick */}
@@ -748,7 +819,7 @@ const TradesPage = () => {
               {totalPages > 1 && (
                 <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200 dark:border-gray-700"> {/* Added dark mode border */}
                   <div className="text-sm text-gray-500 dark:text-gray-400"> {/* Added dark mode text color */}
-                    Showing {paginatedTrades.length > 0 ? ((currentPage - 1) * 5) + 1 : 0} to {Math.min(currentPage * 5, demoTrades.length)} of {demoTrades.length} results
+                    Showing {paginatedTrades.length > 0 ? ((currentPage - 1) * 5) + 1 : 0} to {Math.min(currentPage * 5, backtestingTrades.length)} of {backtestingTrades.length} results
                   </div>
                   <Pagination>
                     <PaginationContent>

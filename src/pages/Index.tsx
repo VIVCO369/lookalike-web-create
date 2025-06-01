@@ -51,15 +51,15 @@ const initialTradeFormData: Omit<TradeFormData, 'id'> = {
 const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
-  // Use local storage for balance
-  const [balance, setBalance] = useLocalStorage<number>("userBalance", 10.00);
+  // Use local storage for balance - Dashboard specific
+  const [balance, setBalance] = useLocalStorage<number>("dashboardBalance", 10.00);
   const [isSettingBalance, setIsSettingBalance] = useState(false);
-  const [newBalance, setNewBalance] = useLocalStorage<string>("newBalanceInput", "");
+  const [newBalance, setNewBalance] = useLocalStorage<string>("dashboardNewBalanceInput", "");
   const { toast } = useToast();
 
   // State for Daily Target
   const [isSettingDailyTarget, setIsSettingDailyTarget] = useState(false);
-  const [newDailyTarget, setNewDailyTarget] = useLocalStorage<string>("newDailyTargetInput", "");
+  const [newDailyTarget, setNewDailyTarget] = useLocalStorage<string>("dashboardNewDailyTargetInput", "");
 
   // New state for Trading Rules progress
   const [tradingRulesProgress, setTradingRulesProgress] = useState(0);
@@ -69,16 +69,17 @@ const Index = () => {
   const [selectedTimeframes, setSelectedTimeframes] = useLocalStorage<string[]>("selectedTimeframes", ["1M", "15M", "1H", "4H", "1D"]);
   const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
 
-  // Use the trade data context for Dashboard Real Trades and daily target
+  // Use the trade data context for Dashboard Real Trades (removed dailyTarget from context)
   const {
     dashboardRealTrades, // Use dashboardRealTrades
-    dailyTarget,
-    setDailyTarget,
     addTrade, // Import addTrade
     updateTrade, // Import updateTrade
     deleteTrade, // Import deleteTrade
     clearDashboardRealTrades, // Use clearDashboardRealTrades
   } = useTradeData();
+
+  // Dashboard specific Daily Target
+  const [dailyTarget, setDailyTarget] = useLocalStorage<number>("dashboardDailyTarget", 0.00);
 
   // Calculate stats for Dashboard Real Trades
   const stats = useMemo(() => calculateStats(dashboardRealTrades), [dashboardRealTrades]);
@@ -291,6 +292,59 @@ const Index = () => {
     });
   };
 
+  // Handle clicking the View icon - Enhanced and engaging version
+  const handleViewTrade = (trade: TradeFormData) => {
+    console.log("📊 Viewing Dashboard Trade Details:", trade);
+
+    // Calculate trade performance metrics
+    const profit = parseFloat(trade.netProfit);
+    const isWin = trade.winLoss === "win";
+    const profitEmoji = profit > 0 ? "💰" : profit < 0 ? "📉" : "➖";
+    const resultEmoji = isWin ? "✅" : "❌";
+
+    // Create an engaging and detailed view of the trade
+    const tradeDetails = `
+🏦 DASHBOARD TRADE ANALYSIS
+═══════════════════════════════
+
+📋 Trade Information:
+   • Trade ID: #${trade.id}
+   • Strategy: ${trade.strategy}
+   • Trading Pair: ${trade.pair}
+   • Position Type: ${trade.type.toUpperCase()}
+
+📅 Timing Details:
+   • Date: ${trade.openTime}
+   • Time: ${trade.tradeTime}
+   • Timeframe: ${trade.timeframe}
+   • Market Trend: ${trade.trend}
+
+⚙️ Trade Setup:
+   • Lot Size: ${trade.lotSize}
+   • Candles Analyzed: ${trade.candles}
+
+📊 Results:
+   • Outcome: ${trade.winLoss.toUpperCase()} ${resultEmoji}
+   • Net Profit: ${formatCurrency(profit)} ${profitEmoji}
+   • Account Balance: ${formatCurrency(parseFloat(trade.balance))}
+
+💡 Performance Note:
+   ${isWin ?
+     "🎉 Successful trade! This trade contributed positively to your dashboard performance." :
+     "📚 Learning opportunity. Analyze this trade to improve future performance."}
+    `.trim();
+
+    // Show engaging toast notification
+    toast({
+      title: `${profitEmoji} Dashboard Trade #${trade.id} ${resultEmoji}`,
+      description: `${isWin ? "Profitable" : "Loss"} trade on ${trade.pair} • ${formatCurrency(profit)}`,
+      duration: 6000,
+    });
+
+    // Show detailed alert with formatted information
+    alert(`${tradeDetails}`);
+  };
+
 
   return (
     <div className="flex min-h-screen bg-background"> {/* Changed inline style to Tailwind class */}
@@ -358,7 +412,7 @@ const Index = () => {
                         onClick={handleSetBalance}
                         className="bg-blue-500 hover:bg-blue-600 text-white"
                       >
-                        Set
+                        Add Deposit
                       </Button>
                       <Button
                         size="sm"
@@ -374,7 +428,7 @@ const Index = () => {
                       className="bg-blue-500 hover:bg-blue-600 text-white"
                       onClick={() => setIsSettingBalance(true)}
                     >
-                      <Plus className="h-4 w-4 mr-1" /> Set Balance
+                      <Plus className="h-4 w-4 mr-1" /> Add Deposit
                     </Button>
                   )}
 
@@ -416,7 +470,7 @@ const Index = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <StatsCard
-                  title="Balance"
+                  title="Deposit"
                   value={`$${balance.toFixed(2)}`}
                   color="text-green-500"
                   borderColor="border-green-500 dark:border-green-700" // Added dark mode border color
@@ -447,7 +501,14 @@ const Index = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                <StatsCard
+                  title="Account Balance"
+                  value={formatCurrency(balance + stats.netProfit)} // Deposit + Net Profit
+                  labelPosition="below"
+                  color={balance + stats.netProfit >= 0 ? "text-blue-500" : "text-red-500"}
+                  borderColor={balance + stats.netProfit >= 0 ? "border-blue-500 dark:border-blue-700" : "border-red-500 dark:border-red-700"}
+                />
                 <StatsCard
                   title="Total Trades"
                   value={stats.totalTrades.toString()} // Use totalTrades from calculated stats
@@ -799,7 +860,13 @@ const Index = () => {
                       <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.balance}</TableCell> {/* Added dark mode text color and border */}
                       <TableCell className="border-b border-gray-200 dark:border-gray-700"> {/* Added border */}
                         <div className="flex space-x-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                            onClick={() => handleViewTrade(trade)}
+                            title="View live trade analysis"
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => handleOpenEditTradeForm(trade)}> {/* Updated onClick */}

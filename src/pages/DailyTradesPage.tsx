@@ -37,39 +37,60 @@ const DailyTradesPage = () => {
   // Removed showAddTrade state as it's handled by DetailedData
   // Removed formData state as it's handled by DetailedData
 
-  // Use the shared context for demo trades and daily target
-  const { demoTrades, dailyTarget, setDailyTarget, clearDemoTrades } = useTradeData(); // Get clearDemoTrades
+  // Use the daily trades context for daily trades (removed dailyTarget from context)
+  const { dailyTrades, updateTrade, clearDailyTrades } = useTradeData(); // Get updateTrade and clearDailyTrades
 
-  // Calculate stats for demo trades
-  const stats = useMemo(() => calculateStats(demoTrades), [demoTrades]);
+  // Daily Trades specific Daily Target
+  const [dailyTarget, setDailyTarget] = useLocalStorage<number>("dailyTradesDailyTarget", 0.00);
 
-  // Pagination state for demo trades
+  // Calculate stats for daily trades
+  const stats = useMemo(() => calculateStats(dailyTrades), [dailyTrades]);
+
+  // Pagination state for daily trades
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 5; // Show 5 trades per page
 
-  // Calculate total pages for demo trades
-  const totalPages = Math.ceil(demoTrades.length / itemsPerPage);
+  // Calculate total pages for daily trades
+  const totalPages = Math.ceil(dailyTrades.length / itemsPerPage);
 
-  // Get paginated demo trades for current page
+  // Get paginated daily trades for current page
   const paginatedTrades = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return demoTrades.slice(startIndex, startIndex + itemsPerPage);
-  }, [demoTrades, currentPage, itemsPerPage]);
+    return dailyTrades.slice(startIndex, startIndex + itemsPerPage);
+  }, [dailyTrades, currentPage, itemsPerPage]);
 
   // Use localStorage for timeframes and balance
   const [selectedTimeframes, setSelectedTimeframes] = useLocalStorage<string[]>("selectedTimeframes", ["1M", "15M", "1H", "4H", "1D"]);
   const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
 
-  const [balance, setBalance] = useLocalStorage<number>("userBalance", 10.00); // This balance might need to be separated for demo/real too
+  const [balance, setBalance] = useLocalStorage<number>("dailyTradesBalance", 10.00); // Daily Trades specific balance
   const [isSettingBalance, setIsSettingBalance] = useState(false);
-  const [newBalance, setNewBalance] = useLocalStorage<string>("newBalanceInput", "");
+  const [newBalance, setNewBalance] = useLocalStorage<string>("dailyTradesNewBalanceInput", "");
 
   const [isSettingDailyTarget, setIsSettingDailyTarget] = useState(false);
-  const [newDailyTarget, setNewDailyTarget] = useLocalStorage<string>("newDailyTargetInput", "");
+  const [newDailyTarget, setNewDailyTarget] = useLocalStorage<string>("dailyTradesNewDailyTargetInput", "");
 
   // State for Challenge Milestones
   const [challengeStarted, setChallengeStarted] = useLocalStorage<boolean>("challengeStarted", false);
   const [daysRemaining, setDaysRemaining] = useLocalStorage<number>("daysRemaining", 0);
+
+  // State for editing trades
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingTradeId, setEditingTradeId] = useState<number | null>(null);
+  const [editFormData, setEditFormData] = useState<Omit<TradeFormData, 'id'>>({
+    strategy: "",
+    pair: "",
+    type: "",
+    openTime: "",
+    tradeTime: "",
+    timeframe: "",
+    trend: "",
+    lotSize: "",
+    winLoss: "",
+    netProfit: "",
+    balance: "",
+    candles: "",
+  });
 
   const { toast } = useToast();
 
@@ -172,12 +193,12 @@ const DailyTradesPage = () => {
     setCurrentPage(page);
   };
 
-  // Handle reset demo trades (This function is now called from AlertDialog in DetailedData)
-  const handleResetDemoTrades = () => {
-    clearDemoTrades();
+  // Handle reset daily trades (This function is now called from AlertDialog in DetailedData)
+  const handleResetDailyTrades = () => {
+    clearDailyTrades();
     toast({
-      title: "Demo Trades Cleared",
-      description: "All demo trade history has been removed.",
+      title: "Daily Trades Cleared",
+      description: "All daily trade history has been removed.",
     });
     setCurrentPage(1); // Reset to the first page after clearing
   };
@@ -222,6 +243,176 @@ const DailyTradesPage = () => {
       title: "Challenge Reset",
       description: "Your 30-day trading challenge has been reset.",
     });
+  };
+
+  // Handle clicking the View icon - Enhanced daily trades version
+  const handleViewTrade = (trade: TradeFormData) => {
+    console.log("📈 Viewing Daily Trade Details:", trade);
+
+    // Calculate trade performance metrics
+    const profit = parseFloat(trade.netProfit);
+    const isWin = trade.winLoss === "win";
+    const profitEmoji = profit > 0 ? "💰" : profit < 0 ? "📉" : "➖";
+    const resultEmoji = isWin ? "✅" : "❌";
+    const dailyEmoji = "📈";
+
+    // Calculate performance metrics for daily trading
+    const performanceLevel = Math.abs(profit) > 100 ? "Excellent" : Math.abs(profit) > 50 ? "Good" : Math.abs(profit) > 20 ? "Average" : "Modest";
+    const performanceEmoji = performanceLevel === "Excellent" ? "🚀" : performanceLevel === "Good" ? "👍" : performanceLevel === "Average" ? "👌" : "📊";
+
+    // Calculate challenge progress
+    const challengeProgress = challengeStarted ? `Day ${31 - daysRemaining}/30` : "Challenge not started";
+
+    // Create an engaging and detailed daily trading analysis
+    const tradeDetails = `
+📈 DAILY TRADING ANALYSIS
+═══════════════════════════════════
+
+🎯 Daily Trade Overview:
+   • Trade ID: #${trade.id}
+   • Strategy: ${trade.strategy}
+   • Trading Pair: ${trade.pair}
+   • Position Type: ${trade.type.toUpperCase()}
+   • Performance: ${performanceLevel} ${performanceEmoji}
+
+📅 Trading Session:
+   • Date: ${trade.openTime}
+   • Time: ${trade.tradeTime}
+   • Timeframe: ${trade.timeframe}
+   • Market Trend: ${trade.trend}
+
+⚙️ Trade Execution:
+   • Lot Size: ${trade.lotSize}
+   • Candles Analyzed: ${trade.candles}
+   • Entry Method: Daily Trading
+
+📊 Performance Results:
+   • Outcome: ${trade.winLoss.toUpperCase()} ${resultEmoji}
+   • Net Profit: ${formatCurrency(profit)} ${profitEmoji}
+   • Account Balance: ${formatCurrency(parseFloat(trade.balance))}
+
+🏆 Challenge Status:
+   • Progress: ${challengeProgress}
+   • Days Remaining: ${daysRemaining}/30
+   • Challenge Active: ${challengeStarted ? "Yes ✅" : "No ❌"}
+
+💡 Daily Trading Insights:
+   ${isWin ?
+     "🎉 Great daily trade! You're building consistent trading habits and profitable results." :
+     "📚 Learning trade. Daily consistency is key - analyze and improve for tomorrow's session."}
+
+🎯 Daily Goals:
+   • Focus on consistent daily performance
+   • Build sustainable trading habits
+   • Track progress toward daily targets
+   • Maintain disciplined risk management
+    `.trim();
+
+    // Show engaging daily trading toast notification
+    toast({
+      title: `${dailyEmoji} Daily Trade #${trade.id} ${resultEmoji}`,
+      description: `${isWin ? "Profitable" : "Loss"} daily trade on ${trade.pair} • ${formatCurrency(profit)} • ${performanceLevel} performance`,
+      duration: 8000,
+    });
+
+    // Show detailed alert with formatted daily trading information
+    alert(`${tradeDetails}`);
+  };
+
+  // Handle clicking the Edit icon - Enhanced daily trades version
+  const handleEditTrade = (trade: TradeFormData) => {
+    console.log("✏️ Editing Daily Trade:", trade);
+
+    // Pre-fill the form with trade data
+    setEditFormData({
+      strategy: trade.strategy,
+      pair: trade.pair,
+      type: trade.type,
+      openTime: trade.openTime,
+      tradeTime: trade.tradeTime,
+      timeframe: trade.timeframe,
+      trend: trade.trend,
+      lotSize: trade.lotSize,
+      winLoss: trade.winLoss,
+      netProfit: trade.netProfit,
+      balance: trade.balance,
+      candles: trade.candles,
+    });
+
+    setEditingTradeId(trade.id || null);
+    setShowEditForm(true);
+
+    toast({
+      title: "📝 Edit Mode Activated",
+      description: `Editing daily trade #${trade.id} on ${trade.pair}`,
+      duration: 3000,
+    });
+  };
+
+  // Handle saving the edited trade
+  const handleSaveEditedTrade = () => {
+    if (editingTradeId === null) return;
+
+    // Update the trade
+    updateTrade(editingTradeId, { ...editFormData, id: editingTradeId }, 'daily-trades');
+
+    // Reset form state
+    setShowEditForm(false);
+    setEditingTradeId(null);
+    setEditFormData({
+      strategy: "",
+      pair: "",
+      type: "",
+      openTime: "",
+      tradeTime: "",
+      timeframe: "",
+      trend: "",
+      lotSize: "",
+      winLoss: "",
+      netProfit: "",
+      balance: "",
+      candles: "",
+    });
+
+    toast({
+      title: "✅ Trade Updated Successfully",
+      description: `Daily trade #${editingTradeId} has been updated with new information.`,
+      duration: 4000,
+    });
+  };
+
+  // Handle canceling the edit
+  const handleCancelEdit = () => {
+    setShowEditForm(false);
+    setEditingTradeId(null);
+    setEditFormData({
+      strategy: "",
+      pair: "",
+      type: "",
+      openTime: "",
+      tradeTime: "",
+      timeframe: "",
+      trend: "",
+      lotSize: "",
+      winLoss: "",
+      netProfit: "",
+      balance: "",
+      candles: "",
+    });
+
+    toast({
+      title: "❌ Edit Cancelled",
+      description: "Trade editing has been cancelled. No changes were saved.",
+      duration: 3000,
+    });
+  };
+
+  // Handle form input changes
+  const handleEditFormInputChange = (field: keyof Omit<TradeFormData, 'id'>, value: string) => {
+    setEditFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
 
@@ -348,7 +539,7 @@ const DailyTradesPage = () => {
                           onClick={handleSetBalance}
                           className="bg-blue-500 hover:bg-blue-600 text-white"
                         >
-                          Set
+                          Add Deposit
                         </Button>
                         <Button
                           size="sm"
@@ -364,7 +555,7 @@ const DailyTradesPage = () => {
                         className="bg-blue-500 hover:bg-blue-600 text-white"
                         onClick={() => setIsSettingBalance(true)}
                       >
-                        <Plus className="h-4 w-4 mr-1" /> Set Balance
+                        <Plus className="h-4 w-4 mr-1" /> Add Deposit
                       </Button>
                     )}
 
@@ -407,7 +598,7 @@ const DailyTradesPage = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                   <StatsCard
-                    title="Balance"
+                    title="Deposit"
                     value={`$${balance.toFixed(2)}`} // Using the local balance state for now
                     color="text-green-500"
                     borderColor="border-green-500 dark:border-green-700" // Added dark mode border color
@@ -438,7 +629,14 @@ const DailyTradesPage = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                  <StatsCard
+                    title="Account Balance"
+                    value={formatCurrency(balance + stats.netProfit)} // Deposit + Net Profit
+                    labelPosition="below"
+                    color={balance + stats.netProfit >= 0 ? "text-blue-500" : "text-red-500"}
+                    borderColor={balance + stats.netProfit >= 0 ? "border-blue-500 dark:border-blue-700" : "border-red-500 dark:border-red-700"}
+                  />
                   <StatsCard
                     title="Total Trades"
                     value={stats.totalTrades.toString()} // Use totalTrades from calculated stats
@@ -464,16 +662,246 @@ const DailyTradesPage = () => {
               </div>
             </AnimatedContainer>
 
-            {/* Use the DetailedData component for adding DEMO trades */}
+            {/* Use the DetailedData component for adding DAILY TRADES */}
             {/* Pass the reset function and trade count */}
             <AnimatedContainer delay={0.3}>
               <DetailedData
                 showAddTrade={true}
-                accountType="demo"
-                onResetTrades={handleResetDemoTrades}
-                tradeCount={demoTrades.length}
+                accountType="daily-trades"
+                onResetTrades={handleResetDailyTrades}
+                tradeCount={dailyTrades.length}
               />
             </AnimatedContainer>
+
+            {/* Edit Trade Form */}
+            {showEditForm && (
+              <AnimatedContainer delay={0.35}>
+                <motion.div
+                  className="bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg shadow-lg p-6 border-2 border-purple-200 dark:border-purple-700"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-purple-800 dark:text-purple-200 flex items-center gap-2">
+                      <Edit className="h-5 w-5" />
+                      Edit Daily Trade #{editingTradeId}
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCancelEdit}
+                      className="text-gray-500 hover:text-red-500 transition-colors"
+                    >
+                      ✕
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* First Row */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Strategy</label>
+                      <Input
+                        value={editFormData.strategy}
+                        onChange={(e) => handleEditFormInputChange("strategy", e.target.value)}
+                        className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:focus:border-purple-400"
+                        placeholder="Strategy"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Pair</label>
+                      <Select
+                        value={editFormData.pair}
+                        onValueChange={(value) => handleEditFormInputChange("pair", value)}
+                      >
+                        <SelectTrigger className="border-purple-200 dark:border-purple-600 focus:border-purple-400">
+                          <SelectValue placeholder="Select Trading Pair" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Boom 300 Index">Boom 300 Index</SelectItem>
+                          <SelectItem value="Boom 500 Index">Boom 500 Index</SelectItem>
+                          <SelectItem value="Boom 600 Index">Boom 600 Index</SelectItem>
+                          <SelectItem value="Boom 900 Index">Boom 900 Index</SelectItem>
+                          <SelectItem value="Boom 1000 Index">Boom 1000 Index</SelectItem>
+                          <SelectItem value="Crash 300 Index">Crash 300 Index</SelectItem>
+                          <SelectItem value="Crash 500 Index">Crash 500 Index</SelectItem>
+                          <SelectItem value="Crash 600 Index">Crash 600 Index</SelectItem>
+                          <SelectItem value="Crash 900 Index">Crash 900 Index</SelectItem>
+                          <SelectItem value="Crash 1000 Index">Crash 1000 Index</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Type</label>
+                      <Select
+                        value={editFormData.type}
+                        onValueChange={(value) => handleEditFormInputChange("type", value)}
+                      >
+                        <SelectTrigger className="border-purple-200 dark:border-purple-600 focus:border-purple-400">
+                          <SelectValue placeholder="Buy" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Buy">Buy</SelectItem>
+                          <SelectItem value="Sell">Sell</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Second Row */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Date</label>
+                      <Input
+                        type="date"
+                        value={editFormData.openTime}
+                        onChange={(e) => handleEditFormInputChange("openTime", e.target.value)}
+                        className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:focus:border-purple-400"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Trade Time</label>
+                      <Input
+                        type="time"
+                        value={editFormData.tradeTime}
+                        onChange={(e) => handleEditFormInputChange("tradeTime", e.target.value)}
+                        className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:focus:border-purple-400"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Timeframe</label>
+                      <Select
+                        value={editFormData.timeframe}
+                        onValueChange={(value) => handleEditFormInputChange("timeframe", value)}
+                      >
+                        <SelectTrigger className="border-purple-200 dark:border-purple-600 focus:border-purple-400">
+                          <SelectValue placeholder="1M" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1M">1M</SelectItem>
+                          <SelectItem value="5M">5M</SelectItem>
+                          <SelectItem value="15M">15M</SelectItem>
+                          <SelectItem value="1H">1H</SelectItem>
+                          <SelectItem value="4H">4H</SelectItem>
+                          <SelectItem value="1D">1D</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Third Row */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Trend</label>
+                      <Select
+                        value={editFormData.trend}
+                        onValueChange={(value) => handleEditFormInputChange("trend", value)}
+                      >
+                        <SelectTrigger className="border-purple-200 dark:border-purple-600 focus:border-purple-400">
+                          <SelectValue placeholder="Up" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Up">Up</SelectItem>
+                          <SelectItem value="Down">Down</SelectItem>
+                          <SelectItem value="Sideways">Sideways</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Lot Size</label>
+                      <Input
+                        value={editFormData.lotSize}
+                        onChange={(e) => handleEditFormInputChange("lotSize", e.target.value)}
+                        className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:focus:border-purple-400"
+                        placeholder="0.01"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Win/Loss</label>
+                      <Select
+                        value={editFormData.winLoss}
+                        onValueChange={(value) => handleEditFormInputChange("winLoss", value)}
+                      >
+                        <SelectTrigger className="border-purple-200 dark:border-purple-600 focus:border-purple-400">
+                          <SelectValue placeholder="Win" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="win">Win</SelectItem>
+                          <SelectItem value="loss">Loss</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Fourth Row */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Net Profit</label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={editFormData.netProfit}
+                        onChange={(e) => handleEditFormInputChange("netProfit", e.target.value)}
+                        className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:focus:border-purple-400"
+                        placeholder="0.00"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Balance</label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={editFormData.balance}
+                        onChange={(e) => handleEditFormInputChange("balance", e.target.value)}
+                        className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:focus:border-purple-400"
+                        placeholder="0.00"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Candles</label>
+                      <Select
+                        value={editFormData.candles}
+                        onValueChange={(value) => handleEditFormInputChange("candles", value)}
+                      >
+                        <SelectTrigger className="border-purple-200 dark:border-purple-600 focus:border-purple-400">
+                          <SelectValue placeholder="Select candles" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">1 Candle</SelectItem>
+                          <SelectItem value="2">2 Candles</SelectItem>
+                          <SelectItem value="3">3 Candles</SelectItem>
+                          <SelectItem value="4">4 Candles</SelectItem>
+                          <SelectItem value="5">5 Candles</SelectItem>
+                          <SelectItem value="10">10 Candles</SelectItem>
+                          <SelectItem value="15">15 Candles</SelectItem>
+                          <SelectItem value="20">20 Candles</SelectItem>
+                          <SelectItem value="25">25 Candles</SelectItem>
+                          <SelectItem value="30">30 Candles</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 mt-6">
+                    <Button
+                      variant="outline"
+                      onClick={handleCancelEdit}
+                      className="border-gray-300 text-gray-600 hover:bg-gray-50"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleSaveEditedTrade}
+                      className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg"
+                    >
+                      💾 Save Changes
+                    </Button>
+                  </div>
+                </motion.div>
+              </AnimatedContainer>
+            )}
 
             {/* Trades Table - Updated to use demo trades with pagination */}
             <AnimatedContainer delay={0.4}>
@@ -532,10 +960,22 @@ const DailyTradesPage = () => {
                         <TableCell className="text-gray-900 dark:text-gray-100">{trade.balance}</TableCell> {/* Added dark mode text color */}
                         <TableCell>
                           <div className="flex space-x-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                              onClick={() => handleViewTrade(trade)}
+                              title="View daily trade analysis"
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                              onClick={() => handleEditTrade(trade)}
+                              title="Edit daily trade"
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}

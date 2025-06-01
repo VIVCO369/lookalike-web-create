@@ -59,8 +59,8 @@ const AnalyticsPage = () => {
   // Calculate stats for Analytics Real Trades
   const stats = useMemo(() => calculateStats(analyticsRealTrades), [analyticsRealTrades]);
 
-  // Use local storage for balance (assuming analytics shows real account balance)
-  const [balance] = useLocalStorage<number>("userBalance", 10.00);
+  // Use local storage for balance - Analytics specific
+  const [balance] = useLocalStorage<number>("analyticsBalance", 10.00);
 
   // Format currency values for display
   const formatCurrency = (value: number) => {
@@ -110,7 +110,7 @@ const AnalyticsPage = () => {
             <div className="mb-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <StatsCard
-                  title="Balance"
+                  title="Deposit"
                   value={`$${balance.toFixed(2)}`} // Using the local balance state
                   color="text-green-500"
                   borderColor="border-green-500 dark:border-green-700" // Added dark mode border color

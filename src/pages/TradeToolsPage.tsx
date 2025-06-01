@@ -185,6 +185,83 @@ const TradeToolsPage = () => {
     });
   };
 
+  // Handle clicking the View icon - Enhanced trade tools version
+  const handleViewTrade = (trade: TradeFormData) => {
+    console.log("🔧 Viewing Trade Tools Trade Details:", trade);
+
+    // Calculate trade performance metrics
+    const profit = parseFloat(trade.netProfit);
+    const isWin = trade.winLoss === "win";
+    const profitEmoji = profit > 0 ? "💰" : profit < 0 ? "📉" : "➖";
+    const resultEmoji = isWin ? "✅" : "❌";
+    const toolsEmoji = "🔧";
+
+    // Calculate performance metrics for trade tools analysis
+    const performanceLevel = Math.abs(profit) > 75 ? "Outstanding" : Math.abs(profit) > 50 ? "Excellent" : Math.abs(profit) > 25 ? "Good" : "Standard";
+    const performanceEmoji = performanceLevel === "Outstanding" ? "🌟" : performanceLevel === "Excellent" ? "🚀" : performanceLevel === "Good" ? "👍" : "📊";
+
+    // Calculate tool effectiveness
+    const toolEffectiveness = isWin ? "Effective" : "Needs Review";
+    const effectivenessEmoji = isWin ? "✨" : "🔍";
+
+    // Create an engaging and detailed trade tools analysis
+    const tradeDetails = `
+🔧 TRADE TOOLS ANALYSIS
+═══════════════════════════════════
+
+⚙️ Tool Performance Overview:
+   • Trade ID: #${trade.id}
+   • Strategy: ${trade.strategy}
+   • Trading Pair: ${trade.pair}
+   • Position Type: ${trade.type.toUpperCase()}
+   • Performance Level: ${performanceLevel} ${performanceEmoji}
+   • Tool Effectiveness: ${toolEffectiveness} ${effectivenessEmoji}
+
+📅 Execution Details:
+   • Date: ${trade.openTime}
+   • Time: ${trade.tradeTime}
+   • Timeframe: ${trade.timeframe}
+   • Market Trend: ${trade.trend}
+
+🛠️ Tool Configuration:
+   • Lot Size: ${trade.lotSize}
+   • Candles Analyzed: ${trade.candles}
+   • Entry Method: Trade Tools
+
+📈 Performance Results:
+   • Outcome: ${trade.winLoss.toUpperCase()} ${resultEmoji}
+   • Net Profit: ${formatCurrency(profit)} ${profitEmoji}
+   • Account Balance: ${formatCurrency(parseFloat(trade.balance))}
+
+🎯 Tool Analysis:
+   ${isWin ?
+     "🎉 Excellent tool performance! This configuration shows strong potential for consistent results." :
+     "🔍 Tool review needed. Analyze this setup to optimize future trade tool configurations."}
+
+💡 Trade Tools Insights:
+   • This trade was executed using advanced trade tools
+   • Performance metrics indicate tool effectiveness
+   • Use this data to refine tool configurations
+   • Consider this setup for future trading strategies
+
+🔧 Tool Optimization Notes:
+   • Monitor tool performance across different market conditions
+   • Adjust parameters based on historical results
+   • Maintain consistent tool usage for best results
+   • Document successful configurations for replication
+    `.trim();
+
+    // Show engaging trade tools toast notification
+    toast({
+      title: `${toolsEmoji} Trade Tools #${trade.id} ${resultEmoji}`,
+      description: `${isWin ? "Successful" : "Review needed"} tool execution on ${trade.pair} • ${formatCurrency(profit)} • ${performanceLevel} performance`,
+      duration: 9000,
+    });
+
+    // Show detailed alert with formatted trade tools information
+    alert(`${tradeDetails}`);
+  };
+
 
   return (
     <div className="flex min-h-screen bg-background"> {/* Changed inline style to Tailwind class */}
@@ -503,7 +580,13 @@ const TradeToolsPage = () => {
                                 <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{parseFloat(trade.balance).toFixed(2)}</TableCell> {/* Added dark mode text color and border */}
                                 <TableCell className="border-b border-gray-200 dark:border-gray-700"> {/* Added border */}
                                   <div className="flex gap-2">
-                                    <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"> {/* Added dark mode styles */}
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-gray-600 dark:text-gray-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-600 dark:hover:text-yellow-400 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                                      onClick={() => handleViewTrade(trade)}
+                                      title="View trade tools analysis"
+                                    >
                                       <Eye className="h-4 w-4" />
                                     </Button>
                                     <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => handleOpenEditTradeForm(trade)}> {/* Updated onClick */}
