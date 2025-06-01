@@ -545,30 +545,48 @@ const TradesPage = () => {
                 </div>
               </div>
 
-              {/* Inline Add/Edit Trade Form */}
+              {/* Enhanced Inline Add/Edit Trade Form */}
               {showInlineForm && (
                 <AnimatedContainer delay={0.1}>
-                  <div className="p-6 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
-                    <h3 className="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200">
-                      {editingTradeId !== null ? "Edit Trade" : "Add New Trade"}
-                    </h3>
+                  <motion.div
+                    className="p-6 bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-b-2 border-purple-200 dark:border-purple-700 shadow-lg"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-xl font-bold text-purple-800 dark:text-purple-200 flex items-center gap-2">
+                        <Edit className="h-5 w-5" />
+                        {editingTradeId !== null ? `Edit Backtesting Trade #${editingTradeId}` : "Add New Backtesting Trade"}
+                      </h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCancelInlineForm}
+                        className="text-gray-500 hover:text-red-500 transition-colors"
+                      >
+                        ✕
+                      </Button>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* First Row */}
                       <div className="space-y-2">
-                        <label className="text-sm text-gray-700 dark:text-gray-300">Strategy</label>
+                        <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Strategy *</label>
                         <Input
-                          placeholder="Strategy"
+                          placeholder="Enter strategy name"
                           value={tradeFormData.strategy}
                           onChange={(e) => handleTradeFormInputChange("strategy", e.target.value)}
-                          className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                          className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:focus:border-purple-400 dark:bg-gray-600 dark:text-white"
+                          required
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm text-gray-700 dark:text-gray-300">Pair</label>
+                        <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Trading Pair *</label>
                         <Select
                           value={tradeFormData.pair}
                           onValueChange={(value) => handleTradeFormInputChange("pair", value)}
                         >
-                          <SelectTrigger className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400">
+                          <SelectTrigger className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:bg-gray-600 dark:text-white">
                             <SelectValue placeholder="Select Trading Pair" />
                           </SelectTrigger>
                           <SelectContent className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
@@ -585,12 +603,12 @@ const TradesPage = () => {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm text-gray-700 dark:text-gray-300">Type</label>
+                        <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Position Type *</label>
                         <Select
                           value={tradeFormData.type}
                           onValueChange={(value) => handleTradeFormInputChange("type", value)}
                         >
-                          <SelectTrigger className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400">
+                          <SelectTrigger className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:bg-gray-600 dark:text-white">
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                           <SelectContent className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
@@ -599,40 +617,44 @@ const TradesPage = () => {
                           </SelectContent>
                         </Select>
                       </div>
+
+                      {/* Second Row */}
                       <div className="space-y-2">
-                        <label className="text-sm text-gray-700 dark:text-gray-300">Date</label>
+                        <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Date *</label>
                         <Input
                           type="date"
                           value={tradeFormData.openTime}
                           onChange={(e) => handleTradeFormInputChange("openTime", e.target.value)}
-                          className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                          className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:focus:border-purple-400 dark:bg-gray-600 dark:text-white"
+                          required
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm text-gray-700 dark:text-gray-300">Trade Time</label>
+                        <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Trade Time *</label>
                         <Input
                           type="time"
                           value={tradeFormData.tradeTime}
                           onChange={(e) => handleTradeFormInputChange("tradeTime", e.target.value)}
-                          className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                          className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:focus:border-purple-400 dark:bg-gray-600 dark:text-white"
+                          required
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm text-gray-700 dark:text-gray-300">Timeframe</label>
+                        <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Timeframe *</label>
                         <Select
                           value={tradeFormData.timeframe}
                           onValueChange={(value) => handleTradeFormInputChange("timeframe", value)}
                         >
-                          <SelectTrigger className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400">
+                          <SelectTrigger className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:bg-gray-600 dark:text-white">
                             <SelectValue placeholder="Select timeframe" />
                           </SelectTrigger>
                           <SelectContent className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
-                            <SelectItem value="1m">1M</SelectItem>
-                            <SelectItem value="5m">5M</SelectItem>
-                            <SelectItem value="15m">15M</SelectItem>
-                            <SelectItem value="1h">1H</SelectItem>
-                            <SelectItem value="4h">4H</SelectItem>
-                            <SelectItem value="1d">1D</SelectItem>
+                            <SelectItem value="1M">1M</SelectItem>
+                            <SelectItem value="5M">5M</SelectItem>
+                            <SelectItem value="15M">15M</SelectItem>
+                            <SelectItem value="1H">1H</SelectItem>
+                            <SelectItem value="4H">4H</SelectItem>
+                            <SelectItem value="1D">1D</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -724,13 +746,23 @@ const TradesPage = () => {
                         </Select>
                       </div>
                     </div>
-                    <div className="flex justify-end gap-2 mt-4">
-                      <Button variant="outline" onClick={handleCancelInlineForm}>Cancel</Button> {/* Added Cancel button */}
-                      <Button onClick={handleSaveTrade}>
-                        {editingTradeId !== null ? "Save Changes" : "Add Trade"}
+                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-purple-200 dark:border-purple-700">
+                      <Button
+                        variant="outline"
+                        onClick={handleCancelInlineForm}
+                        className="border-gray-300 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleSaveTrade}
+                        className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg"
+                        disabled={!tradeFormData.strategy || !tradeFormData.pair || !tradeFormData.type || !tradeFormData.openTime || !tradeFormData.tradeTime || !tradeFormData.timeframe}
+                      >
+                        {editingTradeId !== null ? "💾 Save Changes" : "➕ Add Trade"}
                       </Button>
                     </div>
-                  </div>
+                  </motion.div>
                 </AnimatedContainer>
               )}
 
@@ -804,7 +836,13 @@ const TradesPage = () => {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => handleOpenEditTradeForm(trade)}> {/* Updated onClick */}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                            onClick={() => handleOpenEditTradeForm(trade)}
+                            title="Edit backtesting trade"
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
                           {/* Removed individual delete button */}

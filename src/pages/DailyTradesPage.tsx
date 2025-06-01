@@ -221,7 +221,7 @@ const DailyTradesPage = () => {
       losses,
       winRate: ((wins / trades) * 100).toFixed(1),
       profit: Math.round(dailyProfit),
-      pips: Math.round((wins * 15 - losses * 10) + (Math.random() - 0.5) * 20),
+      candles: Math.round((wins * 15 - losses * 10) + (Math.random() - 0.5) * 20),
     };
   });
 
