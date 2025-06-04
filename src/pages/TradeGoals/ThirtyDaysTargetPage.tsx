@@ -3,27 +3,37 @@ import Sidebar from "@/components/Sidebar";
 import AnimatedContainer from "@/components/AnimatedContainer";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Target, Plus, Trash2, Edit, Pencil } from "lucide-react"; // Import Target, Plus, Trash2, Edit, Pencil icons
-import { Button } from "@/components/ui/button"; // Import Button component
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"; // Import Table components
-import { Input } from "@/components/ui/input"; // Import Input component
-import useLocalStorage from "@/hooks/useLocalStorage"; // Import useLocalStorage
+import { Target, DollarSign, TrendingUp, Wallet } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import useLocalStorage from "@/hooks/useLocalStorage";
 
-// Define the type for a custom target row
-interface CustomTargetRow {
-  id: string; // Unique ID for each row
-  week: string;
-  days: number | string;
-  amount: number | string;
+// Define the type for trading day data
+interface TradingDay {
+  day: number;
+  amount: number;
   dailyProfit: string;
-  lotSize: number | string;
-  amountTrade: number | string;
-  trades: number | string;
+  dailyProfitAmount: number;
+  lotSize: number;
+  amountTrade: number;
+  trades: number;
+  reached: string;
+  week: string;
+}
+
+// Define the type for trading phases
+interface TradingPhase {
+  id: number;
+  name: string;
+  days: string;
+  data: TradingDay[];
 }
 
 const ThirtyDaysTargetPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [currentPhase, setCurrentPhase] = useState(1);
+  const [reachedStatus, setReachedStatus] = useLocalStorage<{[key: string]: string}>('targetReachedStatus', {});
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -52,196 +62,113 @@ const ThirtyDaysTargetPage = () => {
     return date.toLocaleTimeString('en-US', options);
   };
 
-  // Data matching the image provided for the first table
-  const targetData = [
-    { week: "Week", days: "Days", amount: "Amount", dailyProfit: "Daily Profit", lotSize: "Lot Size", amountTrade: "Amount Trade", trades: "Trades" },
-    { week: "✓", days: 1, amount: 20.00, dailyProfit: "10%", lotSize: 2.00, amountTrade: 0.20, trades: 6 },
-    { week: "✓", days: 2, amount: 22.00, dailyProfit: "10%", lotSize: 2.20, amountTrade: 0.20, trades: 6 },
-    { week: "✓", days: 3, amount: 24.20, dailyProfit: "10%", lotSize: 2.42, amountTrade: 0.20, trades: 6 },
-    { week: "✓", days: 4, amount: 26.62, dailyProfit: "10%", lotSize: 2.66, amountTrade: 0.20, trades: 6 },
-    { week: "$9.28", days: 5, amount: 29.28, dailyProfit: "10%", lotSize: 2.93, amountTrade: 0.25, trades: 10 },
-    { week: "□", days: 6, amount: 32.21, dailyProfit: "10%", lotSize: 3.22, amountTrade: 0.20, trades: 12 },
-    { week: "□", days: 7, amount: 35.43, dailyProfit: "10%", lotSize: 3.54, amountTrade: 0.20, trades: 12 },
-    { week: "□", days: 8, amount: 38.97, dailyProfit: "10%", lotSize: 3.90, amountTrade: 0.20, trades: 12 },
-    { week: "□", days: 9, amount: 42.87, dailyProfit: "10%", lotSize: 4.29, amountTrade: 0.20, trades: 12 },
-    { week: "-$17.88", days: 10, amount: 47.16, dailyProfit: "10%", lotSize: 4.72, amountTrade: 0.35, trades: 12 },
-    { week: "□", days: 11, amount: 51.87, dailyProfit: "", lotSize: 5.19, amountTrade: 7, trades: 15 },
-    { week: "□", days: 12, amount: 57.06, dailyProfit: "", lotSize: 5.71, amountTrade: 7, trades: 15 },
-    { week: "□", days: 13, amount: 62.77, dailyProfit: "", lotSize: 6.28, amountTrade: 7, trades: 15 },
-    { week: "□", days: 14, amount: 69.05, dailyProfit: "", lotSize: 6.90, amountTrade: 7, trades: 15 },
-    { week: "-$28.79", days: 15, amount: 75.95, dailyProfit: "", lotSize: 7.59, amountTrade: 7, trades: 15 },
-    { week: "□", days: 16, amount: 83.54, dailyProfit: "8%", lotSize: 6.68, amountTrade: 9, trades: 20 },
-    { week: "□", days: 17, amount: 90.23, dailyProfit: "8%", lotSize: 7.22, amountTrade: 9, trades: 20 },
-    { week: "□", days: 18, amount: 97.45, dailyProfit: "8%", lotSize: 7.80, amountTrade: 9, trades: 20 },
-    { week: "□", days: 19, amount: 105.24, dailyProfit: "8%", lotSize: 8.42, amountTrade: 9, trades: 20 },
-    { week: "-$37.71", days: 20, amount: 113.66, dailyProfit: "8%", lotSize: 9.09, amountTrade: 9, trades: 20 },
-    { week: "□", days: 21, amount: 122.75, dailyProfit: "8%", lotSize: 9.82, amountTrade: 10, trades: 30 },
-    { week: "□", days: 22, amount: 132.58, dailyProfit: "8%", lotSize: 10.61, amountTrade: 10, trades: 30 },
-    { week: "□", days: 23, amount: 143.18, dailyProfit: "8%", lotSize: 11.45, amountTrade: 10, trades: 30 },
-    { week: "□", days: 24, amount: 154.64, dailyProfit: "8%", lotSize: 12.37, amountTrade: 10, trades: 30 },
-    { week: "-$53.34", days: 25, amount: 167.01, dailyProfit: "8%", lotSize: 13.36, amountTrade: 10, trades: 30 },
-    { week: "□", days: 26, amount: 180.37, dailyProfit: "6%", lotSize: 10.82, amountTrade: 12, trades: 5 },
-    { week: "□", days: 27, amount: 191.19, dailyProfit: "6%", lotSize: 11.47, amountTrade: 12, trades: 5 },
-    { week: "□", days: 28, amount: 202.66, dailyProfit: "6%", lotSize: 12.16, amountTrade: 12, trades: 5 },
-    { week: "□", days: 29, amount: 214.82, dailyProfit: "6%", lotSize: 12.89, amountTrade: 12, trades: 5 },
-    { week: "-$60.70", days: 30, amount: 227.71, dailyProfit: "6%", lotSize: 13.66, amountTrade: 12, trades: 5 }
+  // Trading phases data for $20 to $100 in 30 Days
+  const tradingPhases: TradingPhase[] = [
+    {
+      id: 1,
+      name: "Phase 1 Target Plan",
+      days: "Days 1-5",
+      data: [
+        { day: 1, amount: 20.00, dailyProfit: "10%", dailyProfitAmount: 2.00, lotSize: 0.20, amountTrade: 2.00, trades: 6, reached: "--", week: "Week 1" },
+        { day: 2, amount: 22.00, dailyProfit: "10%", dailyProfitAmount: 2.20, lotSize: 0.20, amountTrade: 2.20, trades: 6, reached: "--", week: "Week 1" },
+        { day: 3, amount: 24.20, dailyProfit: "10%", dailyProfitAmount: 2.42, lotSize: 0.20, amountTrade: 2.42, trades: 6, reached: "--", week: "Week 1" },
+        { day: 4, amount: 26.62, dailyProfit: "10%", dailyProfitAmount: 2.66, lotSize: 0.20, amountTrade: 2.66, trades: 6, reached: "--", week: "Week 1" },
+        { day: 5, amount: 29.28, dailyProfit: "10%", dailyProfitAmount: 2.93, lotSize: 0.25, amountTrade: 2.93, trades: 10, reached: "--", week: "-$9.28" }
+      ]
+    },
+    {
+      id: 2,
+      name: "Phase 2 Target Plan",
+      days: "Days 6-10",
+      data: [
+        { day: 6, amount: 32.21, dailyProfit: "10%", dailyProfitAmount: 3.22, lotSize: 0.20, amountTrade: 3.22, trades: 12, reached: "--", week: "Week 2" },
+        { day: 7, amount: 35.43, dailyProfit: "10%", dailyProfitAmount: 3.54, lotSize: 0.20, amountTrade: 3.54, trades: 12, reached: "--", week: "Week 2" },
+        { day: 8, amount: 38.97, dailyProfit: "10%", dailyProfitAmount: 3.90, lotSize: 0.20, amountTrade: 3.90, trades: 12, reached: "--", week: "Week 2" },
+        { day: 9, amount: 42.87, dailyProfit: "10%", dailyProfitAmount: 4.29, lotSize: 0.20, amountTrade: 4.29, trades: 12, reached: "--", week: "Week 2" },
+        { day: 10, amount: 47.16, dailyProfit: "10%", dailyProfitAmount: 4.72, lotSize: 0.35, amountTrade: 4.72, trades: 12, reached: "--", week: "-$17.88" }
+      ]
+    },
+    {
+      id: 3,
+      name: "Phase 3 Target Plan",
+      days: "Days 11-15",
+      data: [
+        { day: 11, amount: 51.87, dailyProfit: "10%", dailyProfitAmount: 5.19, lotSize: 7, amountTrade: 5.19, trades: 15, reached: "--", week: "Week 3" },
+        { day: 12, amount: 57.06, dailyProfit: "10%", dailyProfitAmount: 5.71, lotSize: 7, amountTrade: 5.71, trades: 15, reached: "--", week: "Week 3" },
+        { day: 13, amount: 62.77, dailyProfit: "10%", dailyProfitAmount: 6.28, lotSize: 7, amountTrade: 6.28, trades: 15, reached: "--", week: "Week 3" },
+        { day: 14, amount: 69.05, dailyProfit: "10%", dailyProfitAmount: 6.90, lotSize: 7, amountTrade: 6.90, trades: 15, reached: "--", week: "Week 3" },
+        { day: 15, amount: 75.95, dailyProfit: "10%", dailyProfitAmount: 7.59, lotSize: 7, amountTrade: 7.59, trades: 15, reached: "--", week: "-$28.79" }
+      ]
+    },
+    {
+      id: 4,
+      name: "Phase 4 Target Plan",
+      days: "Days 16-20",
+      data: [
+        { day: 16, amount: 83.54, dailyProfit: "10%", dailyProfitAmount: 8.35, lotSize: 9, amountTrade: 8.35, trades: 20, reached: "--", week: "Week 4" },
+        { day: 17, amount: 91.90, dailyProfit: "10%", dailyProfitAmount: 9.19, lotSize: 9, amountTrade: 9.19, trades: 20, reached: "--", week: "Week 4" },
+        { day: 18, amount: 101.09, dailyProfit: "10%", dailyProfitAmount: 10.11, lotSize: 9, amountTrade: 10.11, trades: 20, reached: "--", week: "Week 4" },
+        { day: 19, amount: 111.20, dailyProfit: "10%", dailyProfitAmount: 11.12, lotSize: 9, amountTrade: 11.12, trades: 20, reached: "--", week: "Week 4" },
+        { day: 20, amount: 122.32, dailyProfit: "10%", dailyProfitAmount: 12.23, lotSize: 9, amountTrade: 12.23, trades: 20, reached: "--", week: "-$37.71" }
+      ]
+    },
+    {
+      id: 5,
+      name: "Phase 5 Target Plan",
+      days: "Days 21-25",
+      data: [
+        { day: 21, amount: 134.55, dailyProfit: "10%", dailyProfitAmount: 13.46, lotSize: 10, amountTrade: 13.46, trades: 30, reached: "--", week: "Week 5" },
+        { day: 22, amount: 148.01, dailyProfit: "10%", dailyProfitAmount: 14.80, lotSize: 10, amountTrade: 14.80, trades: 30, reached: "--", week: "Week 5" },
+        { day: 23, amount: 162.81, dailyProfit: "10%", dailyProfitAmount: 16.28, lotSize: 10, amountTrade: 16.28, trades: 30, reached: "--", week: "Week 5" },
+        { day: 24, amount: 179.09, dailyProfit: "10%", dailyProfitAmount: 17.91, lotSize: 10, amountTrade: 17.91, trades: 30, reached: "--", week: "Week 5" },
+        { day: 25, amount: 197.00, dailyProfit: "10%", dailyProfitAmount: 19.70, lotSize: 10, amountTrade: 19.70, trades: 30, reached: "--", week: "-$53.34" }
+      ]
+    },
+    {
+      id: 6,
+      name: "Phase 6 Target Plan",
+      days: "Days 26-30",
+      data: [
+        { day: 26, amount: 216.70, dailyProfit: "10%", dailyProfitAmount: 21.67, lotSize: 12, amountTrade: 21.67, trades: 5, reached: "--", week: "Week 6" },
+        { day: 27, amount: 238.37, dailyProfit: "10%", dailyProfitAmount: 23.84, lotSize: 12, amountTrade: 23.84, trades: 5, reached: "--", week: "Week 6" },
+        { day: 28, amount: 262.21, dailyProfit: "10%", dailyProfitAmount: 26.22, lotSize: 12, amountTrade: 26.22, trades: 5, reached: "--", week: "Week 6" },
+        { day: 29, amount: 288.43, dailyProfit: "10%", dailyProfitAmount: 28.84, lotSize: 12, amountTrade: 28.84, trades: 5, reached: "--", week: "Week 6" },
+        { day: 30, amount: 317.27, dailyProfit: "10%", dailyProfitAmount: 31.73, lotSize: 12, amountTrade: 31.73, trades: 5, reached: "--", week: "-$60.70" }
+      ]
+    }
   ];
 
-  // State for the new table data, persisted with useLocalStorage
-  const [customTargetData, setCustomTargetData] = useLocalStorage<CustomTargetRow[]>("customTargetData", []);
+  // Calculate statistics
+  const calculateStats = () => {
+    const openingBalance = 20.00;
+    const totalTarget = 100.00;
+    const currentAmount = 317.27; // Final amount from phase 6 with 10% daily growth
+    const totalProfit = currentAmount - openingBalance;
 
-  // State for managing the add/edit form
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState<Omit<CustomTargetRow, 'id'>>({
-    week: "",
-    days: "",
-    amount: "",
-    dailyProfit: "",
-    lotSize: "",
-    amountTrade: "",
-    trades: "",
-  });
-  const [editingId, setEditingId] = useState<string | null>(null); // State to track which row is being edited
-
-  // State for selected rows to delete
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
-
-  // State for the custom table title, persisted with useLocalStorage
-  const [customTableTitle, setCustomTableTitle] = useLocalStorage<string>("customTargetTableTitle", "Custom Target Table");
-  // State to track if the title is being edited
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  // State to hold the temporary title value while editing
-  const [tempTitle, setTempTitle] = useState(customTableTitle);
-
-
-  const getRowClass = (index: number, week: string | number) => {
-    if (index === 0) return "bg-green-600 text-white font-bold"; // Header
-    if (typeof week === "string" && week.includes("$")) {
-      return "bg-green-500 text-white font-bold"; // Weekly totals
-    }
-    if (typeof week === "string" && week === "✓") {
-      return "bg-green-100 dark:bg-green-900"; // Completed days - Added dark mode style
-    }
-    return "bg-white dark:bg-gray-800"; // Regular days - Added dark mode style
+    return {
+      openingBalance,
+      totalTarget,
+      currentAmount,
+      totalProfit
+    };
   };
 
-  const getCellClass = (colIndex: number, value: any) => {
-    // Highlight specific cells with yellow background
-    if (colIndex === 4 && typeof value === "number") {
-      return "bg-yellow-300 dark:bg-yellow-700 font-bold text-gray-900 dark:text-gray-100"; // Added dark mode styles
-    }
-    if (colIndex === 6 && typeof value === "number") {
-      return "bg-yellow-300 dark:bg-yellow-700 font-bold text-gray-900 dark:text-gray-100"; // Added dark mode styles
-    }
-    return "text-gray-900 dark:text-gray-100"; // Default text color - Added dark mode style
+  const stats = calculateStats();
+
+  // Handle reached status change
+  const handleReachedChange = (day: number, value: string) => {
+    setReachedStatus(prev => ({
+      ...prev,
+      [day]: value
+    }));
   };
 
-  // Handle input changes in the form
-  const handleInputChange = (field: keyof Omit<CustomTargetRow, 'id'>, value: string) => {
-    setFormData({ ...formData, [field]: value });
+  // Get current phase data
+  const getCurrentPhaseData = () => {
+    return tradingPhases.find(phase => phase.id === currentPhase) || tradingPhases[0];
   };
 
-  // Handle adding or saving a row
-  const handleSaveRow = () => {
-    if (editingId) {
-      // Update existing row
-      setCustomTargetData(customTargetData.map(row =>
-        row.id === editingId ? { ...row, ...formData, id: editingId } : row
-      ));
-      setEditingId(null);
-    } else {
-      // Add new row
-      const newRow: CustomTargetRow = {
-        id: Date.now().toString(), // Simple unique ID
-        ...formData,
-        days: parseInt(formData.days as string) || formData.days, // Convert to number if possible
-        amount: parseFloat(formData.amount as string) || formData.amount, // Convert to number if possible
-        lotSize: parseFloat(formData.lotSize as string) || formData.lotSize, // Convert to number if possible
-        amountTrade: parseFloat(formData.amountTrade as string) || formData.amountTrade, // Convert to number if possible
-        trades: parseInt(formData.trades as string) || formData.trades, // Convert to number if possible
-      };
-      setCustomTargetData([...customTargetData, newRow]);
-    }
 
-    // Reset form and hide it
-    setFormData({
-      week: "",
-      days: "",
-      amount: "",
-      dailyProfit: "",
-      lotSize: "",
-      amountTrade: "",
-      trades: "",
-    });
-    setShowForm(false);
-  };
-
-  // Handle deleting selected rows
-  const handleDeleteRows = () => {
-    setCustomTargetData(customTargetData.filter(row => !selectedRows.includes(row.id)));
-    setSelectedRows([]); // Clear selection after deleting
-  };
-
-  // Handle selecting/deselecting a row
-  const handleSelectRow = (id: string) => {
-    if (selectedRows.includes(id)) {
-      setSelectedRows(selectedRows.filter(rowId => rowId !== id));
-    } else {
-      setSelectedRows([...selectedRows, id]);
-    }
-  };
-
-  // Handle editing a row
-  const handleEditRow = (row: CustomTargetRow) => {
-    setEditingId(row.id);
-    setFormData({
-      week: row.week,
-      days: row.days,
-      amount: row.amount,
-      dailyProfit: row.dailyProfit,
-      lotSize: row.lotSize,
-      amountTrade: row.amountTrade,
-      trades: row.trades,
-    });
-    setShowForm(true); // Show the form for editing
-  };
-
-  // Handle canceling add/edit
-  const handleCancelForm = () => {
-    setShowForm(false);
-    setEditingId(null);
-    setFormData({
-      week: "",
-      days: "",
-      amount: "",
-      dailyProfit: "",
-      lotSize: "",
-      amountTrade: "",
-      trades: "",
-    });
-  };
-
-  // Function to determine row background color based on trades count
-  const getCustomRowClass = (trades: number | string) => {
-    const tradesNumber = typeof trades === 'number' ? trades : parseInt(trades as string);
-    // Check if tradesNumber is a valid number and a multiple of 5
-    if (!isNaN(tradesNumber) && tradesNumber > 0 && tradesNumber % 5 === 0) {
-      return "bg-green-100 dark:bg-green-900"; // Green background for multiples of 5
-    }
-    return "bg-white dark:bg-gray-800"; // Default background
-  };
-
-  // Handle saving the custom table title
-  const handleSaveTitle = () => {
-    setCustomTableTitle(tempTitle);
-    setIsEditingTitle(false);
-  };
-
-  // Handle canceling title editing
-  const handleCancelEditTitle = () => {
-    setTempTitle(customTableTitle); // Revert to the saved title
-    setIsEditingTitle(false);
-  };
 
 
   return (
@@ -254,224 +181,204 @@ const ThirtyDaysTargetPage = () => {
           sidebarOpen ? "ml-64" : "ml-20"
         )}
       >
-        {/* Header - Made fixed */}
+        {/* Header */}
         <motion.header
-          className="fixed top-0 left-0 right-0 z-10 h-16 flex items-center justify-between px-6 shadow-sm bg-white dark:bg-gray-800 border-b dark:border-gray-700" // Added fixed positioning and dark mode styles
+          className="bg-white dark:bg-gray-800 border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-           {/* Page Title (Left) */}
-           <div className="flex items-center gap-2"> {/* Added container for icon and title */}
-            <Target className="h-5 w-5 text-gray-500 dark:text-gray-400" /> {/* Added icon and dark mode text color */}
-            <h1 className="text-xl font-medium text-gray-700 dark:text-gray-200">30 Days Target</h1> {/* Added title and dark mode text color */}
+          {/* Page Title (Left) */}
+          <div className="flex items-center gap-3">
+            <Target className="h-6 w-6 text-[#FF5A1F]" />
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">30 Days Target</h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400">DAILY PROFIT</p>
+            </div>
           </div>
-          {/* Display current date and time (Right) */}
-          <div>
-            <p className="text-black dark:text-white text-sm font-bold">{formatDate(currentDateTime)}</p>
-            <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
+
+          {/* Phase Navigation (Right) */}
+          <div className="flex gap-2">
+            {tradingPhases.map((phase) => (
+              <Button
+                key={phase.id}
+                onClick={() => setCurrentPhase(phase.id)}
+                className={cn(
+                  "px-3 py-1 text-xs font-medium rounded transition-all duration-200",
+                  currentPhase === phase.id
+                    ? "bg-[#FF5A1F] text-white shadow-lg shadow-orange-500/25"
+                    : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white"
+                )}
+              >
+                Phase {phase.id}
+              </Button>
+            ))}
           </div>
-          {/* Removed Timeframe buttons and Trend */}
         </motion.header>
 
-        {/* Main content - Added pt-16 for header clearance and overflow-y-auto */}
-        <div className="p-6 pt-24 overflow-y-auto flex-1"> {/* Added pt-24 and overflow-y-auto */}
+        {/* Main content */}
+        <div className="p-6 overflow-y-auto flex-1 bg-white dark:bg-gray-900">
+          {/* Current Phase Header */}
           <AnimatedContainer>
-            <div className="mb-8">
-              {/* Removed the h1 and p tags */}
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-6 h-6 bg-[#FF5A1F] rounded flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">{getCurrentPhaseData().id}</span>
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">{getCurrentPhaseData().name} ({getCurrentPhaseData().days})</h2>
+                <div className="ml-auto">
+                  <span className="bg-[#FF5A1F] text-white px-3 py-1 rounded-full text-sm font-medium">
+                    10% Daily Target
+                  </span>
+                </div>
+              </div>
             </div>
           </AnimatedContainer>
 
-          {/* First Table: $20 To $100 in 30 Days */}
+          {/* Trading Plan Table */}
           <AnimatedContainer delay={0.2}>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden mb-8"> {/* Added margin-bottom */}
-              {/* Header */}
-              <div className="bg-black text-white text-center py-3">
-                <h2 className="text-xl font-bold">$20 To $100 in 30 Days</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
+              {/* Table Header */}
+              <div className="bg-gray-100 dark:bg-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="grid grid-cols-9 gap-4 text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                  <div>DAY</div>
+                  <div>AMOUNT</div>
+                  <div>% PER DAY</div>
+                  <div>DAILY PROFIT</div>
+                  <div>LOT SIZE</div>
+                  <div>AMOUNT TRADE</div>
+                  <div>TRADES</div>
+                  <div>REACHED</div>
+                  <div>WEEK</div>
+                </div>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse">
-                  <tbody>
-                    {targetData.map((row, index) => (
-                      <tr key={index} className={getRowClass(index, row.week)}>
-                        <td className={cn(`border border-gray-400 dark:border-gray-600 px-3 py-2 text-center`, getCellClass(0, row.week))}>
-                          {row.week}
-                        </td>
-                        <td className={cn(`border border-gray-400 dark:border-gray-600 px-3 py-2 text-center`, getCellClass(1, row.days))}>
-                          {row.days}
-                        </td>
-                        <td className={cn(`border border-gray-400 dark:border-gray-600 px-3 py-2 text-center`, getCellClass(2, row.amount))}>
-                          {typeof row.amount === "number" ? `$${row.amount.toFixed(2)}` : row.amount}
-                        </td>
-                        <td className={cn(`border border-gray-400 dark:border-gray-600 px-3 py-2 text-center`, getCellClass(3, row.dailyProfit))}>
-                          {row.dailyProfit}
-                        </td>
-                        <td className={cn(`border border-gray-400 dark:border-gray-600 px-3 py-2 text-center`, getCellClass(4, row.lotSize))}>
-                          {typeof row.lotSize === "number" ? `$${row.lotSize.toFixed(2)}` : row.lotSize}
-                        </td>
-                        <td className={cn(`border border-gray-400 dark:border-gray-600 px-3 py-2 text-center`, getCellClass(5, row.amountTrade))}>
-                          {typeof row.amountTrade === "number" ? row.amountTrade.toFixed(2) : row.amountTrade}
-                        </td>
-                        <td className={cn(`border border-gray-400 dark:border-gray-600 px-3 py-2 text-center`, getCellClass(6, row.trades))}>
-                          {row.trades}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              {/* Table Body */}
+              <div className="bg-white dark:bg-gray-900">
+                {getCurrentPhaseData().data.map((day, index) => (
+                  <motion.div
+                    key={day.day}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="grid grid-cols-9 gap-4 px-6 py-3 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-200"
+                  >
+                    {/* Day */}
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 bg-[#FF5A1F] rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">{day.day}</span>
+                      </div>
+                    </div>
+
+                    {/* Amount */}
+                    <div className="text-gray-900 dark:text-white font-medium">${day.amount.toFixed(2)}</div>
+
+                    {/* % Per Day */}
+                    <div className="text-blue-600 dark:text-blue-400 font-medium">{day.dailyProfit}</div>
+
+                    {/* Daily Profit Amount */}
+                    <div className="text-green-600 dark:text-green-400 font-medium">${day.dailyProfitAmount.toFixed(2)}</div>
+
+                    {/* Lot Size */}
+                    <div className="text-yellow-600 dark:text-yellow-400 font-medium">
+                      {typeof day.lotSize === 'number' && day.lotSize >= 1 ? day.lotSize : day.lotSize.toFixed(2)}
+                    </div>
+
+                    {/* Amount Trade */}
+                    <div className="text-blue-600 dark:text-blue-300">${day.amountTrade.toFixed(2)}</div>
+
+                    {/* Trades */}
+                    <div className="text-purple-600 dark:text-purple-400 font-medium">{day.trades}</div>
+
+                    {/* Reached Status */}
+                    <div>
+                      <Select
+                        value={reachedStatus[day.day] || day.reached}
+                        onValueChange={(value) => handleReachedChange(day.day, value)}
+                      >
+                        <SelectTrigger className="w-20 h-8 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
+                          <SelectItem value="Yes" className="text-green-600 dark:text-green-400">Yes</SelectItem>
+                          <SelectItem value="No" className="text-red-600 dark:text-red-400">No</SelectItem>
+                          <SelectItem value="--" className="text-gray-600 dark:text-gray-400">--</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Week */}
+                    <div className={`text-sm ${
+                      day.week.startsWith('-$')
+                        ? 'text-red-600 dark:text-red-400 font-bold'
+                        : 'text-gray-600 dark:text-gray-400'
+                    }`}>
+                      {day.week}
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             </div>
           </AnimatedContainer>
 
-          {/* Second Table: Custom Target Table */}
-          <AnimatedContainer delay={0.3}>
-             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-              {/* Header and Buttons */}
-              <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 px-6 py-3 border-b dark:border-gray-600">
-                {isEditingTitle ? (
-                  <div className="flex items-center gap-2 flex-grow">
-                    <Input
-                      value={tempTitle}
-                      onChange={(e) => setTempTitle(e.target.value)}
-                      className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400"
-                    />
-                    <Button size="sm" onClick={handleSaveTitle} className="bg-blue-500 hover:bg-blue-600 text-white">Save</Button>
-                    <Button size="sm" variant="outline" onClick={handleCancelEditTitle}>Cancel</Button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{customTableTitle}</h2>
-                    <Button variant="ghost" size="sm" onClick={() => setIsEditingTitle(true)} className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-                <div className="flex gap-2">
-                  <Button className="bg-green-500 hover:bg-green-600 text-white" onClick={() => { setShowForm(true); setEditingId(null); setFormData({ week: "", days: "", amount: "", dailyProfit: "", lotSize: "", amountTrade: "", trades: "" }); }}>
-                    <Plus className="mr-2 h-4 w-4" /> Add
-                  </Button>
-                  <Button variant="outline" className="bg-red-500 hover:bg-red-600 text-white disabled:opacity-50" onClick={handleDeleteRows} disabled={selectedRows.length === 0}>
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete ({selectedRows.length})
-                  </Button>
+          {/* Statistics Cards */}
+          <AnimatedContainer delay={0.4}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Opening Balance */}
+              <motion.div
+                whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(255, 90, 31, 0.3)" }}
+                className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg p-6 border border-[#FF5A1F]/20"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <DollarSign className="h-5 w-5 text-[#FF5A1F]" />
+                  <span className="text-gray-600 dark:text-gray-400 text-sm">Opening Balance</span>
                 </div>
-              </div>
-
-              {/* Add/Edit Form */}
-              {showForm && (
-                <div className="p-6 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
-                  <h3 className="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200">{editingId ? "Edit Row" : "Add New Row"}</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Input
-                      placeholder="Week"
-                      value={formData.week}
-                      onChange={(e) => handleInputChange("week", e.target.value)}
-                      className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Days"
-                      value={formData.days}
-                      onChange={(e) => handleInputChange("days", e.target.value)}
-                      className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Amount"
-                      value={formData.amount}
-                      onChange={(e) => handleInputChange("amount", e.target.value)}
-                      className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
-                    />
-                    <Input
-                      placeholder="Daily Profit"
-                      value={formData.dailyProfit}
-                      onChange={(e) => handleInputChange("dailyProfit", e.target.value)}
-                      className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Lot Size"
-                      value={formData.lotSize}
-                      onChange={(e) => handleInputChange("lotSize", e.target.value)}
-                      className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Amount Trade"
-                      value={formData.amountTrade}
-                      onChange={(e) => handleInputChange("amountTrade", e.target.value)}
-                      className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Trades"
-                      value={formData.trades}
-                      onChange={(e) => handleInputChange("trades", e.target.value)}
-                      className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
-                    />
-                  </div>
-                  <div className="flex justify-end gap-2 mt-4">
-                    <Button variant="outline" onClick={handleCancelForm}>Cancel</Button>
-                    <Button className="bg-blue-500 hover:bg-blue-600 text-white" onClick={handleSaveRow}>
-                      {editingId ? "Save Changes" : "Add Row"}
-                    </Button>
-                  </div>
+                <div className="text-2xl font-bold text-[#FF5A1F]">
+                  ${stats.openingBalance.toFixed(2)}
                 </div>
-              )}
+              </motion.div>
 
+              {/* Total Target */}
+              <motion.div
+                whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(255, 90, 31, 0.3)" }}
+                className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg p-6 border border-[#FF5A1F]/20"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <Target className="h-5 w-5 text-[#FF5A1F]" />
+                  <span className="text-gray-600 dark:text-gray-400 text-sm">Total Target</span>
+                </div>
+                <div className="text-2xl font-bold text-[#FF5A1F]">
+                  ${stats.totalTarget.toFixed(2)}
+                </div>
+              </motion.div>
 
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader className="bg-green-600"> {/* Changed background class to green-600 */}
-                    <TableRow>
-                      <TableHead className="w-[40px] text-gray-900 dark:text-gray-100"></TableHead> {/* Checkbox column - Changed text color */}
-                      <TableHead className="text-gray-900 dark:text-gray-100">Week</TableHead> {/* Changed text color */}
-                      <TableHead className="text-gray-900 dark:text-gray-100">Days</TableHead> {/* Changed text color */}
-                      <TableHead className="text-gray-900 dark:text-gray-100">Amount</TableHead> {/* Changed text color */}
-                      <TableHead className="text-gray-900 dark:text-gray-100">Daily Profit</TableHead> {/* Changed text color */}
-                      <TableHead className="text-gray-900 dark:text-gray-100">Lot Size</TableHead> {/* Changed text color */}
-                      <TableHead className="text-gray-900 dark:text-gray-100">Amount Trade</TableHead> {/* Changed text color */}
-                      <TableHead className="text-gray-900 dark:text-gray-100">Trades</TableHead> {/* Changed text color */}
-                      <TableHead className="text-gray-900 dark:text-gray-100">Actions</TableHead> {/* Actions column - Changed text color */}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {/* Render rows from customTargetData */}
-                    {customTargetData.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={9} className="text-center text-gray-500 dark:text-gray-400 py-4">
-                          No data available. Click "Add" to add a row.
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      customTargetData.map((row) => (
-                        <TableRow key={row.id} className={cn("hover:bg-gray-50 dark:hover:bg-gray-700", getCustomRowClass(row.trades))}> {/* Apply conditional class */}
-                           <TableCell>
-                            <input
-                              type="checkbox"
-                              checked={selectedRows.includes(row.id)}
-                              onChange={() => handleSelectRow(row.id)}
-                              className="form-checkbox h-4 w-4 text-blue-600 rounded dark:bg-gray-700 dark:border-gray-600"
-                            />
-                          </TableCell>
-                          <TableCell className="text-gray-900 dark:text-gray-100">{row.week}</TableCell>
-                          <TableCell className="text-gray-900 dark:text-gray-100">{row.days}</TableCell>
-                          <TableCell className="text-gray-900 dark:text-gray-100">{typeof row.amount === "number" ? `$${row.amount.toFixed(2)}` : row.amount}</TableCell>
-                          <TableCell className="text-gray-900 dark:text-gray-100">{row.dailyProfit}</TableCell>
-                          <TableCell className="text-gray-900 dark:text-gray-100">{typeof row.lotSize === "number" ? `$${row.lotSize.toFixed(2)}` : row.lotSize}</TableCell>
-                          <TableCell className="text-gray-900 dark:text-gray-100">{typeof row.amountTrade === "number" ? row.amountTrade.toFixed(2) : row.amountTrade}</TableCell>
-                          <TableCell className="text-gray-900 dark:text-gray-100">{row.trades}</TableCell>
-                           <TableCell>
-                            <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => handleEditRow(row)}>
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+              {/* Current Amount */}
+              <motion.div
+                whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(255, 90, 31, 0.3)" }}
+                className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg p-6 border border-[#FF5A1F]/20"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <TrendingUp className="h-5 w-5 text-[#FF5A1F]" />
+                  <span className="text-gray-600 dark:text-gray-400 text-sm">Current Amount</span>
+                </div>
+                <div className="text-2xl font-bold text-[#FF5A1F]">
+                  ${stats.currentAmount.toFixed(2)}
+                </div>
+              </motion.div>
+
+              {/* Total Profit */}
+              <motion.div
+                whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(255, 90, 31, 0.3)" }}
+                className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg p-6 border border-[#FF5A1F]/20"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <Wallet className="h-5 w-5 text-[#FF5A1F]" />
+                  <span className="text-gray-600 dark:text-gray-400 text-sm">Total Profit</span>
+                </div>
+                <div className="text-2xl font-bold text-[#FF5A1F]">
+                  ${stats.totalProfit.toFixed(2)}
+                </div>
+              </motion.div>
             </div>
           </AnimatedContainer>
         </div>

@@ -225,7 +225,7 @@ const ThirtyDayTradePage = () => {
                       transition={{ delay: 0.3, type: "spring" }}
                     >
                       <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${challengeStarted ? 'bg-orange-400 animate-pulse' : 'bg-gray-400'}`}></div>
+                        <div className={`w-2 h-2 rounded-full ${challengeStarted ? 'bg-orange-600 dark:bg-orange-400 animate-pulse' : 'bg-gray-600 dark:bg-gray-400'}`}></div>
                         <span className="text-sm font-semibold">
                           {challengeStarted ? "ACTIVE" : "INACTIVE"}
                         </span>
@@ -242,7 +242,7 @@ const ThirtyDayTradePage = () => {
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                     {/* Total Trades */}
                     <motion.div
-                      className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300"
+                      className="bg-white dark:bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-gray-300 dark:border-white/20 hover:bg-gray-50 dark:hover:bg-white/15 transition-all duration-300 shadow-md"
                       whileHover={{ scale: 1.05, y: -5 }}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -250,20 +250,20 @@ const ThirtyDayTradePage = () => {
                     >
                       <div className="text-center">
                         <div className="flex items-center justify-center mb-3">
-                          <div className="p-2 bg-green-400/20 rounded-lg">
-                            <TrendingUp className="h-6 w-6 text-green-200" />
+                          <div className="p-2 bg-green-100 dark:bg-green-400/20 rounded-lg">
+                            <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-200" />
                           </div>
                         </div>
                         <motion.p
-                          className="text-4xl font-bold text-white mb-2"
+                          className="text-4xl font-bold text-gray-900 dark:text-white mb-2"
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{ delay: 0.3, type: "spring" }}
                         >
                           {totalTrades}
                         </motion.p>
-                        <p className="text-green-100 text-sm font-medium">Total Trades</p>
-                        <div className="mt-2 h-1 bg-white/20 rounded-full overflow-hidden">
+                        <p className="text-green-600 dark:text-green-100 text-sm font-medium">Total Trades</p>
+                        <div className="mt-2 h-1 bg-gray-200 dark:bg-white/20 rounded-full overflow-hidden">
                           <motion.div
                             className="h-full bg-gradient-to-r from-green-400 to-green-200"
                             initial={{ width: 0 }}
@@ -276,7 +276,7 @@ const ThirtyDayTradePage = () => {
 
                     {/* Win Rate */}
                     <motion.div
-                      className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300"
+                      className="bg-white dark:bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-gray-300 dark:border-white/20 hover:bg-gray-50 dark:hover:bg-white/15 transition-all duration-300 shadow-md"
                       whileHover={{ scale: 1.05, y: -5 }}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -284,20 +284,20 @@ const ThirtyDayTradePage = () => {
                     >
                       <div className="text-center">
                         <div className="flex items-center justify-center mb-3">
-                          <div className="p-2 bg-blue-400/20 rounded-lg">
-                            <Trophy className="h-6 w-6 text-blue-200" />
+                          <div className="p-2 bg-blue-100 dark:bg-blue-400/20 rounded-lg">
+                            <Trophy className="h-6 w-6 text-blue-600 dark:text-blue-200" />
                           </div>
                         </div>
                         <motion.p
-                          className="text-4xl font-bold text-white mb-2"
+                          className="text-4xl font-bold text-gray-900 dark:text-white mb-2"
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{ delay: 0.4, type: "spring" }}
                         >
                           {overallWinRate}%
                         </motion.p>
-                        <p className="text-blue-100 text-sm font-medium">Win Rate</p>
-                        <div className="mt-2 h-1 bg-white/20 rounded-full overflow-hidden">
+                        <p className="text-blue-600 dark:text-blue-100 text-sm font-medium">Win Rate</p>
+                        <div className="mt-2 h-1 bg-gray-200 dark:bg-white/20 rounded-full overflow-hidden">
                           <motion.div
                             className="h-full bg-gradient-to-r from-blue-400 to-blue-200"
                             initial={{ width: 0 }}
@@ -310,7 +310,7 @@ const ThirtyDayTradePage = () => {
 
                     {/* Total Profit */}
                     <motion.div
-                      className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300"
+                      className="bg-white dark:bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-gray-300 dark:border-white/20 hover:bg-gray-50 dark:hover:bg-white/15 transition-all duration-300 shadow-md"
                       whileHover={{ scale: 1.05, y: -5 }}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -318,20 +318,20 @@ const ThirtyDayTradePage = () => {
                     >
                       <div className="text-center">
                         <div className="flex items-center justify-center mb-3">
-                          <div className={`p-2 rounded-lg ${totalProfit >= 0 ? 'bg-emerald-400/20' : 'bg-red-400/20'}`}>
-                            <TrendingUp className={`h-6 w-6 ${totalProfit >= 0 ? 'text-emerald-200' : 'text-red-200'}`} />
+                          <div className={`p-2 rounded-lg ${totalProfit >= 0 ? 'bg-emerald-100 dark:bg-emerald-400/20' : 'bg-red-100 dark:bg-red-400/20'}`}>
+                            <TrendingUp className={`h-6 w-6 ${totalProfit >= 0 ? 'text-emerald-600 dark:text-emerald-200' : 'text-red-600 dark:text-red-200'}`} />
                           </div>
                         </div>
                         <motion.p
-                          className={`text-4xl font-bold mb-2 ${totalProfit >= 0 ? 'text-emerald-300' : 'text-red-300'}`}
+                          className={`text-4xl font-bold mb-2 ${totalProfit >= 0 ? 'text-emerald-600 dark:text-emerald-300' : 'text-red-600 dark:text-red-300'}`}
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{ delay: 0.5, type: "spring" }}
                         >
                           ${totalProfit.toLocaleString()}
                         </motion.p>
-                        <p className="text-white text-sm font-medium">Total Profit</p>
-                        <div className="mt-2 h-1 bg-white/20 rounded-full overflow-hidden">
+                        <p className="text-gray-700 dark:text-white text-sm font-medium">Total Profit</p>
+                        <div className="mt-2 h-1 bg-gray-200 dark:bg-white/20 rounded-full overflow-hidden">
                           <motion.div
                             className={`h-full bg-gradient-to-r ${
                               totalProfit >= 0
@@ -348,7 +348,7 @@ const ThirtyDayTradePage = () => {
 
                     {/* Total Candles */}
                     <motion.div
-                      className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300"
+                      className="bg-white dark:bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-gray-300 dark:border-white/20 hover:bg-gray-50 dark:hover:bg-white/15 transition-all duration-300 shadow-md"
                       whileHover={{ scale: 1.05, y: -5 }}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -356,20 +356,20 @@ const ThirtyDayTradePage = () => {
                     >
                       <div className="text-center">
                         <div className="flex items-center justify-center mb-3">
-                          <div className="p-2 bg-orange-400/20 rounded-lg">
-                            <Calendar className="h-6 w-6 text-orange-200" />
+                          <div className="p-2 bg-orange-100 dark:bg-orange-400/20 rounded-lg">
+                            <Calendar className="h-6 w-6 text-orange-600 dark:text-orange-200" />
                           </div>
                         </div>
                         <motion.p
-                          className="text-4xl font-bold text-white mb-2"
+                          className="text-4xl font-bold text-gray-900 dark:text-white mb-2"
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{ delay: 0.6, type: "spring" }}
                         >
                           {totalCandles}
                         </motion.p>
-                        <p className="text-orange-100 text-sm font-medium">Total Candles</p>
-                        <div className="mt-2 h-1 bg-white/20 rounded-full overflow-hidden">
+                        <p className="text-orange-600 dark:text-orange-100 text-sm font-medium">Total Candles</p>
+                        <div className="mt-2 h-1 bg-gray-200 dark:bg-white/20 rounded-full overflow-hidden">
                           <motion.div
                             className="h-full bg-gradient-to-r from-orange-400 to-orange-200"
                             initial={{ width: 0 }}
@@ -384,18 +384,18 @@ const ThirtyDayTradePage = () => {
                   {/* Progress Indicator */}
                   {challengeStarted && (
                     <motion.div
-                      className="mt-8 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20"
+                      className="mt-8 p-4 bg-white dark:bg-white/10 backdrop-blur-sm rounded-xl border border-gray-300 dark:border-white/20 shadow-md"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.8 }}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-white font-medium">Challenge Progress</span>
-                        <span className="text-green-200 text-sm">
+                        <span className="text-gray-900 dark:text-white font-medium">Challenge Progress</span>
+                        <span className="text-green-600 dark:text-green-200 text-sm">
                           {Math.min(Math.floor((new Date().getTime() - new Date(challengeStartDate).getTime()) / (1000 * 60 * 60 * 24)) + 1, 30)} / 30 Days
                         </span>
                       </div>
-                      <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+                      <div className="h-2 bg-gray-200 dark:bg-white/20 rounded-full overflow-hidden">
                         <motion.div
                           className="h-full bg-gradient-to-r from-green-400 via-blue-400 to-orange-400"
                           initial={{ width: 0 }}
