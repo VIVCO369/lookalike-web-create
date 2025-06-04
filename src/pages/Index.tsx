@@ -8,6 +8,7 @@ import Sidebar from "../components/Sidebar";
 import StatsCard from "../components/StatsCard";
 import TradingRules from "../components/TradingRules";
 import ScheduleList from "../components/ScheduleList";
+import TradingSessions from "../components/TradingSessions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
@@ -531,6 +532,14 @@ const Index = () => {
                   borderColor={stats.dailyProfit >= 0 ? "border-green-500 dark:border-green-700" : "border-red-500 dark:border-red-700"} // Added dark mode border color
                 />
               </div>
+            </div>
+          </AnimatedContainer>
+
+          {/* Trading Sessions */}
+          <AnimatedContainer delay={0.15}>
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200 mb-4">Trading Sessions</h3>
+              <TradingSessions />
             </div>
           </AnimatedContainer>
 

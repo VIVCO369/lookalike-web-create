@@ -3,9 +3,11 @@ import Sidebar from "@/components/Sidebar";
 import AnimatedContainer from "@/components/AnimatedContainer";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Target, DollarSign, TrendingUp, Wallet } from "lucide-react";
+import { Target, DollarSign, TrendingUp, Wallet, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import useLocalStorage from "@/hooks/useLocalStorage";
 
 // Define the type for trading day data
@@ -35,6 +37,11 @@ const ThirtyDaysTargetPage = () => {
   const [currentPhase, setCurrentPhase] = useState(1);
   const [reachedStatus, setReachedStatus] = useLocalStorage<{[key: string]: string}>('targetReachedStatus', {});
 
+  // Dynamic calculation states
+  const [startingAmount, setStartingAmount] = useLocalStorage<number>('startingAmount', 20.00);
+  const [dailyPercentage, setDailyPercentage] = useLocalStorage<number>('dailyPercentage', 10);
+  const [showSettings, setShowSettings] = useState(false);
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -62,87 +69,80 @@ const ThirtyDaysTargetPage = () => {
     return date.toLocaleTimeString('en-US', options);
   };
 
-  // Trading phases data for $20 to $100 in 30 Days
-  const tradingPhases: TradingPhase[] = [
-    {
-      id: 1,
-      name: "Phase 1 Target Plan",
-      days: "Days 1-5",
-      data: [
-        { day: 1, amount: 20.00, dailyProfit: "10%", dailyProfitAmount: 2.00, lotSize: 0.20, amountTrade: 2.00, trades: 6, reached: "--", week: "Week 1" },
-        { day: 2, amount: 22.00, dailyProfit: "10%", dailyProfitAmount: 2.20, lotSize: 0.20, amountTrade: 2.20, trades: 6, reached: "--", week: "Week 1" },
-        { day: 3, amount: 24.20, dailyProfit: "10%", dailyProfitAmount: 2.42, lotSize: 0.20, amountTrade: 2.42, trades: 6, reached: "--", week: "Week 1" },
-        { day: 4, amount: 26.62, dailyProfit: "10%", dailyProfitAmount: 2.66, lotSize: 0.20, amountTrade: 2.66, trades: 6, reached: "--", week: "Week 1" },
-        { day: 5, amount: 29.28, dailyProfit: "10%", dailyProfitAmount: 2.93, lotSize: 0.25, amountTrade: 2.93, trades: 10, reached: "--", week: "-$9.28" }
-      ]
-    },
-    {
-      id: 2,
-      name: "Phase 2 Target Plan",
-      days: "Days 6-10",
-      data: [
-        { day: 6, amount: 32.21, dailyProfit: "10%", dailyProfitAmount: 3.22, lotSize: 0.20, amountTrade: 3.22, trades: 12, reached: "--", week: "Week 2" },
-        { day: 7, amount: 35.43, dailyProfit: "10%", dailyProfitAmount: 3.54, lotSize: 0.20, amountTrade: 3.54, trades: 12, reached: "--", week: "Week 2" },
-        { day: 8, amount: 38.97, dailyProfit: "10%", dailyProfitAmount: 3.90, lotSize: 0.20, amountTrade: 3.90, trades: 12, reached: "--", week: "Week 2" },
-        { day: 9, amount: 42.87, dailyProfit: "10%", dailyProfitAmount: 4.29, lotSize: 0.20, amountTrade: 4.29, trades: 12, reached: "--", week: "Week 2" },
-        { day: 10, amount: 47.16, dailyProfit: "10%", dailyProfitAmount: 4.72, lotSize: 0.35, amountTrade: 4.72, trades: 12, reached: "--", week: "-$17.88" }
-      ]
-    },
-    {
-      id: 3,
-      name: "Phase 3 Target Plan",
-      days: "Days 11-15",
-      data: [
-        { day: 11, amount: 51.87, dailyProfit: "10%", dailyProfitAmount: 5.19, lotSize: 7, amountTrade: 5.19, trades: 15, reached: "--", week: "Week 3" },
-        { day: 12, amount: 57.06, dailyProfit: "10%", dailyProfitAmount: 5.71, lotSize: 7, amountTrade: 5.71, trades: 15, reached: "--", week: "Week 3" },
-        { day: 13, amount: 62.77, dailyProfit: "10%", dailyProfitAmount: 6.28, lotSize: 7, amountTrade: 6.28, trades: 15, reached: "--", week: "Week 3" },
-        { day: 14, amount: 69.05, dailyProfit: "10%", dailyProfitAmount: 6.90, lotSize: 7, amountTrade: 6.90, trades: 15, reached: "--", week: "Week 3" },
-        { day: 15, amount: 75.95, dailyProfit: "10%", dailyProfitAmount: 7.59, lotSize: 7, amountTrade: 7.59, trades: 15, reached: "--", week: "-$28.79" }
-      ]
-    },
-    {
-      id: 4,
-      name: "Phase 4 Target Plan",
-      days: "Days 16-20",
-      data: [
-        { day: 16, amount: 83.54, dailyProfit: "10%", dailyProfitAmount: 8.35, lotSize: 9, amountTrade: 8.35, trades: 20, reached: "--", week: "Week 4" },
-        { day: 17, amount: 91.90, dailyProfit: "10%", dailyProfitAmount: 9.19, lotSize: 9, amountTrade: 9.19, trades: 20, reached: "--", week: "Week 4" },
-        { day: 18, amount: 101.09, dailyProfit: "10%", dailyProfitAmount: 10.11, lotSize: 9, amountTrade: 10.11, trades: 20, reached: "--", week: "Week 4" },
-        { day: 19, amount: 111.20, dailyProfit: "10%", dailyProfitAmount: 11.12, lotSize: 9, amountTrade: 11.12, trades: 20, reached: "--", week: "Week 4" },
-        { day: 20, amount: 122.32, dailyProfit: "10%", dailyProfitAmount: 12.23, lotSize: 9, amountTrade: 12.23, trades: 20, reached: "--", week: "-$37.71" }
-      ]
-    },
-    {
-      id: 5,
-      name: "Phase 5 Target Plan",
-      days: "Days 21-25",
-      data: [
-        { day: 21, amount: 134.55, dailyProfit: "10%", dailyProfitAmount: 13.46, lotSize: 10, amountTrade: 13.46, trades: 30, reached: "--", week: "Week 5" },
-        { day: 22, amount: 148.01, dailyProfit: "10%", dailyProfitAmount: 14.80, lotSize: 10, amountTrade: 14.80, trades: 30, reached: "--", week: "Week 5" },
-        { day: 23, amount: 162.81, dailyProfit: "10%", dailyProfitAmount: 16.28, lotSize: 10, amountTrade: 16.28, trades: 30, reached: "--", week: "Week 5" },
-        { day: 24, amount: 179.09, dailyProfit: "10%", dailyProfitAmount: 17.91, lotSize: 10, amountTrade: 17.91, trades: 30, reached: "--", week: "Week 5" },
-        { day: 25, amount: 197.00, dailyProfit: "10%", dailyProfitAmount: 19.70, lotSize: 10, amountTrade: 19.70, trades: 30, reached: "--", week: "-$53.34" }
-      ]
-    },
-    {
-      id: 6,
-      name: "Phase 6 Target Plan",
-      days: "Days 26-30",
-      data: [
-        { day: 26, amount: 216.70, dailyProfit: "10%", dailyProfitAmount: 21.67, lotSize: 12, amountTrade: 21.67, trades: 5, reached: "--", week: "Week 6" },
-        { day: 27, amount: 238.37, dailyProfit: "10%", dailyProfitAmount: 23.84, lotSize: 12, amountTrade: 23.84, trades: 5, reached: "--", week: "Week 6" },
-        { day: 28, amount: 262.21, dailyProfit: "10%", dailyProfitAmount: 26.22, lotSize: 12, amountTrade: 26.22, trades: 5, reached: "--", week: "Week 6" },
-        { day: 29, amount: 288.43, dailyProfit: "10%", dailyProfitAmount: 28.84, lotSize: 12, amountTrade: 28.84, trades: 5, reached: "--", week: "Week 6" },
-        { day: 30, amount: 317.27, dailyProfit: "10%", dailyProfitAmount: 31.73, lotSize: 12, amountTrade: 31.73, trades: 5, reached: "--", week: "-$60.70" }
-      ]
+  // Function to calculate dynamic trading phases
+  const calculateDynamicPhases = (): TradingPhase[] => {
+    const phases: TradingPhase[] = [];
+    let currentAmount = startingAmount;
+    const dailyDecimal = dailyPercentage / 100;
+
+    // Define lot sizes and trades for each phase
+    const phaseConfig = [
+      { lotSizes: [0.20, 0.20, 0.20, 0.20, 0.25], trades: [6, 6, 6, 6, 10] },
+      { lotSizes: [0.20, 0.20, 0.20, 0.20, 0.35], trades: [12, 12, 12, 12, 12] },
+      { lotSizes: [7, 7, 7, 7, 7], trades: [15, 15, 15, 15, 15] },
+      { lotSizes: [9, 9, 9, 9, 9], trades: [20, 20, 20, 20, 20] },
+      { lotSizes: [10, 10, 10, 10, 10], trades: [30, 30, 30, 30, 30] },
+      { lotSizes: [12, 12, 12, 12, 12], trades: [5, 5, 5, 5, 5] }
+    ];
+
+    for (let phaseIndex = 0; phaseIndex < 6; phaseIndex++) {
+      const phaseData: TradingDay[] = [];
+      const startDay = phaseIndex * 5 + 1;
+      const endDay = startDay + 4;
+
+      for (let dayIndex = 0; dayIndex < 5; dayIndex++) {
+        const day = startDay + dayIndex;
+        const dailyProfitAmount = currentAmount * dailyDecimal;
+        const nextAmount = currentAmount + dailyProfitAmount;
+
+        // Calculate week indicator or milestone amount
+        let weekIndicator: string;
+        if (day % 5 === 0) {
+          // Milestone days (5, 10, 15, 20, 25, 30)
+          const milestoneAmounts = [-9.28, -17.88, -28.79, -37.71, -53.34, -60.70];
+          weekIndicator = `-$${Math.abs(milestoneAmounts[Math.floor((day - 1) / 5)]).toFixed(2)}`;
+        } else {
+          // Regular week indicators
+          const weekNumber = Math.floor((day - 1) / 5) + 1;
+          weekIndicator = `Week ${weekNumber}`;
+        }
+
+        phaseData.push({
+          day,
+          amount: currentAmount,
+          dailyProfit: `${dailyPercentage}%`,
+          dailyProfitAmount,
+          lotSize: phaseConfig[phaseIndex].lotSizes[dayIndex],
+          amountTrade: dailyProfitAmount,
+          trades: phaseConfig[phaseIndex].trades[dayIndex],
+          reached: "--",
+          week: weekIndicator
+        });
+
+        currentAmount = nextAmount;
+      }
+
+      phases.push({
+        id: phaseIndex + 1,
+        name: `Phase ${phaseIndex + 1} Target Plan`,
+        days: `Days ${startDay}-${endDay}`,
+        data: phaseData
+      });
     }
-  ];
+
+    return phases;
+  };
+
+  // Get dynamic trading phases
+  const tradingPhases: TradingPhase[] = calculateDynamicPhases();
 
   // Calculate statistics
   const calculateStats = () => {
-    const openingBalance = 20.00;
-    const totalTarget = 100.00;
-    const currentAmount = 317.27; // Final amount from phase 6 with 10% daily growth
+    const openingBalance = startingAmount;
+    const totalTarget = startingAmount * 5; // 5x the starting amount as target
+    const finalPhase = tradingPhases[tradingPhases.length - 1];
+    const finalDay = finalPhase.data[finalPhase.data.length - 1];
+    const currentAmount = finalDay.amount + finalDay.dailyProfitAmount; // Final amount after 30 days
     const totalProfit = currentAmount - openingBalance;
 
     return {
@@ -195,6 +195,18 @@ const ThirtyDaysTargetPage = () => {
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">30 Days Target</h1>
               <p className="text-xs text-gray-500 dark:text-gray-400">DAILY PROFIT</p>
             </div>
+            <Button
+              onClick={() => setShowSettings(!showSettings)}
+              className={cn(
+                "ml-4 px-3 py-2 text-xs font-medium rounded transition-all duration-200",
+                showSettings
+                  ? "bg-[#FF5A1F] text-white shadow-lg shadow-orange-500/25"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+              )}
+            >
+              <Settings className="h-4 w-4 mr-1" />
+              Settings
+            </Button>
           </div>
 
           {/* Phase Navigation (Right) */}
@@ -218,6 +230,86 @@ const ThirtyDaysTargetPage = () => {
 
         {/* Main content */}
         <div className="p-6 overflow-y-auto flex-1 bg-white dark:bg-gray-900">
+          {/* Settings Panel */}
+          {showSettings && (
+            <AnimatedContainer>
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6"
+              >
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <Settings className="h-5 w-5 text-[#FF5A1F]" />
+                  Dynamic Settings
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Starting Amount */}
+                  <div>
+                    <Label htmlFor="startingAmount" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Starting Amount ($)
+                    </Label>
+                    <Input
+                      id="startingAmount"
+                      type="number"
+                      value={startingAmount}
+                      onChange={(e) => setStartingAmount(parseFloat(e.target.value) || 20)}
+                      className="mt-1"
+                      min="1"
+                      step="0.01"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Initial trading capital amount
+                    </p>
+                  </div>
+
+                  {/* Daily Percentage */}
+                  <div>
+                    <Label htmlFor="dailyPercentage" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Daily Percentage (%)
+                    </Label>
+                    <Input
+                      id="dailyPercentage"
+                      type="number"
+                      value={dailyPercentage}
+                      onChange={(e) => setDailyPercentage(parseFloat(e.target.value) || 10)}
+                      className="mt-1"
+                      min="1"
+                      max="100"
+                      step="0.1"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Target daily profit percentage
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preview:</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Starting:</span>
+                      <div className="font-medium text-[#FF5A1F]">${startingAmount.toFixed(2)}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Daily %:</span>
+                      <div className="font-medium text-[#FF5A1F]">{dailyPercentage}%</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Day 1 Profit:</span>
+                      <div className="font-medium text-green-600">${(startingAmount * dailyPercentage / 100).toFixed(2)}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Final Amount:</span>
+                      <div className="font-medium text-blue-600">${stats.currentAmount.toFixed(2)}</div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatedContainer>
+          )}
+
           {/* Current Phase Header */}
           <AnimatedContainer>
             <div className="mb-6">
@@ -228,7 +320,7 @@ const ThirtyDaysTargetPage = () => {
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">{getCurrentPhaseData().name} ({getCurrentPhaseData().days})</h2>
                 <div className="ml-auto">
                   <span className="bg-[#FF5A1F] text-white px-3 py-1 rounded-full text-sm font-medium">
-                    10% Daily Target
+                    {dailyPercentage}% Daily Target
                   </span>
                 </div>
               </div>
