@@ -66,8 +66,8 @@ const WeeklySessionActivity: React.FC = () => {
         { time: '6:00-7:00', status: 'Yes' },
         { time: '7:00-8:00', status: 'Yes' }
       ],
-      color: '#8B4513', // Dark Brown/Bronze
-      bgColor: 'bg-amber-900'
+      color: '#16a34a', // Green
+      bgColor: 'bg-green-900'
     },
     {
       id: 2,
@@ -78,8 +78,8 @@ const WeeklySessionActivity: React.FC = () => {
         { time: '11:00-12:00', status: 'No' },
         { time: '12:00-13:00', status: 'Yes' }
       ],
-      color: '#1F4F2F', // Dark Green
-      bgColor: 'bg-green-900'
+      color: '#7c3aed', // Purple
+      bgColor: 'bg-purple-900'
     },
     {
       id: 3,
@@ -90,7 +90,7 @@ const WeeklySessionActivity: React.FC = () => {
         { time: '15:00-16:00', status: 'Yes' },
         { time: '16:00-17:00', status: 'Yes' }
       ],
-      color: '#1E3A8A', // Dark Navy Blue
+      color: '#2563eb', // Blue
       bgColor: 'bg-blue-900'
     },
     {
@@ -102,8 +102,8 @@ const WeeklySessionActivity: React.FC = () => {
         { time: '20:00-21:00', status: 'No' },
         { time: '21:00-22:00', status: 'No' }
       ],
-      color: '#B45309', // Dark Yellow/Gold
-      bgColor: 'bg-yellow-900'
+      color: '#ea580c', // Orange
+      bgColor: 'bg-orange-900'
     }
   ]);
 

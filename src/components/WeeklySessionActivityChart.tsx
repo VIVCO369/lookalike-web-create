@@ -92,10 +92,10 @@ const WeeklySessionActivityChart: React.FC<WeeklySessionActivityChartProps> = ({
 
   // Session colors matching the website theme
   const sessionColors = {
-    session1: '#f97316', // Orange-500 (matches website orange theme)
-    session2: '#10b981', // Emerald-500 (green theme)
-    session3: '#3b82f6', // Blue-500 (blue theme)
-    session4: '#8b5cf6', // Violet-500 (purple theme)
+    session1: '#16a34a', // Green-600 (green theme)
+    session2: '#7c3aed', // Purple-600 (purple theme)
+    session3: '#2563eb', // Blue-600 (blue theme)
+    session4: '#ea580c', // Orange-600 (orange theme)
   };
 
   // Calculate bar height based on fixed 4-slot scale
