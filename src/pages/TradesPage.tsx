@@ -27,6 +27,7 @@ import {
 // Removed Dialog imports as we are using an inline form
 import AnimatedContainer from "@/components/AnimatedContainer"; // Import AnimatedContainer
 import { motion } from "framer-motion"; // Import motion
+import TradingRules from "@/components/TradingRules";
 
 
 // Initial form data for adding/editing trades
@@ -53,11 +54,27 @@ const TradesPage = () => {
   // Use the backtesting context for backtesting trades (removed dailyTarget from context)
   const { backtestingTrades, addTrade, updateTrade, deleteTrade, clearBacktestingTrades } = useTradeData(); // Get all necessary functions
 
-  // Backtesting specific Daily Target
-  const [dailyTarget, setDailyTarget] = useLocalStorage<number>("backtestingDailyTarget", 0.00);
+
 
   // Calculate stats for backtesting trades
   const stats = useMemo(() => calculateStats(backtestingTrades), [backtestingTrades]);
+
+  // Calculate separate wins and losses profits
+  const winsLossesStats = useMemo(() => {
+    let winsProfit = 0;
+    let lossesProfit = 0;
+
+    backtestingTrades.forEach(trade => {
+      const profit = parseFloat(trade.netProfit || '0');
+      if (trade.winLoss === 'win') {
+        winsProfit += profit;
+      } else if (trade.winLoss === 'loss') {
+        lossesProfit += Math.abs(profit); // Make losses positive for display
+      }
+    });
+
+    return { winsProfit, lossesProfit };
+  }, [backtestingTrades]);
 
   // Pagination state for demo trades
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -70,6 +87,9 @@ const TradesPage = () => {
 
   // State for selected trades to delete
   const [selectedTrades, setSelectedTrades] = useState<number[]>([]);
+
+  // State for Trading Rules progress
+  const [tradingRulesProgress, setTradingRulesProgress] = useState<number>(0);
 
   // Calculate total pages for backtesting trades
   const totalPages = Math.ceil(backtestingTrades.length / itemsPerPage);
@@ -88,8 +108,7 @@ const TradesPage = () => {
   const [isSettingBalance, setIsSettingBalance] = useState(false);
   const [newBalance, setNewBalance] = useLocalStorage<string>("backtestingNewBalanceInput", "");
 
-  const [isSettingDailyTarget, setIsSettingDailyTarget] = useState(false);
-  const [newDailyTarget, setNewDailyTarget] = useLocalStorage<string>("backtestingNewDailyTargetInput", "");
+
 
   const { toast } = useToast();
 
@@ -153,26 +172,7 @@ const TradesPage = () => {
     });
   };
 
-  const handleSetDailyTarget = () => {
-    const parsedTarget = parseFloat(newDailyTarget);
-    if (isNaN(parsedTarget)) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a valid number",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    setDailyTarget(parsedTarget);
-    setIsSettingDailyTarget(false);
-    setNewDailyTarget("");
-
-    toast({
-      title: "Daily Target updated",
-      description: `Your daily target has been set to $${parsedTarget.toFixed(2)}`,
-    });
-  };
 
   // Handle input changes in the trade form
   const handleTradeFormInputChange = (field: keyof Omit<TradeFormData, 'id'>, value: string) => {
@@ -381,7 +381,7 @@ const TradesPage = () => {
           <AnimatedContainer delay={0.1}>
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-medium text-gray-700 dark:text-gray-200">Backtesting</h2> {/* Updated title and added dark mode text color */}
+                <h2 className="text-xl font-medium text-gray-700 dark:text-gray-200">Start Trade</h2> {/* Updated title and added dark mode text color */}
                 <div className="flex gap-2">
                   {isSettingBalance ? (
                     <div className="flex gap-2 items-center">
@@ -417,44 +417,11 @@ const TradesPage = () => {
                     </Button>
                   )}
 
-                  {/* Daily Target Button and Input */}
-                  {isSettingDailyTarget ? (
-                    <div className="flex gap-2 items-center">
-                      <input
-                        type="number"
-                        value={newDailyTarget}
-                        onChange={(e) => setNewDailyTarget(e.target.value)}
-                        placeholder="Enter daily target"
-                        className="border p-1 rounded text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" // Added dark mode styles
-                      />
-                      <Button
-                        size="sm"
-                        onClick={handleSetDailyTarget}
-                        className="bg-green-500 hover:bg-green-600 text-white"
-                      >
-                        Set
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setIsSettingDailyTarget(false)}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      className="bg-green-500 hover:bg-green-600 text-white"
-                      onClick={() => setIsSettingDailyTarget(true)}
-                    >
-                      <Plus className="h-4 w-4 mr-1" /> Daily Target
-                    </Button>
-                  )}
+
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatsCard
                   title="Deposit"
                   value={`$${balance.toFixed(2)}`} // Using the local balance state for now
@@ -462,10 +429,10 @@ const TradesPage = () => {
                   borderColor="border-green-500 dark:border-green-700" // Added dark mode border color
                 />
                 <StatsCard
-                  title="Net Profit"
-                  value={formatCurrency(stats.netProfit)}
+                  title="Today's P&L"
+                  value={stats.netProfit >= 0 ? `+${formatCurrency(stats.netProfit)}` : formatCurrency(stats.netProfit)}
                   color={stats.netProfit >= 0 ? "text-green-500" : "text-red-500"}
-                  borderColor={stats.netProfit >= 0 ? "border-green-500 dark:border-green-700" : "border-red-500 dark:border-red-700"} // Added dark mode border color
+                  borderColor={stats.netProfit >= 0 ? "border-green-500 dark:border-green-700" : "border-red-500 dark:border-red-700"}
                 />
                 <StatsCard
                   title="Win Rate"
@@ -474,27 +441,14 @@ const TradesPage = () => {
                   borderColor="border-gray-200 dark:border-gray-700" // Added dark mode border color
                 />
                 <StatsCard
-                  title="Best Trade"
-                  value={stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
-                  color="text-green-500"
-                  borderColor="border-green-500 dark:border-green-700" // Added dark mode border color
-                />
-                <StatsCard
-                  title="Worst Trade"
-                  value={formatCurrency(stats.worstTrade)}
-                  color="text-red-500"
-                  borderColor="border-red-500 dark:border-red-700" // Added dark mode border color
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-                <StatsCard
                   title="Account Balance"
                   value={formatCurrency(balance + stats.netProfit)} // Deposit + Net Profit
-                  labelPosition="below"
                   color={balance + stats.netProfit >= 0 ? "text-blue-500" : "text-red-500"}
                   borderColor={balance + stats.netProfit >= 0 ? "border-blue-500 dark:border-blue-700" : "border-red-500 dark:border-red-700"}
                 />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
                 <StatsCard
                   title="Total Trades"
                   value={stats.totalTrades.toString()} // Use totalTrades from calculated stats
@@ -503,19 +457,66 @@ const TradesPage = () => {
                   borderColor="border-gray-200 dark:border-gray-700" // Added dark mode border color
                 />
                 <StatsCard
-                  title="Daily Target" // Changed title from Avg. Duration
-                  value={formatCurrency(dailyTarget)} // Use dailyTarget state
+                  title="Wins"
+                  value={formatCurrency(winsLossesStats.winsProfit)}
                   labelPosition="below"
-                  color="text-gray-700 dark:text-gray-200" // Added dark mode text color
-                  borderColor="border-gray-200 dark:border-gray-700" // Added dark mode border color
+                  color="text-green-500"
+                  borderColor="border-green-500 dark:border-green-700"
                 />
                 <StatsCard
-                  title="Today's P&L"
-                  value={stats.netProfit >= 0 ? `+${formatCurrency(stats.netProfit)}` : formatCurrency(stats.netProfit)} // Changed to use stats.netProfit
-                  color={stats.netProfit >= 0 ? "text-green-500" : "text-red-500"} // Changed to use stats.netProfit
+                  title="Losses"
+                  value={formatCurrency(winsLossesStats.lossesProfit)}
                   labelPosition="below"
-                  borderColor={stats.netProfit >= 0 ? "border-green-500 dark:border-green-700" : "border-red-500 dark:border-red-700"} // Added dark mode border color
+                  color="text-red-500"
+                  borderColor="border-red-500 dark:border-red-700"
                 />
+                <StatsCard
+                  title="Best Trade"
+                  value={stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
+                  labelPosition="below"
+                  color="text-green-500"
+                  borderColor="border-green-500 dark:border-green-700" // Added dark mode border color
+                />
+                <StatsCard
+                  title="Worst Trade"
+                  value={formatCurrency(stats.worstTrade)}
+                  labelPosition="below"
+                  color="text-red-500"
+                  borderColor="border-red-500 dark:border-red-700" // Added dark mode border color
+                />
+              </div>
+            </div>
+          </AnimatedContainer>
+
+          {/* Trading Rules and Signal Progress - Moved from Dashboard */}
+          <AnimatedContainer delay={0.25}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="md:col-span-2">
+                <TradingRules hideAddButton={true} dashboardView={true} onProgressChange={setTradingRulesProgress} />
+              </div>
+              <div className="md:col-span-1">
+                <Card>
+                  <CardContent className="pt-6">
+                    <h3 className="text-lg font-medium text-center mb-6 text-gray-800 dark:text-gray-200">Signal Progress</h3>
+                    <div className="flex justify-center mb-4">
+                      <div className="relative h-32 w-32">
+                        <Progress value={tradingRulesProgress} className="h-full w-full rounded-full [&>div]:!bg-green-500" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-2xl font-bold text-gray-800 dark:text-gray-100">{tradingRulesProgress.toFixed(0)}%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-center text-gray-600 dark:text-gray-300 mb-6">Trade Completed</p>
+                    <div className="flex justify-center">
+                      <Button
+                        variant={tradingRulesProgress === 100 ? "default" : "destructive"}
+                        className={tradingRulesProgress === 100 ? "bg-green-500 hover:bg-green-600 text-white" : ""}
+                      >
+                        {tradingRulesProgress === 100 ? "Take The Trade" : "Ready To Trade"}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </AnimatedContainer>
@@ -557,7 +558,7 @@ const TradesPage = () => {
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="text-xl font-bold text-purple-800 dark:text-purple-200 flex items-center gap-2">
                         <Edit className="h-5 w-5" />
-                        {editingTradeId !== null ? `Edit Backtesting Trade #${editingTradeId}` : "Add New Backtesting Trade"}
+                        {editingTradeId !== null ? `Edit Start Trade #${editingTradeId}` : "Add New Start Trade"}
                       </h3>
                       <Button
                         variant="ghost"
@@ -832,7 +833,7 @@ const TradesPage = () => {
                             size="icon"
                             className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 hover:scale-105"
                             onClick={() => handleViewTrade(trade)}
-                            title="View backtesting trade analysis"
+                            title="View start trade analysis"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -841,7 +842,7 @@ const TradesPage = () => {
                             size="icon"
                             className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-200 hover:scale-105 hover:shadow-md"
                             onClick={() => handleOpenEditTradeForm(trade)}
-                            title="Edit backtesting trade"
+                            title="Edit start trade"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>

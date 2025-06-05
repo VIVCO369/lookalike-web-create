@@ -45,6 +45,11 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
   // State for selected strategy in dashboard view
   const [selectedStrategy, setSelectedStrategy] = useState<string | undefined>(undefined);
 
+  // State for editing rules
+  const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
+  const [editRuleName, setEditRuleName] = useState("");
+  const [editStrategyName, setEditStrategyName] = useState("");
+
   // Get unique strategy names for the select dropdown and pagination
   const uniqueStrategies = useMemo(() => {
     const strategies = Array.from(new Set(rules.map(rule => rule.strategy))).filter(Boolean) as string[];
@@ -138,6 +143,34 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
     }
   };
 
+  // Handle editing a rule
+  const handleEditRule = (rule: Rule) => {
+    setEditingRuleId(rule.id);
+    setEditRuleName(rule.name);
+    setEditStrategyName(rule.strategy || "");
+  };
+
+  // Handle saving edited rule
+  const handleSaveEditedRule = () => {
+    if (editingRuleId && editRuleName.trim() && editStrategyName.trim()) {
+      setRules(rules.map(rule =>
+        rule.id === editingRuleId
+          ? { ...rule, name: editRuleName.trim(), strategy: editStrategyName.trim() }
+          : rule
+      ));
+      setEditingRuleId(null);
+      setEditRuleName("");
+      setEditStrategyName("");
+    }
+  };
+
+  // Handle canceling edit
+  const handleCancelEdit = () => {
+    setEditingRuleId(null);
+    setEditRuleName("");
+    setEditStrategyName("");
+  };
+
 
   const displayRulesByStrategy = () => {
     const grouped: { [key: string]: Rule[] } = {};
@@ -173,39 +206,80 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
             </div>
             <div className="space-y-2">
               {rulesForStrategy.map(rule => (
-                <div key={rule.id} className="flex items-center justify-between border rounded p-3 bg-white dark:bg-gray-800 dark:border-gray-700"> {/* Added dark mode styles */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-700 dark:text-gray-200">{rule.name}</span> {/* Added dark mode text color */}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {/* Improved Checkbox Button Styling */}
-                    <button
-                      className={cn(
-                        "w-6 h-6 flex items-center justify-center rounded-full border-2 transition-colors",
-                        rule.completed
-                          ? "bg-green-500 border-green-500 hover:bg-green-600 hover:border-green-600"
-                          : "bg-white border-gray-300 hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600" // Added dark mode styles
-                      )}
-                      onClick={() => handleToggleComplete(rule.id)}
-                    >
-                      {/* Check icon color changes based on completion */}
-                      <Check className={cn("h-4 w-4", rule.completed ? "text-white" : "text-gray-400 dark:text-gray-500")} /> {/* Added dark mode text color */}
-                    </button>
-                    {/* Hide edit/delete rule buttons in dashboard view */}
-                    {!dashboardView && (
-                      <>
-                        <button className="text-gray-400 dark:text-gray-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600"> {/* Added dark mode styles */}
-                          <Pencil className="h-4 w-4" />
-                        </button>
+                <div key={rule.id}>
+                  {editingRuleId === rule.id ? (
+                    // Edit form for the rule
+                    <div className="border rounded p-3 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-700">
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-sm text-gray-600 dark:text-gray-400">Rule Name</label>
+                          <Input
+                            value={editRuleName}
+                            onChange={(e) => setEditRuleName(e.target.value)}
+                            className="mt-1 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            placeholder="Enter rule name"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm text-gray-600 dark:text-gray-400">Strategy Name</label>
+                          <Input
+                            value={editStrategyName}
+                            onChange={(e) => setEditStrategyName(e.target.value)}
+                            className="mt-1 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            placeholder="Enter strategy name"
+                          />
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <Button variant="outline" size="sm" onClick={handleCancelEdit}>
+                            Cancel
+                          </Button>
+                          <Button size="sm" className="bg-green-500 hover:bg-green-600" onClick={handleSaveEditedRule}>
+                            Save
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    // Normal rule display
+                    <div className="flex items-center justify-between border rounded p-3 bg-white dark:bg-gray-800 dark:border-gray-700">
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-700 dark:text-gray-200">{rule.name}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {/* Improved Checkbox Button Styling */}
                         <button
-                          className="text-gray-400 dark:text-gray-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600" // Added dark mode styles
-                          onClick={() => handleRemoveRule(rule.id)}
+                          className={cn(
+                            "w-6 h-6 flex items-center justify-center rounded-full border-2 transition-colors",
+                            rule.completed
+                              ? "bg-green-500 border-green-500 hover:bg-green-600 hover:border-green-600"
+                              : "bg-white border-gray-300 hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600"
+                          )}
+                          onClick={() => handleToggleComplete(rule.id)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Check className={cn("h-4 w-4", rule.completed ? "text-white" : "text-gray-400 dark:text-gray-500")} />
                         </button>
-                      </>
-                    )}
-                  </div>
+                        {/* Hide edit/delete rule buttons in dashboard view */}
+                        {!dashboardView && (
+                          <>
+                            <button
+                              className="text-gray-400 dark:text-gray-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600"
+                              onClick={() => handleEditRule(rule)}
+                              title="Edit rule"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                            <button
+                              className="text-gray-400 dark:text-gray-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600"
+                              onClick={() => handleRemoveRule(rule.id)}
+                              title="Delete rule"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

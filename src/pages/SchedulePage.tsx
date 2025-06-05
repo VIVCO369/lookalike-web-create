@@ -2,6 +2,7 @@ import { Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Sidebar from "../components/Sidebar";
 import ScheduleList from "../components/ScheduleList";
+import DerivApp from "../components/DerivApp";
 import { useState, useEffect } from "react"; // Import useEffect
 import { cn } from "@/lib/utils"; // Import cn utility
 import AnimatedContainer from "@/components/AnimatedContainer"; // Import AnimatedContainer
@@ -54,7 +55,7 @@ const SchedulePage = () => {
         >
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-gray-500 dark:text-gray-400" /> {/* Added dark mode text color */}
-            <h1 className="text-xl font-medium text-gray-700 dark:text-gray-200">Today's Schedule</h1> {/* Added dark mode text color */}
+            <h1 className="text-xl font-medium text-gray-700 dark:text-gray-200">Schedule</h1> {/* Added dark mode text color */}
           </div>
           {/* Display current date and time */}
           <div>
@@ -66,8 +67,13 @@ const SchedulePage = () => {
         {/* Main content */}
         <main className="flex-1 p-6">
           <AnimatedContainer delay={0.1}>
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto space-y-6">
               <ScheduleList />
+
+              {/* Deriv Chart Dashboard */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                <DerivApp />
+              </div>
             </div>
           </AnimatedContainer>
         </main>

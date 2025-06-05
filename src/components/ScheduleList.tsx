@@ -185,7 +185,7 @@ const ScheduleList = ({ hideAddButton = false, hideActions = false }: ScheduleLi
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-gray-600 dark:text-gray-400" /> {/* Added dark mode text color */}
-            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">Today's Schedule</h3> {/* Added dark mode text color */}
+            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">Schedule</h3> {/* Added dark mode text color */}
           </div>
           {!hideAddButton && (
             <Button className="bg-green-500 hover:bg-green-600" onClick={() => {

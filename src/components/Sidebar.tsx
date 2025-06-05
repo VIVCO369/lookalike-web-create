@@ -63,7 +63,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/" },
     { icon: BookOpen, label: "Trade Rules", path: "/trading-rules" },
-    { icon: BarChart3, label: "Backtesting", path: "/trades" }, // Changed label from "Trade Demo" to "Backtesting"
+    { icon: BarChart3, label: "Start Trade", path: "/trades" }, // Changed label from "Backtesting" to "Start Trade"
     // Removed Trade Goals link from main items
     // Removed Trade Tools from here to move it lower
   ];

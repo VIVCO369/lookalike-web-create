@@ -8,9 +8,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import StatsCard from "@/components/StatsCard";
 import AnimatedContainer from "@/components/AnimatedContainer";
 import { Target, TrendingUp, Calendar, DollarSign, Plus, Edit2, Trash2 } from "lucide-react";
+import useLocalStorage from "@/hooks/useLocalStorage";
+import { useTradeData, calculateStats } from "@/contexts/TradeDataContext";
+import { useMemo } from "react";
+// Fixed import path for calculateStats
 
 const TradeManageGoalsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Get trade data for real-time progress calculation
+  const { backtestingTrades } = useTradeData();
+
+  // Calculate real progress from Start Trade data
+  const startTradeStats = useMemo(() => calculateStats(backtestingTrades), [backtestingTrades]);
+
+  // Use netProfit to match Start Trade "Today's P&L" calculation
+  const currentProfit = startTradeStats.netProfit;
 
   // Predefined goal titles
   const goalTitles = [
@@ -36,12 +49,33 @@ const TradeManageGoalsPage = () => {
     deadline: ""
   });
 
-  const [goals, setGoals] = useState([
-    { id: 1, title: "Monthly Profit Target", target: "$5,000", current: "$3,200", progress: 64, deadline: "2024-01-31" },
-    { id: 2, title: "Weekly Profit Target", target: "$1,200", current: "$800", progress: 67, deadline: "2024-01-07" },
-    { id: 3, title: "Daily Profit Target", target: "$200", current: "$150", progress: 75, deadline: "2024-01-01" },
-    { id: 4, title: "Quarterly Profit Target", target: "$15,000", current: "$9,600", progress: 64, deadline: "2024-03-31" },
-  ]);
+  // Default goals template
+  const defaultGoals = [
+    { id: 1, title: "Monthly Profit Target", target: "$5,000", current: "$1,200", progress: 24, deadline: "2025-01-31" },
+    { id: 2, title: "Weekly Profit Target", target: "$1,200", current: "$300", progress: 25, deadline: "2025-01-07" },
+    { id: 3, title: "Daily Profit Target", target: "$200", current: "$0", progress: 0, deadline: "2025-01-01" },
+    { id: 4, title: "Quarterly Profit Target", target: "$15,000", current: "$3,500", progress: 23, deadline: "2025-03-31" },
+    { id: 5, title: "Yearly Profit Target", target: "$50,000", current: "$8,000", progress: 16, deadline: "2025-12-31" },
+  ];
+
+  // Base goals with static values (will be updated with real data)
+  const [baseGoals, setBaseGoals] = useLocalStorage("tradeGoals", defaultGoals);
+
+  // Update ALL goals with real-time data from Today's P&L
+  const goals = useMemo(() => {
+    return baseGoals.map(goal => {
+      // ALL goals get the same current value from Start Trade "Today's P&L"
+      const targetValue = parseFloat(goal.target.replace(/[$,]/g, '')) || 1;
+      const currentValue = currentProfit || 0;
+      const progress = targetValue > 0 ? Math.min((currentValue / targetValue) * 100, 100) : 0;
+
+      return {
+        ...goal,
+        current: `$${currentValue.toFixed(2)}`,
+        progress: Math.round(Math.max(0, progress))
+      };
+    });
+  }, [baseGoals, currentProfit]);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
@@ -55,21 +89,21 @@ const TradeManageGoalsPage = () => {
   const handleAddGoal = () => {
     if (newGoal.title && newGoal.target && newGoal.deadline) {
       const goal = {
-        id: goals.length + 1,
+        id: baseGoals.length + 1,
         title: newGoal.title,
         target: newGoal.target,
         current: "$0", // Default starting value
         progress: 0, // Default starting progress
         deadline: newGoal.deadline
       };
-      setGoals([...goals, goal]);
+      setBaseGoals([...baseGoals, goal]);
       setNewGoal({ title: "", target: "", deadline: "" }); // Reset form
     }
   };
 
   // Handle editing a goal
   const handleEditGoal = (goalId: number) => {
-    const goal = goals.find(g => g.id === goalId);
+    const goal = baseGoals.find(g => g.id === goalId);
     if (goal) {
       setEditingGoal(goalId);
       setEditGoal({
@@ -83,7 +117,7 @@ const TradeManageGoalsPage = () => {
   // Handle saving edited goal
   const handleSaveEdit = () => {
     if (editingGoal && editGoal.title && editGoal.target && editGoal.deadline) {
-      setGoals(goals.map(goal =>
+      setBaseGoals(baseGoals.map(goal =>
         goal.id === editingGoal
           ? { ...goal, title: editGoal.title, target: editGoal.target, deadline: editGoal.deadline }
           : goal
@@ -102,7 +136,18 @@ const TradeManageGoalsPage = () => {
   // Handle deleting a goal
   const handleDeleteGoal = (goalId: number) => {
     if (window.confirm("Are you sure you want to delete this goal?")) {
-      setGoals(goals.filter(goal => goal.id !== goalId));
+      setBaseGoals(baseGoals.filter(goal => goal.id !== goalId));
+    }
+  };
+
+  // Handle resetting goals to default
+  const handleResetGoals = () => {
+    if (window.confirm("Are you sure you want to reset all goals to default values? This will clear all your custom goals.")) {
+      // Clear localStorage completely and reset to defaults
+      localStorage.removeItem('tradeGoals');
+      setBaseGoals(defaultGoals);
+      // Force page refresh to ensure clean state
+      setTimeout(() => window.location.reload(), 100);
     }
   };
 
@@ -217,9 +262,19 @@ const TradeManageGoalsPage = () => {
           <AnimatedContainer delay={0.4}>
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Your Trading Goals
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    Your Trading Goals
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetGoals}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    Reset to Default
+                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent>
