@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import Sidebar from "../components/Sidebar";
-import TradingSessionsSimple from "../components/TradingSessionsSimple";
+
 import DailyProfitTarget from "../components/DailyProfitTarget";
 import WeeklySessionActivity from "../components/WeeklySessionActivity";
 
@@ -134,25 +134,8 @@ const Index = () => {
             </div>
           </AnimatedContainer>
 
-          {/* Trading Sessions - Moved before Dashboard */}
-          <AnimatedContainer delay={0.1}>
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Global Trading Sessions</h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">Monitor and manage your trading activity across major market sessions</p>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span>Live Markets</span>
-                </div>
-              </div>
-              <TradingSessionsSimple />
-            </div>
-          </AnimatedContainer>
-
           {/* Weekly Session Activity */}
-          <AnimatedContainer delay={0.15}>
+          <AnimatedContainer delay={0.1}>
             <div className="mb-8">
               <WeeklySessionActivity />
             </div>
