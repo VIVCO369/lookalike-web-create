@@ -4,10 +4,10 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%; /* White */
+    --background: 40 33% 96%; /* Warm cream #f7f5f0 */
     --foreground: 222.2 84% 4.9%; /* Dark Blue */
 
-    --card: 0 0% 100%; /* White */
+    --card: 0 0% 100%; /* White - keeping cards white for contrast */
     --card-foreground: 222.2 84% 4.9%; /* Dark Blue */
 
     --popover: 0 0% 100%; /* White */

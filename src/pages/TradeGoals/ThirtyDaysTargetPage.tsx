@@ -172,7 +172,7 @@ const ThirtyDaysTargetPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-background flex w-full">
+    <div className="min-h-screen flex w-full" style={{ backgroundColor: '#f7f5f0' }}>
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       <div
@@ -229,7 +229,7 @@ const ThirtyDaysTargetPage = () => {
         </motion.header>
 
         {/* Main content */}
-        <div className="p-6 overflow-y-auto flex-1 bg-white dark:bg-gray-900">
+        <div className="p-6 overflow-y-auto flex-1" style={{ backgroundColor: '#f7f5f0' }}>
           {/* Settings Panel */}
           {showSettings && (
             <AnimatedContainer>
