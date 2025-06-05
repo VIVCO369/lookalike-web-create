@@ -4,6 +4,8 @@ import Sidebar from "../components/Sidebar";
 
 import DailyProfitTarget from "../components/DailyProfitTarget";
 import WeeklySessionActivity from "../components/WeeklySessionActivity";
+import TimePLChart from "../components/TimePLChart";
+import TimeTradesChart from "../components/TimeTradesChart";
 
 
 
@@ -21,8 +23,7 @@ const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
-  const [selectedTimeframes, setSelectedTimeframes] = useLocalStorage<string[]>("selectedTimeframes", ["1M", "15M", "1H", "4H", "1D"]);
-  const timeframes = ["1M", "5M", "15M", "1H", "4H", "1D"];
+
 
   // Use the trade data context for Start Trade data for Daily Profit Target calculation
   const { backtestingTrades } = useTradeData();
@@ -61,62 +62,30 @@ const Index = () => {
     return date.toLocaleTimeString('en-US', options);
   };
 
-  const toggleTimeframe = (timeframe: string) => {
-    if (selectedTimeframes.includes(timeframe)) {
-      setSelectedTimeframes(selectedTimeframes.filter(t => t !== timeframe));
-    } else {
-      setSelectedTimeframes([...selectedTimeframes, timeframe]);
-    }
-  };
 
-  const numberOfRedButtons = timeframes.length - selectedTimeframes.length;
-  const trend = numberOfRedButtons >= 3 ? "Down Trend" : "Up Trend";
-  // Updated trendColor to use Tailwind classes directly for button background
-  const trendColorClass = numberOfRedButtons >= 3 ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600";
 
 
   return (
-    <div className="flex min-h-screen bg-background"> {/* Changed inline style to Tailwind class */}
+    <div className="flex min-h-screen" style={{ backgroundColor: '#f7f5f0' }}>
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}>
         {/* Header */}
         <motion.header
-          className="bg-white dark:bg-gray-800 border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm" // Added dark mode styles
+          className="bg-white dark:bg-gray-800 border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
+          {/* Dashboard Title - Left Side */}
           <div>
-            <p className="text-black dark:text-white text-sm font-bold">{formatDate(currentDateTime)}</p> {/* Added dark mode text color */}
-            <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
           </div>
-          <div className="flex items-center gap-4"> {/* Adjusted gap */}
-            {/* Changed Trend display from p to Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn("text-white", trendColorClass)} // Apply dynamic background color class
-            >
-              {trend}
-            </Button>
-            <div className="flex items-center gap-2">
-              {timeframes.map((timeframe) => (
-                <Button
-                  key={timeframe}
-                  variant="outline"
-                  size="sm"
-                  className={`${
-                    selectedTimeframes.includes(timeframe) ? "bg-green-500" : "bg-red-500"
-                  } text-white hover:${
-                    selectedTimeframes.includes(timeframe) ? "bg-green-600" : "bg-red-600"
-                  }`}
-                  onClick={() => toggleTimeframe(timeframe)}
-                >
-                  {timeframe}
-                </Button>
-              ))}
-            </div>
+
+          {/* Date and Time - Right Side */}
+          <div className="text-right">
+            <p className="text-gray-900 dark:text-white text-sm font-bold">{formatDate(currentDateTime)}</p>
+            <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
         </motion.header>
 
@@ -138,6 +107,19 @@ const Index = () => {
           <AnimatedContainer delay={0.1}>
             <div className="mb-8">
               <WeeklySessionActivity />
+            </div>
+          </AnimatedContainer>
+
+          {/* Time-based Charts */}
+          <AnimatedContainer delay={0.2}>
+            <div className="mb-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Time P&L Chart */}
+                <TimePLChart />
+
+                {/* Time Number of Trades Chart */}
+                <TimeTradesChart />
+              </div>
             </div>
           </AnimatedContainer>
 

@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import TradingRulesPage from "./pages/TradingRulesPage";
-import SchedulePage from "./pages/SchedulePage";
+
 import TradesPage from "./pages/TradesPage";
 import SettingsPage from "./pages/SettingsPage";
 // Removed AnalyticsPage import
@@ -19,6 +19,8 @@ import TradeManageGoalsPage from "./pages/TradeManageGoalsPage"; // This page wi
 import TradeManageTargetPage from "./pages/TradeManageTargetPage"; // This page will be renamed/repurposed for managing targets
 import ThirtyDaysProfitsPage from "./pages/TradeGoals/ThirtyDaysProfitsPage"; // Import new page from correct directory
 import ThirtyDaysTargetPage from "./pages/TradeGoals/ThirtyDaysTargetPage"; // Import new page from correct directory
+import AutoTradePage from "./pages/Settings/AutoTradePage";
+import CopyTradePage from "./pages/Settings/CopyTradePage";
 import NotFound from "./pages/NotFound";
 import { TradeDataProvider } from "./contexts/TradeDataContext";
 
@@ -34,7 +36,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/trading-rules" element={<TradingRulesPage />} />
-            <Route path="/schedule" element={<SchedulePage />} />
+
             <Route path="/trades" element={<TradesPage />} />
             {/* Removed AnalyticsPage route */}
             {/* Updated Trade Goals routes */}
@@ -53,6 +55,8 @@ const App = () => (
             <Route path="/trade-analytics/summary" element={<TradeSummaryPage />} />
             <Route path="/trade-analytics/history" element={<TradeHistoryPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/settings/auto-trade" element={<AutoTradePage />} />
+            <Route path="/settings/copy-trade" element={<CopyTradePage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
