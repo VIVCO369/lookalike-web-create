@@ -184,8 +184,8 @@ const CopyTradePage: React.FC = () => {
               <Copy className="h-6 w-6 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Copy Trade</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Follow and copy successful traders</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">VivCo AI Bot</h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Copy Trade - Follow and copy successful traders</p>
             </div>
           </div>
           

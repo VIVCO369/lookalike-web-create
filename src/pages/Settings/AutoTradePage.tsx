@@ -119,8 +119,8 @@ const AutoTradePage: React.FC = () => {
               <Bot className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Auto Trade</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Automated trading configuration</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">VivCo AI Bot</h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Auto Trade - Automated trading configuration</p>
             </div>
           </div>
           

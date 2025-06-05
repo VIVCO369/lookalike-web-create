@@ -39,7 +39,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const [tradeChallengeExpanded, setTradeChallengeExpanded] = useState(false);
   const [tradeManageExpanded, setTradeManageExpanded] = useState(false);
   const [tradeGoalsExpanded, setTradeGoalsExpanded] = useState(false); // New state for Trade Goals expansion
-  const [settingsExpanded, setSettingsExpanded] = useState(false); // New state for Settings expansion
+
 
 
   useEffect(() => {
@@ -61,9 +61,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
      if (currentPath.includes('/trade-goals')) { // Check for Trade Goals path
       setTradeGoalsExpanded(true);
     }
-    if (currentPath.includes('/settings')) { // Check for Settings path
-      setSettingsExpanded(true);
-    }
+
   }, [currentPath]);
 
   const navItems = [
@@ -96,11 +94,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     { icon: Target, label: "30 Days Target", path: "/trade-goals/target" }, // Moved here and adjusted label
   ];
 
-  // New sub-items for Settings
-  const settingsSubItems = [
-    { icon: Bot, label: "Auto Trade", path: "/settings/auto-trade" },
-    { icon: Copy, label: "Copy Trade", path: "/settings/copy-trade" },
-  ];
+
 
 
   const toggleAnalytics = () => {
@@ -119,9 +113,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     setTradeGoalsExpanded(!tradeGoalsExpanded);
   };
 
-  const toggleSettings = () => { // New toggle function for Settings
-    setSettingsExpanded(!settingsExpanded);
-  };
+
 
 
   return (
@@ -357,49 +349,44 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
 
 
 
-        {/* Settings Menu Item */}
-        <div>
-          <div
-            onClick={isOpen ? toggleSettings : undefined}
-            className={cn(
-              "flex items-center px-4 py-3 text-gray-100 hover:bg-teal-800 transition-all duration-200 cursor-pointer",
-              (currentPath.includes('/settings')) && "bg-teal-700 border-l-4 border-white",
-              !isOpen && "justify-center"
-            )}
-          >
-            <Settings className={cn("h-5 w-5", !isOpen && "h-6 w-6")} />
-            {isOpen && (
-              <>
-                <span className="ml-4 flex-1">Settings</span>
-                <ChevronDown
-                  className={cn(
-                    "h-4 w-4 transition-transform duration-200",
-                    settingsExpanded && "rotate-180"
-                  )}
-                />
-              </>
-            )}
-          </div>
-
-          {/* Settings Sub Items */}
-          {isOpen && settingsExpanded && (
-            <div className="bg-teal-800">
-              {settingsSubItems.map((subItem, subIndex) => (
-                <Link
-                  key={subIndex}
-                  to={subItem.path}
-                  className={cn(
-                    "flex items-center px-8 py-2 text-gray-200 hover:bg-teal-700 transition-all duration-200 text-sm",
-                    currentPath === subItem.path && "bg-teal-600 text-white"
-                  )}
-                >
-                  <subItem.icon className="h-4 w-4" />
-                  <span className="ml-3">{subItem.label}</span>
-                </Link>
-              ))}
-            </div>
+        {/* Settings Link */}
+        <Link
+          to="/settings"
+          className={cn(
+            "flex items-center px-4 py-3 text-gray-100 hover:bg-teal-800 transition-all duration-200",
+            currentPath === "/settings" && "bg-teal-700 border-l-4 border-white",
+            !isOpen && "justify-center"
           )}
-        </div>
+        >
+          <Settings className={cn("h-5 w-5", !isOpen && "h-6 w-6")} />
+          {isOpen && <span className={cn("ml-4 transition-opacity", isOpen ? "opacity-100" : "opacity-0")}>Settings</span>}
+        </Link>
+
+        {/* Auto Trade Link */}
+        <Link
+          to="/settings/auto-trade"
+          className={cn(
+            "flex items-center px-4 py-3 text-gray-100 hover:bg-teal-800 transition-all duration-200",
+            currentPath === "/settings/auto-trade" && "bg-teal-700 border-l-4 border-white",
+            !isOpen && "justify-center"
+          )}
+        >
+          <Bot className={cn("h-5 w-5", !isOpen && "h-6 w-6")} />
+          {isOpen && <span className={cn("ml-4 transition-opacity", isOpen ? "opacity-100" : "opacity-0")}>Auto Trade</span>}
+        </Link>
+
+        {/* Copy Trade Link */}
+        <Link
+          to="/settings/copy-trade"
+          className={cn(
+            "flex items-center px-4 py-3 text-gray-100 hover:bg-teal-800 transition-all duration-200",
+            currentPath === "/settings/copy-trade" && "bg-teal-700 border-l-4 border-white",
+            !isOpen && "justify-center"
+          )}
+        >
+          <Copy className={cn("h-5 w-5", !isOpen && "h-6 w-6")} />
+          {isOpen && <span className={cn("ml-4 transition-opacity", isOpen ? "opacity-100" : "opacity-0")}>Copy Trade</span>}
+        </Link>
       </nav>
       <div className="p-4 border-t border-teal-800 text-center text-xs text-teal-300">
         {isOpen ? (
