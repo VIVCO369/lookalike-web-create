@@ -61,10 +61,10 @@ const WeeklySessionActivity: React.FC = () => {
       id: 1,
       name: 'Session 1',
       timeSlots: [
-        { time: '4:00-5:00', status: 'Yes' },
+        { time: '4:00-5:00', status: 'No' },
         { time: '5:00-6:00', status: 'No' },
-        { time: '6:00-7:00', status: 'Yes' },
-        { time: '7:00-8:00', status: 'Yes' }
+        { time: '6:00-7:00', status: 'No' },
+        { time: '7:00-8:00', status: 'No' }
       ],
       color: '#16a34a', // Green
       bgColor: 'bg-green-900'
@@ -73,10 +73,10 @@ const WeeklySessionActivity: React.FC = () => {
       id: 2,
       name: 'Session 2',
       timeSlots: [
-        { time: '9:00-10:00', status: 'Yes' },
-        { time: '10:00-11:00', status: 'Yes' },
+        { time: '9:00-10:00', status: 'No' },
+        { time: '10:00-11:00', status: 'No' },
         { time: '11:00-12:00', status: 'No' },
-        { time: '12:00-13:00', status: 'Yes' }
+        { time: '12:00-13:00', status: 'No' }
       ],
       color: '#7c3aed', // Purple
       bgColor: 'bg-purple-900'
@@ -85,10 +85,10 @@ const WeeklySessionActivity: React.FC = () => {
       id: 3,
       name: 'Session 3',
       timeSlots: [
-        { time: '13:00-14:00', status: 'Yes' },
+        { time: '13:00-14:00', status: 'No' },
         { time: '14:00-15:00', status: 'No' },
-        { time: '15:00-16:00', status: 'Yes' },
-        { time: '16:00-17:00', status: 'Yes' }
+        { time: '15:00-16:00', status: 'No' },
+        { time: '16:00-17:00', status: 'No' }
       ],
       color: '#2563eb', // Blue
       bgColor: 'bg-blue-900'
@@ -98,7 +98,7 @@ const WeeklySessionActivity: React.FC = () => {
       name: 'Session 4',
       timeSlots: [
         { time: '17:00-18:00', status: 'No' },
-        { time: '18:00-19:00', status: 'Yes' },
+        { time: '18:00-19:00', status: 'No' },
         { time: '20:00-21:00', status: 'No' },
         { time: '21:00-22:00', status: 'No' }
       ],
@@ -201,16 +201,16 @@ const WeeklySessionActivity: React.FC = () => {
           {/* Y-axis labels */}
           <div className="absolute left-2 top-6 text-xs font-medium text-blue-600 dark:text-blue-400 pr-3" style={{ height: `${chartHeight}px` }}>
             <div className="absolute" style={{ top: '0px' }}>
-              <span className="px-2 py-1 bg-blue-100/50 dark:bg-blue-900/30 rounded-md">4 slots</span>
+              <span className="px-2 py-1 bg-blue-100/50 dark:bg-blue-900/30 rounded-md whitespace-nowrap">4 slots</span>
             </div>
             <div className="absolute" style={{ top: '50px' }}>
-              <span className="px-2 py-1 bg-blue-100/50 dark:bg-blue-900/30 rounded-md">3 slots</span>
+              <span className="px-2 py-1 bg-blue-100/50 dark:bg-blue-900/30 rounded-md whitespace-nowrap">3 slots</span>
             </div>
             <div className="absolute" style={{ top: '100px' }}>
-              <span className="px-2 py-1 bg-blue-100/50 dark:bg-blue-900/30 rounded-md">2 slots</span>
+              <span className="px-2 py-1 bg-blue-100/50 dark:bg-blue-900/30 rounded-md whitespace-nowrap">2 slots</span>
             </div>
             <div className="absolute" style={{ top: '150px' }}>
-              <span className="px-2 py-1 bg-blue-100/50 dark:bg-blue-900/30 rounded-md">1 slot</span>
+              <span className="px-2 py-1 bg-blue-100/50 dark:bg-blue-900/30 rounded-md whitespace-nowrap">1 slot</span>
             </div>
           </div>
 
