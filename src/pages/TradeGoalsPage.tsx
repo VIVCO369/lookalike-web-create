@@ -91,7 +91,7 @@ const TradeGoalsPage = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-background"> {/* Changed inline style to Tailwind class */}
+    <div className="flex min-h-screen" style={{ backgroundColor: '#f7f5f0' }}>
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}>

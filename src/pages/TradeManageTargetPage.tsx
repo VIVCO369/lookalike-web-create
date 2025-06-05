@@ -31,7 +31,7 @@ const TradeManageTargetPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex w-full">
+    <div className="min-h-screen flex w-full" style={{ backgroundColor: '#f7f5f0' }}>
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       
       <div 
