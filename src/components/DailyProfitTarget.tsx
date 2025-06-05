@@ -278,20 +278,11 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
               </motion.div>
             </div>
             {progressPercentage > 0 && (
-              <motion.div
-                className="absolute -top-0.5 -bottom-0.5 rounded-full"
+              <div
+                className="absolute -top-0.5 -bottom-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600"
                 style={{
-                  width: `${progressPercentage}%`,
-                  boxShadow: "0 0 8px rgba(34, 197, 94, 0.4)"
+                  width: `${progressPercentage}%`
                 }}
-                animate={{
-                  boxShadow: [
-                    "0 0 8px rgba(34, 197, 94, 0.4)",
-                    "0 0 16px rgba(34, 197, 94, 0.6)",
-                    "0 0 8px rgba(34, 197, 94, 0.4)"
-                  ]
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
               />
             )}
           </div>
