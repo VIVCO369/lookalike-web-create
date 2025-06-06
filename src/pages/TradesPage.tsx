@@ -1,5 +1,6 @@
-import { Eye, Trash2, Edit, Plus, Clock } from "lucide-react";
+import { Eye, Trash2, Edit, Plus, Clock, DollarSign, TrendingUp, TrendingDown, Percent, Scale, Banknote, Target, Award, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import Sidebar from "../components/Sidebar";
 import { useState, useEffect, useMemo } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -343,7 +344,7 @@ const TradesPage = () => {
           {/* Replaced "Detailed Data" headline with time and date */}
           <div>
             <p className="text-black dark:text-white text-sm font-bold">{formatDate(currentDateTime)}</p> {/* Added dark mode text color */}
-            <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
+            <p className="text-orange-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
           {/* Timeframe buttons and Trend added here */}
           <div className="flex items-center gap-4"> {/* Adjusted gap */}
@@ -395,7 +396,7 @@ const TradesPage = () => {
                       <Button
                         size="sm"
                         onClick={handleSetBalance}
-                        className="bg-blue-500 hover:bg-blue-600 text-white"
+                        className="bg-orange-500 hover:bg-orange-600 text-white"
                       >
                         Add Deposit
                       </Button>
@@ -410,7 +411,7 @@ const TradesPage = () => {
                   ) : (
                     <Button
                       variant="outline"
-                      className="bg-blue-500 hover:bg-blue-600 text-white"
+                      className="bg-orange-500 hover:bg-orange-600 text-white"
                       onClick={() => setIsSettingBalance(true)}
                     >
                       <Plus className="h-4 w-4 mr-1" /> Add Deposit
@@ -424,65 +425,74 @@ const TradesPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatsCard
                   title="Deposit"
-                  value={`$${balance.toFixed(2)}`} // Using the local balance state for now
-                  color="text-green-500"
-                  borderColor="border-green-500 dark:border-green-700" // Added dark mode border color
+                  value={`$${balance.toFixed(2)}`}
+                  color="text-gray-900 dark:text-white"
+                  leftBorderColor="border-l-orange-500"
+                  icon={DollarSign}
                 />
                 <StatsCard
                   title="Today's P&L"
                   value={stats.netProfit >= 0 ? `+${formatCurrency(stats.netProfit)}` : formatCurrency(stats.netProfit)}
-                  color={stats.netProfit >= 0 ? "text-green-500" : "text-red-500"}
-                  borderColor={stats.netProfit >= 0 ? "border-green-500 dark:border-green-700" : "border-red-500 dark:border-red-700"}
+                  color="text-gray-900 dark:text-white"
+                  leftBorderColor="border-l-green-500"
+                  icon={Scale}
                 />
                 <StatsCard
                   title="Win Rate"
                   value={stats.winRate}
-                  color="text-gray-700 dark:text-gray-200" // Added dark mode text color
-                  borderColor="border-gray-200 dark:border-gray-700" // Added dark mode border color
+                  color="text-gray-900 dark:text-white"
+                  leftBorderColor="border-l-blue-500"
+                  icon={Percent}
                 />
                 <StatsCard
                   title="Account Balance"
-                  value={formatCurrency(balance + stats.netProfit)} // Deposit + Net Profit
-                  color={balance + stats.netProfit >= 0 ? "text-blue-500" : "text-red-500"}
-                  borderColor={balance + stats.netProfit >= 0 ? "border-blue-500 dark:border-blue-700" : "border-red-500 dark:border-red-700"}
+                  value={formatCurrency(balance + stats.netProfit)}
+                  color="text-gray-900 dark:text-white"
+                  leftBorderColor="border-l-green-500"
+                  icon={TrendingUp}
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
                 <StatsCard
                   title="Total Trades"
-                  value={stats.totalTrades.toString()} // Use totalTrades from calculated stats
+                  value={`${stats.totalTrades} Trades`}
                   labelPosition="below"
-                  color="text-gray-700 dark:text-gray-200" // Added dark mode text color
-                  borderColor="border-gray-200 dark:border-gray-700" // Added dark mode border color
+                  color="text-gray-900 dark:text-white"
+                  leftBorderColor="border-l-black"
+                  icon={BarChart3}
                 />
                 <StatsCard
                   title="Wins"
-                  value={formatCurrency(winsLossesStats.winsProfit)}
+                  value={`${stats.wins} Wins`}
                   labelPosition="below"
-                  color="text-green-500"
-                  borderColor="border-green-500 dark:border-green-700"
+                  color="text-gray-900 dark:text-white"
+                  leftBorderColor="border-l-green-500"
+                  icon={TrendingUp}
                 />
                 <StatsCard
                   title="Losses"
-                  value={formatCurrency(winsLossesStats.lossesProfit)}
+                  value={`${stats.losses} Losses`}
                   labelPosition="below"
-                  color="text-red-500"
-                  borderColor="border-red-500 dark:border-red-700"
+                  color="text-gray-900 dark:text-white"
+                  leftBorderColor="border-l-red-500"
+                  icon={TrendingDown}
                 />
                 <StatsCard
                   title="Best Trade"
                   value={stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
                   labelPosition="below"
-                  color="text-green-500"
-                  borderColor="border-green-500 dark:border-green-700" // Added dark mode border color
+                  color="text-gray-900 dark:text-white"
+                  leftBorderColor="border-l-green-500"
+                  icon={Award}
                 />
                 <StatsCard
                   title="Worst Trade"
                   value={formatCurrency(stats.worstTrade)}
                   labelPosition="below"
-                  color="text-red-500"
-                  borderColor="border-red-500 dark:border-red-700" // Added dark mode border color
+                  color="text-gray-900 dark:text-white"
+                  leftBorderColor="border-l-red-500"
+                  icon={TrendingDown}
                 />
               </div>
             </div>
@@ -500,7 +510,7 @@ const TradesPage = () => {
                     <h3 className="text-lg font-medium text-center mb-6 text-gray-800 dark:text-gray-200">Signal Progress</h3>
                     <div className="flex justify-center mb-4">
                       <div className="relative h-32 w-32">
-                        <Progress value={tradingRulesProgress} className="h-full w-full rounded-full [&>div]:!bg-green-500" />
+                        <Progress value={tradingRulesProgress} className="h-full w-full rounded-full [&>div]:!bg-orange-500" />
                         <div className="absolute inset-0 flex items-center justify-center">
                           <span className="text-2xl font-bold text-gray-800 dark:text-gray-100">{tradingRulesProgress.toFixed(0)}%</span>
                         </div>
@@ -510,7 +520,7 @@ const TradesPage = () => {
                     <div className="flex justify-center">
                       <Button
                         variant={tradingRulesProgress === 100 ? "default" : "destructive"}
-                        className={tradingRulesProgress === 100 ? "bg-green-500 hover:bg-green-600 text-white" : ""}
+                        className={tradingRulesProgress === 100 ? "bg-orange-500 hover:bg-orange-600 text-white" : ""}
                       >
                         {tradingRulesProgress === 100 ? "Take The Trade" : "Ready To Trade"}
                       </Button>
@@ -532,7 +542,7 @@ const TradesPage = () => {
               <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 px-6 py-3 border-b dark:border-gray-600">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Trade Details</h2>
                 <div className="flex gap-2">
-                  <Button className="bg-green-500 hover:bg-green-600 text-white" onClick={handleOpenAddTradeForm}> {/* Updated onClick */}
+                  <Button className="bg-orange-500 hover:bg-orange-600 text-white" onClick={handleOpenAddTradeForm}> {/* Updated onClick */}
                     <Plus className="mr-2 h-4 w-4" /> Add
                   </Button>
                   <Button
@@ -550,13 +560,13 @@ const TradesPage = () => {
               {showInlineForm && (
                 <AnimatedContainer delay={0.1}>
                   <motion.div
-                    className="p-6 bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-b-2 border-purple-200 dark:border-purple-700 shadow-lg"
+                    className="p-6 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-b-2 border-blue-200 dark:border-blue-700 shadow-lg"
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                   >
                     <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-xl font-bold text-purple-800 dark:text-purple-200 flex items-center gap-2">
+                      <h3 className="text-xl font-bold text-blue-800 dark:text-blue-200 flex items-center gap-2">
                         <Edit className="h-5 w-5" />
                         {editingTradeId !== null ? `Edit Start Trade #${editingTradeId}` : "Add New Start Trade"}
                       </h3>
@@ -572,22 +582,22 @@ const TradesPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {/* First Row */}
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Strategy *</label>
+                        <label className="text-sm font-medium text-blue-700 dark:text-blue-300">Strategy *</label>
                         <Input
                           placeholder="Enter strategy name"
                           value={tradeFormData.strategy}
                           onChange={(e) => handleTradeFormInputChange("strategy", e.target.value)}
-                          className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:focus:border-purple-400 dark:bg-gray-600 dark:text-white"
+                          className="border-blue-200 dark:border-blue-600 focus:border-blue-400 dark:focus:border-blue-400 dark:bg-gray-600 dark:text-white"
                           required
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Trading Pair *</label>
+                        <label className="text-sm font-medium text-blue-700 dark:text-blue-300">Trading Pair *</label>
                         <Select
                           value={tradeFormData.pair}
                           onValueChange={(value) => handleTradeFormInputChange("pair", value)}
                         >
-                          <SelectTrigger className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:bg-gray-600 dark:text-white">
+                          <SelectTrigger className="border-blue-200 dark:border-blue-600 focus:border-blue-400 dark:bg-gray-600 dark:text-white">
                             <SelectValue placeholder="Select Trading Pair" />
                           </SelectTrigger>
                           <SelectContent className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
@@ -604,12 +614,12 @@ const TradesPage = () => {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Position Type *</label>
+                        <label className="text-sm font-medium text-blue-700 dark:text-blue-300">Position Type *</label>
                         <Select
                           value={tradeFormData.type}
                           onValueChange={(value) => handleTradeFormInputChange("type", value)}
                         >
-                          <SelectTrigger className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:bg-gray-600 dark:text-white">
+                          <SelectTrigger className="border-blue-200 dark:border-blue-600 focus:border-blue-400 dark:bg-gray-600 dark:text-white">
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                           <SelectContent className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
@@ -621,32 +631,32 @@ const TradesPage = () => {
 
                       {/* Second Row */}
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Date *</label>
+                        <label className="text-sm font-medium text-blue-700 dark:text-blue-300">Date *</label>
                         <Input
                           type="date"
                           value={tradeFormData.openTime}
                           onChange={(e) => handleTradeFormInputChange("openTime", e.target.value)}
-                          className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:focus:border-purple-400 dark:bg-gray-600 dark:text-white"
+                          className="border-blue-200 dark:border-blue-600 focus:border-blue-400 dark:focus:border-blue-400 dark:bg-gray-600 dark:text-white"
                           required
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Trade Time *</label>
+                        <label className="text-sm font-medium text-blue-700 dark:text-blue-300">Trade Time *</label>
                         <Input
                           type="time"
                           value={tradeFormData.tradeTime}
                           onChange={(e) => handleTradeFormInputChange("tradeTime", e.target.value)}
-                          className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:focus:border-purple-400 dark:bg-gray-600 dark:text-white"
+                          className="border-blue-200 dark:border-blue-600 focus:border-blue-400 dark:focus:border-blue-400 dark:bg-gray-600 dark:text-white"
                           required
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-purple-700 dark:text-purple-300">Timeframe *</label>
+                        <label className="text-sm font-medium text-blue-700 dark:text-blue-300">Timeframe *</label>
                         <Select
                           value={tradeFormData.timeframe}
                           onValueChange={(value) => handleTradeFormInputChange("timeframe", value)}
                         >
-                          <SelectTrigger className="border-purple-200 dark:border-purple-600 focus:border-purple-400 dark:bg-gray-600 dark:text-white">
+                          <SelectTrigger className="border-blue-200 dark:border-blue-600 focus:border-blue-400 dark:bg-gray-600 dark:text-white">
                             <SelectValue placeholder="Select timeframe" />
                           </SelectTrigger>
                           <SelectContent className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
@@ -747,7 +757,7 @@ const TradesPage = () => {
                         </Select>
                       </div>
                     </div>
-                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-purple-200 dark:border-purple-700">
+                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-blue-200 dark:border-blue-700">
                       <Button
                         variant="outline"
                         onClick={handleCancelInlineForm}
@@ -757,7 +767,7 @@ const TradesPage = () => {
                       </Button>
                       <Button
                         onClick={handleSaveTrade}
-                        className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg"
+                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
                         disabled={!tradeFormData.strategy || !tradeFormData.pair || !tradeFormData.type || !tradeFormData.openTime || !tradeFormData.tradeTime || !tradeFormData.timeframe}
                       >
                         {editingTradeId !== null ? "💾 Save Changes" : "➕ Add Trade"}
@@ -818,8 +828,17 @@ const TradesPage = () => {
                       <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.trend}</TableCell> {/* Added dark mode text color and border */}
                       <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.lotSize}</TableCell> {/* Added dark mode text color and border */}
                       <TableCell className="text-red-500 border-b border-gray-200 dark:border-gray-700">{trade.candles}</TableCell> {/* Added border */}
-                      <TableCell className={cn(trade.winLoss === "win" ? "text-green-500" : "text-red-500", "border-b border-gray-200 dark:border-gray-700")}> {/* Added border */}
-                        {trade.winLoss === "win" ? "Win" : "Loss"}
+                      <TableCell className="border-b border-gray-200 dark:border-gray-700"> {/* Added border */}
+                        <Badge
+                          className={cn(
+                            "px-2 py-1 text-xs font-medium rounded-full",
+                            trade.winLoss === "win"
+                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                          )}
+                        >
+                          {trade.winLoss === "win" ? "Win" : "Loss"}
+                        </Badge>
                       </TableCell>
                       <TableCell className={cn(parseFloat(trade.netProfit) >= 0 ? "text-green-500" : "text-red-500", "border-b border-gray-200 dark:border-gray-700")}> {/* Added border */}
                         {trade.netProfit}
@@ -831,7 +850,7 @@ const TradesPage = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 hover:scale-105"
+                            className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200 hover:scale-105"
                             onClick={() => handleViewTrade(trade)}
                             title="View start trade analysis"
                           >

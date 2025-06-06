@@ -57,7 +57,7 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
 
   const getStatusIcon = () => {
     if (isGoalAchieved) {
-      return <CheckCircle className="h-5 w-5 text-green-500" />;
+      return <CheckCircle className="h-5 w-5 text-orange-500" />;
     } else if (isHalfway) {
       return <Clock className="h-5 w-5 text-yellow-500" />;
     } else {
@@ -77,7 +77,7 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
 
   const getStatusColor = () => {
     if (isGoalAchieved) {
-      return "text-green-500";
+      return "text-orange-500";
     } else if (isHalfway) {
       return "text-yellow-500";
     } else {
@@ -89,7 +89,7 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
     // No Goal State
     return (
       <motion.div
-        className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white via-green-50/30 to-emerald-50/50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-950 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600 transition-all duration-300 shadow-sm hover:shadow-md"
+        className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white via-orange-50/30 to-orange-50/50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-950 border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600 transition-all duration-300 shadow-sm hover:shadow-md"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -98,16 +98,16 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
         <div className="absolute inset-0 opacity-5 dark:opacity-10">
           <div className="w-full h-full" style={{
             backgroundImage: `
-              linear-gradient(rgba(34, 197, 94, 0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(34, 197, 94, 0.1) 1px, transparent 1px)
+              linear-gradient(rgba(249, 115, 22, 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(249, 115, 22, 0.1) 1px, transparent 1px)
             `,
             backgroundSize: '20px 20px'
           }}></div>
         </div>
 
         <div className="relative p-8 flex flex-col items-center justify-center text-center">
-          <div className="p-4 bg-green-100 dark:bg-green-900/30 rounded-full mb-4">
-            <Target className="h-8 w-8 text-green-600 dark:text-green-400" />
+          <div className="p-4 bg-orange-100 dark:bg-orange-900/30 rounded-full mb-4">
+            <Target className="h-8 w-8 text-orange-600 dark:text-orange-400" />
           </div>
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
             {readOnly ? "No Daily Profit Target Set" : "Set Your Daily Profit Target"}
@@ -119,7 +119,7 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
           {readOnly ? (
             <Button
               onClick={() => window.location.href = '/trade-goals'}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg"
+              className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg"
             >
               Go to Trade Goals
             </Button>
@@ -130,11 +130,11 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
                 placeholder="Enter target amount"
                 value={newTarget}
                 onChange={(e) => setNewTarget(e.target.value)}
-                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-green-500 dark:focus:border-green-400"
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-orange-500 dark:focus:border-orange-400"
               />
               <Button
                 onClick={handleSetTarget}
-                className="bg-green-600 hover:bg-green-700 text-white"
+                className="bg-orange-600 hover:bg-orange-700 text-white"
               >
                 Set
               </Button>
@@ -149,7 +149,7 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
           ) : (
             <Button
               onClick={() => setIsSettingTarget(true)}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg"
+              className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg"
             >
               Set Daily Goal
             </Button>
@@ -161,7 +161,7 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
 
   return (
     <motion.div
-      className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white via-green-50/30 to-emerald-50/50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-950 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600 transition-all duration-300 shadow-sm hover:shadow-md"
+      className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white via-orange-50/30 to-orange-50/50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-950 border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600 transition-all duration-300 shadow-sm hover:shadow-md"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -170,8 +170,8 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
       <div className="absolute inset-0 opacity-5 dark:opacity-10">
         <div className="w-full h-full" style={{
           backgroundImage: `
-            linear-gradient(rgba(34, 197, 94, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(34, 197, 94, 0.1) 1px, transparent 1px)
+            linear-gradient(rgba(249, 115, 22, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(249, 115, 22, 0.1) 1px, transparent 1px)
           `,
           backgroundSize: '20px 20px'
         }}></div>
@@ -181,8 +181,8 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
         {/* Header Section */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
-              <Target className="h-6 w-6 text-green-600 dark:text-green-400" />
+            <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-full">
+              <Target className="h-6 w-6 text-orange-600 dark:text-orange-400" />
             </div>
             <div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -192,13 +192,13 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
             </div>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
               {formatCurrency(dailyTarget)}
             </div>
             {readOnly ? (
               <button
                 onClick={() => window.location.href = '/trade-goals'}
-                className="text-xs text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+                className="text-xs text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
               >
                 Edit in Trade Goals
               </button>
@@ -209,12 +209,12 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
                   placeholder="New target"
                   value={newTarget}
                   onChange={(e) => setNewTarget(e.target.value)}
-                  className="w-24 h-8 text-xs bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-green-500 dark:focus:border-green-400"
+                  className="w-24 h-8 text-xs bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-orange-500 dark:focus:border-orange-400"
                 />
                 <Button
                   size="sm"
                   onClick={handleSetTarget}
-                  className="h-8 px-3 text-xs bg-green-600 hover:bg-green-700 text-white"
+                  className="h-8 px-3 text-xs bg-orange-600 hover:bg-orange-700 text-white"
                 >
                   Set
                 </Button>
@@ -230,7 +230,7 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
             ) : (
               <button
                 onClick={() => setIsSettingTarget(true)}
-                className="text-xs text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+                className="text-xs text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
               >
                 Edit Target
               </button>
@@ -251,7 +251,7 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
               </span>
             </div>
             <div className="text-right">
-              <div className="text-lg font-bold text-green-600 dark:text-green-400">
+              <div className="text-lg font-bold text-orange-600 dark:text-orange-400">
                 {progressPercentage.toFixed(1)}%
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -264,7 +264,7 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
           <div className="relative">
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
               <motion.div
-                className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full relative overflow-hidden"
+                className="h-full bg-gradient-to-r from-orange-500 to-orange-600 rounded-full relative overflow-hidden"
                 style={{ width: `${progressPercentage}%` }}
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercentage}%` }}
@@ -279,7 +279,7 @@ const DailyProfitTarget = ({ currentProfit, dailyTarget, onSetTarget, readOnly =
             </div>
             {progressPercentage > 0 && (
               <div
-                className="absolute -top-0.5 -bottom-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600"
+                className="absolute -top-0.5 -bottom-0.5 rounded-full bg-gradient-to-r from-orange-400 to-orange-600"
                 style={{
                   width: `${progressPercentage}%`
                 }}

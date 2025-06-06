@@ -97,7 +97,7 @@ const AnalyticsPage = () => {
           {/* Display current date and time */}
           <div>
             <p className="text-black dark:text-white text-sm font-bold">{formatDate(currentDateTime)}</p> {/* Added dark mode text color */}
-            <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
+            <p className="text-orange-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
         </header>
 

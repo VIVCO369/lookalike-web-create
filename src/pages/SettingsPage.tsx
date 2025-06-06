@@ -52,6 +52,7 @@ interface APISettings {
   serverURL: string;
   connectionStatus: 'connected' | 'disconnected' | 'connecting' | 'error';
   lastConnected: Date | null;
+  lastRefresh?: Date | null;
   autoReconnect: boolean;
   accountInfo: {
     loginid: string;
@@ -129,19 +130,14 @@ const initialSettings: AllSettings = {
     autoSave: true
   },
   api: {
-    derivAPIToken: localStorage.getItem('deriv_api_token') || "jJEVrQZnSumnrEs",
-    isConnected: localStorage.getItem('deriv_api_connected') === 'true',
-    serverURL: "wss://ws.derivws.com/websockets/v3?app_id=1089",
-    connectionStatus: localStorage.getItem('deriv_api_connected') === 'true' ? 'connected' : 'disconnected',
-    lastConnected: localStorage.getItem('connection_time') ? new Date(localStorage.getItem('connection_time')!) : null,
+    derivAPIToken: "",
+    isConnected: false,
+    serverURL: "wss://ws.derivws.com/websockets/v3",
+    connectionStatus: 'disconnected',
+    lastConnected: null,
+    lastRefresh: null,
     autoReconnect: true,
-    accountInfo: localStorage.getItem('account_id') ? {
-      loginid: localStorage.getItem('account_id') || '',
-      fullname: localStorage.getItem('account_holder') || '',
-      currency: localStorage.getItem('account_currency') || 'USD',
-      balance: parseFloat(localStorage.getItem('account_balance') || '0'),
-      country: localStorage.getItem('account_country') || ''
-    } : null,
+    accountInfo: null,
     connectionError: null,
     websocket: null,
     permissions: {
@@ -252,30 +248,41 @@ const SettingsPage = () => {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [settings.appearance.theme]);
 
-  // Check for existing global connection on mount
+  // Clear any cached connection data on mount - FORCE FRESH START
   useEffect(() => {
-    if (window.derivGlobalSocket &&
-        window.derivGlobalSocket.readyState === WebSocket.OPEN) {
-      updateSettings('api', 'websocket', window.derivGlobalSocket);
-      updateSettings('api', 'isConnected', true);
-      updateSettings('api', 'connectionStatus', 'connected');
+    console.log('🧹 CLEARING ALL CACHED DATA ON PAGE LOAD');
 
-      // Set up message listener for balance updates
-      window.derivGlobalSocket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.balance) {
-            updateSettings('api', 'accountInfo', {
-              ...settings.api.accountInfo!,
-              balance: parseFloat(data.balance.balance)
-            });
-            localStorage.setItem('account_balance', data.balance.balance);
-          }
-        } catch (error) {
-          console.error('Error parsing balance update:', error);
-        }
-      };
+    // Clear all cached connection data
+    localStorage.removeItem('deriv_api_connected');
+    localStorage.removeItem('account_balance');
+    localStorage.removeItem('account_holder');
+    localStorage.removeItem('account_id');
+    localStorage.removeItem('account_currency');
+    localStorage.removeItem('account_country');
+    localStorage.removeItem('connection_time');
+
+    // Close any existing global socket
+    if (window.derivGlobalSocket) {
+      console.log('🔌 Closing existing global socket on page load');
+      window.derivGlobalSocket.close();
+      delete window.derivGlobalSocket;
     }
+
+    // Force clear the settings state to match reality
+    updateSettings('api', 'isConnected', false);
+    updateSettings('api', 'accountInfo', null);
+    updateSettings('api', 'connectionStatus', 'disconnected');
+    updateSettings('api', 'websocket', null);
+    updateSettings('api', 'lastConnected', null);
+    updateSettings('api', 'connectionError', null);
+
+    // Force reset all connection state
+    updateSettings('api', 'isConnected', false);
+    updateSettings('api', 'connectionStatus', 'disconnected');
+    updateSettings('api', 'accountInfo', null);
+    updateSettings('api', 'websocket', null);
+    updateSettings('api', 'lastConnected', null);
+    updateSettings('api', 'connectionError', null);
   }, []);
 
   // Cleanup WebSocket connection on unmount
@@ -338,23 +345,61 @@ const SettingsPage = () => {
   };
 
   const connectToDerivAPI = async () => {
-    if (!settings.api.derivAPIToken) {
+    // Validate API token first
+    if (!settings.api.derivAPIToken || settings.api.derivAPIToken.trim().length === 0) {
+      updateSettings('api', 'connectionStatus', 'error');
+      updateSettings('api', 'connectionError', 'API token is required');
       toast({
-        title: "API Token required",
-        description: "Please enter your Deriv API token first.",
+        title: "API Token Required",
+        description: "Please enter your Deriv API token before connecting",
         variant: "destructive"
       });
       return;
     }
 
+    // Basic token validation - Deriv tokens are typically 15+ characters
+    const token = settings.api.derivAPIToken.trim();
+    if (token.length < 10) {
+      updateSettings('api', 'connectionStatus', 'error');
+      updateSettings('api', 'connectionError', 'Invalid API token format');
+      toast({
+        title: "Invalid Token",
+        description: "API token appears to be too short. Please check your token.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    console.log('🧹 CLEARING ALL CACHED DATA - FRESH CONNECTION WITH NEW TOKEN');
+    console.log('🔑 New API Token:', settings.api.derivAPIToken.substring(0, 10) + '...');
+
+    // FORCE CLEAR ALL CACHED DATA FIRST - NO MORE FAKE SHIT
+    localStorage.removeItem('deriv_api_connected');
+    localStorage.removeItem('deriv_api_token');
+    localStorage.removeItem('account_balance');
+    localStorage.removeItem('account_holder');
+    localStorage.removeItem('account_id');
+    localStorage.removeItem('account_currency');
+    localStorage.removeItem('account_country');
+    localStorage.removeItem('connection_time');
+
+    // FORCE CLEAR ALL STATE
+    updateSettings('api', 'isConnected', false);
+    updateSettings('api', 'accountInfo', null);
+    updateSettings('api', 'websocket', null);
+    updateSettings('api', 'lastConnected', null);
+    updateSettings('api', 'connectionError', null);
+
     // Close existing connection if any
     if (settings.api.websocket) {
+      console.log('🔌 Closing existing websocket...');
       settings.api.websocket.close();
       updateSettings('api', 'websocket', null);
     }
 
     // Clear global socket if exists
     if (window.derivGlobalSocket) {
+      console.log('🔌 Closing global websocket...');
       window.derivGlobalSocket.close();
       delete window.derivGlobalSocket;
     }
@@ -409,6 +454,17 @@ const SettingsPage = () => {
               updateSettings('api', 'isConnected', false);
               updateSettings('api', 'connectionError', response.error.message);
               updateSettings('api', 'websocket', null);
+              updateSettings('api', 'accountInfo', null);
+
+              // Clear ALL localStorage on auth failure - no more cached fake data
+              localStorage.removeItem('deriv_api_connected');
+              localStorage.removeItem('account_balance');
+              localStorage.removeItem('account_holder');
+              localStorage.removeItem('account_id');
+              localStorage.removeItem('account_currency');
+              localStorage.removeItem('account_country');
+              localStorage.removeItem('connection_time');
+
               ws.close();
 
               toast({
@@ -483,17 +539,33 @@ const SettingsPage = () => {
         clearTimeout(connectionTimeout);
         console.error('WebSocket error:', error);
 
+        let errorMessage = 'WebSocket connection failed';
+
+        // Provide more specific error messages
+        if (navigator.onLine === false) {
+          errorMessage = 'No internet connection detected';
+        } else if (settings.api.serverURL.includes('localhost')) {
+          errorMessage = 'Cannot connect to localhost. Use official Deriv servers.';
+        }
+
         updateSettings('api', 'connectionStatus', 'error');
         updateSettings('api', 'isConnected', false);
-        updateSettings('api', 'connectionError', 'WebSocket connection failed');
+        updateSettings('api', 'connectionError', errorMessage);
         updateSettings('api', 'websocket', null);
+        updateSettings('api', 'accountInfo', null);
 
-        // Clear localStorage on error
-        localStorage.setItem('deriv_api_connected', 'false');
+        // Clear ALL localStorage on error - no more cached fake data
+        localStorage.removeItem('deriv_api_connected');
+        localStorage.removeItem('account_balance');
+        localStorage.removeItem('account_holder');
+        localStorage.removeItem('account_id');
+        localStorage.removeItem('account_currency');
+        localStorage.removeItem('account_country');
+        localStorage.removeItem('connection_time');
 
         toast({
           title: "Connection failed",
-          description: "Unable to connect to Deriv servers",
+          description: errorMessage,
           variant: "destructive"
         });
       };
@@ -506,9 +578,16 @@ const SettingsPage = () => {
           updateSettings('api', 'connectionStatus', 'disconnected');
           updateSettings('api', 'isConnected', false);
           updateSettings('api', 'websocket', null);
+          updateSettings('api', 'accountInfo', null);
 
-          // Clear localStorage
-          localStorage.setItem('deriv_api_connected', 'false');
+          // Clear ALL localStorage - no more cached fake data
+          localStorage.removeItem('deriv_api_connected');
+          localStorage.removeItem('account_balance');
+          localStorage.removeItem('account_holder');
+          localStorage.removeItem('account_id');
+          localStorage.removeItem('account_currency');
+          localStorage.removeItem('account_country');
+          localStorage.removeItem('connection_time');
 
           // Clear global socket
           if (window.derivGlobalSocket === ws) {
@@ -545,36 +624,54 @@ const SettingsPage = () => {
   };
 
   const disconnectFromDerivAPI = () => {
-    // Close WebSocket connection
-    if (settings.api.websocket) {
-      settings.api.websocket.close();
+    console.log('🔌 DISCONNECTING from Deriv API...');
+
+    try {
+      // Close WebSocket connection
+      if (settings.api.websocket) {
+        console.log('Closing settings websocket...');
+        settings.api.websocket.close();
+      }
+
+      // Clear global socket
+      if (window.derivGlobalSocket) {
+        console.log('Closing global websocket...');
+        window.derivGlobalSocket.close();
+        delete window.derivGlobalSocket;
+      }
+
+      // Update state
+      updateSettings('api', 'connectionStatus', 'disconnected');
+      updateSettings('api', 'isConnected', false);
+      updateSettings('api', 'websocket', null);
+      updateSettings('api', 'accountInfo', null);
+      updateSettings('api', 'connectionError', null);
+      updateSettings('api', 'lastConnected', null);
+
+      // Clear localStorage
+      localStorage.setItem('deriv_api_connected', 'false');
+      localStorage.removeItem('deriv_api_token');
+      localStorage.removeItem('account_balance');
+      localStorage.removeItem('account_holder');
+      localStorage.removeItem('account_id');
+      localStorage.removeItem('account_currency');
+      localStorage.removeItem('account_country');
+      localStorage.removeItem('connection_time');
+
+      console.log('✅ Successfully disconnected!');
+
+      toast({
+        title: "Disconnected",
+        description: "Successfully disconnected from Deriv API.",
+      });
+    } catch (error) {
+      console.error('❌ Error during disconnect:', error);
+      toast({
+        title: "Disconnect Error",
+        description: "Error occurred while disconnecting.",
+        variant: "destructive"
+      });
     }
-
-    // Clear global socket
-    if (window.derivGlobalSocket) {
-      window.derivGlobalSocket.close();
-      delete window.derivGlobalSocket;
-    }
-
-    // Update state
-    updateSettings('api', 'connectionStatus', 'disconnected');
-    updateSettings('api', 'isConnected', false);
-    updateSettings('api', 'websocket', null);
-    updateSettings('api', 'accountInfo', null);
-
-    // Clear localStorage
-    localStorage.setItem('deriv_api_connected', 'false');
-    localStorage.removeItem('account_balance');
-    localStorage.removeItem('account_holder');
-    localStorage.removeItem('account_id');
-    localStorage.removeItem('account_currency');
-    localStorage.removeItem('account_country');
-    localStorage.removeItem('connection_time');
-
-    toast({
-      title: "Disconnected",
-      description: "Successfully disconnected from Deriv API.",
-    });
   };
 
   const testNetworkConnectivity = async () => {
@@ -590,52 +687,57 @@ const SettingsPage = () => {
       return false;
     }
 
-    // Test basic WebSocket connection to Deriv
-    try {
-      const testWs = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
+    // Test multiple Deriv endpoints for better reliability
+    const endpoints = [
+      'wss://ws.derivws.com/websockets/v3?app_id=1089',
+      'wss://ws.binaryws.com/websockets/v3?app_id=1089',
+      'wss://frontend.derivws.com/websockets/v3?app_id=1089'
+    ];
 
-      const testPromise = new Promise<boolean>((resolve) => {
-        const timeout = setTimeout(() => {
-          testWs.close();
-          resolve(false);
-        }, 5000);
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`Testing endpoint: ${endpoint}`);
+        const testWs = new WebSocket(endpoint);
 
-        testWs.onopen = () => {
-          clearTimeout(timeout);
-          testWs.close();
-          resolve(true);
-        };
+        const testPromise = new Promise<boolean>((resolve) => {
+          const timeout = setTimeout(() => {
+            testWs.close();
+            resolve(false);
+          }, 5000);
 
-        testWs.onerror = () => {
-          clearTimeout(timeout);
-          resolve(false);
-        };
-      });
+          testWs.onopen = () => {
+            clearTimeout(timeout);
+            testWs.close();
+            resolve(true);
+          };
 
-      const canConnect = await testPromise;
-
-      if (canConnect) {
-        toast({
-          title: "Connection Test Passed",
-          description: "WebSocket connection to Deriv servers is working",
+          testWs.onerror = () => {
+            clearTimeout(timeout);
+            resolve(false);
+          };
         });
-        return true;
-      } else {
-        toast({
-          title: "Connection Test Failed",
-          description: "Cannot reach Deriv servers. Check your network or firewall settings.",
-          variant: "destructive"
-        });
-        return false;
+
+        const canConnect = await testPromise;
+
+        if (canConnect) {
+          toast({
+            title: "Connection Test Passed",
+            description: `WebSocket connection to Deriv servers is working (${endpoint})`,
+          });
+          return true;
+        }
+      } catch (error) {
+        console.log(`Failed to test endpoint ${endpoint}:`, error);
+        continue;
       }
-    } catch (error) {
-      toast({
-        title: "Connection Test Failed",
-        description: "WebSocket connection blocked or failed",
-        variant: "destructive"
-      });
-      return false;
     }
+
+    toast({
+      title: "Connection Test Failed",
+      description: "Cannot reach any Deriv servers. Check your network or firewall settings.",
+      variant: "destructive"
+    });
+    return false;
   };
 
   const testAPIConnection = async () => {
@@ -643,6 +745,51 @@ const SettingsPage = () => {
     if (networkOK) {
       connectToDerivAPI();
     }
+  };
+
+  const forceRefreshConnection = () => {
+    console.log('🔄 FORCE REFRESHING CONNECTION STATE');
+
+    // Clear ALL cached data
+    localStorage.removeItem('deriv_api_connected');
+    localStorage.removeItem('deriv_api_token');
+    localStorage.removeItem('account_balance');
+    localStorage.removeItem('account_holder');
+    localStorage.removeItem('account_id');
+    localStorage.removeItem('account_currency');
+    localStorage.removeItem('account_country');
+    localStorage.removeItem('connection_time');
+
+    // Close any existing connections
+    if (settings.api.websocket) {
+      console.log('🔌 Closing settings websocket...');
+      settings.api.websocket.close();
+    }
+
+    if (window.derivGlobalSocket) {
+      console.log('🔌 Closing global websocket...');
+      window.derivGlobalSocket.close();
+      delete window.derivGlobalSocket;
+    }
+
+    // Reset ALL state to disconnected - Force immediate update
+    console.log('🧹 Clearing all state data...');
+    updateSettings('api', 'isConnected', false);
+    updateSettings('api', 'accountInfo', null);
+    updateSettings('api', 'connectionStatus', 'disconnected');
+    updateSettings('api', 'websocket', null);
+    updateSettings('api', 'lastConnected', null);
+    updateSettings('api', 'connectionError', null);
+
+    // Force a re-render by updating a timestamp
+    updateSettings('api', 'lastRefresh', new Date());
+
+    console.log('✅ All data cleared - accountInfo should now be NULL');
+
+    toast({
+      title: "Connection State Refreshed",
+      description: "All cached data cleared. Ready for fresh connection.",
+    });
   };
 
   const getConnectionStatusColor = () => {
@@ -908,14 +1055,14 @@ const SettingsPage = () => {
                             <Badge className={cn("px-3 py-1", getConnectionStatusColor())}>
                               {getConnectionStatusText()}
                             </Badge>
-                            {settings.api.isConnected && (
+                            {(settings.api.isConnected || settings.api.connectionStatus === 'connected') && (
                               <Button
                                 onClick={disconnectFromDerivAPI}
                                 variant="outline"
                                 size="sm"
-                                className="text-red-600 hover:text-red-700"
+                                className="text-red-600 hover:text-red-700 border-red-300 hover:bg-red-50"
                               >
-                                Disconnect
+                                🔌 Disconnect
                               </Button>
                             )}
                           </div>
@@ -930,17 +1077,36 @@ const SettingsPage = () => {
                                 id="apiToken"
                                 type="password"
                                 value={settings.api.derivAPIToken}
-                                onChange={(e) => updateSettings('api', 'derivAPIToken', e.target.value)}
+                                onChange={(e) => {
+                                  console.log('🔑 API Token changed - clearing cached data');
+                                  // Clear all cached data when token changes
+                                  localStorage.removeItem('deriv_api_connected');
+                                  localStorage.removeItem('deriv_api_token');
+                                  localStorage.removeItem('account_balance');
+                                  localStorage.removeItem('account_holder');
+                                  localStorage.removeItem('account_id');
+                                  localStorage.removeItem('account_currency');
+                                  localStorage.removeItem('account_country');
+                                  localStorage.removeItem('connection_time');
+
+                                  // Clear state
+                                  updateSettings('api', 'isConnected', false);
+                                  updateSettings('api', 'accountInfo', null);
+                                  updateSettings('api', 'connectionStatus', 'disconnected');
+
+                                  // Update token
+                                  updateSettings('api', 'derivAPIToken', e.target.value);
+                                }}
                                 placeholder="Enter your Deriv API token"
                                 className="flex-1"
                               />
                               <div className="flex gap-2">
                                 <Button
-                                  onClick={settings.api.isConnected ? disconnectFromDerivAPI : connectToDerivAPI}
+                                  onClick={(settings.api.isConnected || settings.api.connectionStatus === 'connected') ? disconnectFromDerivAPI : connectToDerivAPI}
                                   disabled={settings.api.connectionStatus === 'connecting'}
                                   className={cn(
                                     "text-white flex-1",
-                                    settings.api.isConnected
+                                    (settings.api.isConnected || settings.api.connectionStatus === 'connected')
                                       ? "bg-red-500 hover:bg-red-600"
                                       : "bg-orange-500 hover:bg-orange-600"
                                   )}
@@ -950,7 +1116,7 @@ const SettingsPage = () => {
                                       <Zap className="h-4 w-4 mr-2 animate-spin" />
                                       Connecting...
                                     </>
-                                  ) : settings.api.isConnected ? (
+                                  ) : (settings.api.isConnected || settings.api.connectionStatus === 'connected') ? (
                                     <>
                                       <Wifi className="h-4 w-4 mr-2" />
                                       Disconnect
@@ -989,62 +1155,88 @@ const SettingsPage = () => {
                             </p>
                           </div>
 
-                          {/* Debug Connection State */}
-                          <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 border rounded-lg text-xs">
-                            <div className="font-mono">
-                              <div>Connection Status: {settings.api.connectionStatus}</div>
-                              <div>Is Connected: {settings.api.isConnected ? 'true' : 'false'}</div>
-                              <div>Account Info: {settings.api.accountInfo ? 'exists' : 'null'}</div>
-                              {settings.api.accountInfo && (
-                                <div>Account Data: {JSON.stringify(settings.api.accountInfo, null, 2)}</div>
-                              )}
+                          {/* Debug Info & Force Refresh */}
+                          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-xs">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <strong>DEBUG:</strong> Connected: {settings.api.isConnected ? 'YES' : 'NO'} |
+                                AccountInfo: {settings.api.accountInfo ? 'EXISTS' : 'NULL'} |
+                                Status: {settings.api.connectionStatus} |
+                                LocalStorage: {localStorage.getItem('deriv_api_connected') || 'NULL'}
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={forceRefreshConnection}
+                              >
+                                🔄 Refresh
+                              </Button>
                             </div>
+                            {settings.api.accountInfo && (
+                              <div className="mt-1">Data: {JSON.stringify(settings.api.accountInfo)}</div>
+                            )}
                           </div>
 
-                          {/* Account Details Information - Always Show for Testing */}
-                          <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-700 rounded-lg">
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="flex items-center gap-2">
-                                <div className={`w-3 h-3 rounded-full ${settings.api.isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
-                                <h4 className="font-semibold text-green-800 dark:text-green-200">
-                                  {settings.api.isConnected ? 'API Connected' : 'API Disconnected'}
-                                </h4>
-                              </div>
-                              <div className="text-xs text-green-600 dark:text-green-400 font-medium">
-                                Online since: {new Date().toLocaleTimeString()}
+                          {/* Modern API Connection Status Card - Matches Your Image */}
+                          {settings.api.isConnected && settings.api.accountInfo && (
+                            <div className="mt-6">
+                              <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border border-green-200 dark:border-green-800 rounded-xl p-6 shadow-sm">
+                                {/* Header */}
+                                <div className="flex items-center justify-between mb-6">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">API Disconnected</h3>
+                                  </div>
+                                  <div className="text-sm text-green-600 dark:text-green-400 font-medium">
+                                    Online since: {settings.api.lastConnected?.toLocaleTimeString() || '4:24:12 AM'}
+                                  </div>
+                                </div>
+
+                                {/* Account Information Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                  {/* Account Holder */}
+                                  <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700">
+                                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                                      ACCOUNT HOLDER
+                                    </div>
+                                    <div className="text-lg font-bold text-green-700 dark:text-green-300">
+                                      {settings.api.accountInfo.fullname}
+                                    </div>
+                                  </div>
+
+                                  {/* Account ID */}
+                                  <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700">
+                                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                                      ACCOUNT ID
+                                    </div>
+                                    <div className="text-lg font-bold text-green-700 dark:text-green-300">
+                                      {settings.api.accountInfo.loginid}
+                                    </div>
+                                  </div>
+
+                                  {/* Account Balance */}
+                                  <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700">
+                                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                                      ACCOUNT BALANCE
+                                    </div>
+                                    <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                                      ${settings.api.accountInfo.balance.toFixed(2)}
+                                    </div>
+                                  </div>
+
+                                  {/* Currency */}
+                                  <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700">
+                                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                                      CURRENCY
+                                    </div>
+                                    <div className="text-lg font-bold text-green-700 dark:text-green-300">
+                                      {settings.api.accountInfo.currency}
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
                             </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-green-100 dark:border-green-800">
-                                <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Account Holder</div>
-                                <div className="font-bold text-green-700 dark:text-green-300 text-lg">
-                                  {settings.api.accountInfo?.fullname || settings.api.accountInfo?.loginid || 'Mr Vivian Ferris'}
-                                </div>
-                              </div>
-
-                              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-green-100 dark:border-green-800">
-                                <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Account ID</div>
-                                <div className="font-bold text-green-700 dark:text-green-300 text-lg">
-                                  {settings.api.accountInfo?.loginid || 'VRTC1436448'}
-                                </div>
-                              </div>
-
-                              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-green-100 dark:border-green-800">
-                                <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Account Balance</div>
-                                <div className="font-bold text-green-700 dark:text-green-300 text-xl">
-                                  ${settings.api.accountInfo?.balance?.toFixed(2) || '263.15'}
-                                </div>
-                              </div>
-
-                              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-green-100 dark:border-green-800">
-                                <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Currency</div>
-                                <div className="font-bold text-green-700 dark:text-green-300 text-lg">
-                                  {settings.api.accountInfo?.currency || 'USD'}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                          )}
 
                           <div className="space-y-2">
                             <Label htmlFor="serverURL">Server URL</Label>

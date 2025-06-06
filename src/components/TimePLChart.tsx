@@ -118,6 +118,69 @@ const TimePLChart: React.FC = () => {
       <CardContent>
         {timePLData.length > 0 ? (
           <>
+            {/* Summary Statistics */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+              <motion.div
+                className="p-3 rounded-lg border bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="text-center">
+                  <DollarSign className="h-5 w-5 text-green-600 mx-auto mb-1" />
+                  <div className="text-xl font-bold text-gray-900 dark:text-white">
+                    ${totalPnL.toFixed(2)}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Total P/L</div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="p-3 rounded-lg border bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+              >
+                <div className="text-center">
+                  <TrendingUp className="h-5 w-5 text-blue-600 mx-auto mb-1" />
+                  <div className="text-xl font-bold text-gray-900 dark:text-white">
+                    ${finalCumulative.toFixed(2)}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Final Balance</div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="p-3 rounded-lg border bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+              >
+                <div className="text-center">
+                  <Clock className="h-5 w-5 text-purple-600 mx-auto mb-1" />
+                  <div className="text-xl font-bold text-gray-900 dark:text-white">
+                    {profitableHours}/{timePLData.length}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Profitable Hours</div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="p-3 rounded-lg border bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-700"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.3 }}
+              >
+                <div className="text-center">
+                  <TrendingUp className="h-5 w-5 text-orange-600 mx-auto mb-1" />
+                  <div className="text-xl font-bold text-gray-900 dark:text-white">
+                    {bestHour.time}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Best Hour</div>
+                </div>
+              </motion.div>
+            </div>
+
             {/* Chart Area */}
             <div className="relative mb-6 bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
               <svg width="100%" height={chartHeight} viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="overflow-visible">
@@ -242,68 +305,7 @@ const TimePLChart: React.FC = () => {
               </div>
             </div>
 
-            {/* Summary Statistics */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <motion.div
-                className="p-3 rounded-lg border bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="text-center">
-                  <DollarSign className="h-5 w-5 text-green-600 mx-auto mb-1" />
-                  <div className="text-xl font-bold text-gray-900 dark:text-white">
-                    ${totalPnL.toFixed(2)}
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Total P/L</div>
-                </div>
-              </motion.div>
 
-              <motion.div
-                className="p-3 rounded-lg border bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-              >
-                <div className="text-center">
-                  <TrendingUp className="h-5 w-5 text-blue-600 mx-auto mb-1" />
-                  <div className="text-xl font-bold text-gray-900 dark:text-white">
-                    ${finalCumulative.toFixed(2)}
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Final Balance</div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                className="p-3 rounded-lg border bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.2 }}
-              >
-                <div className="text-center">
-                  <Clock className="h-5 w-5 text-purple-600 mx-auto mb-1" />
-                  <div className="text-xl font-bold text-gray-900 dark:text-white">
-                    {profitableHours}/{timePLData.length}
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Profitable Hours</div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                className="p-3 rounded-lg border bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-700"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.3 }}
-              >
-                <div className="text-center">
-                  <TrendingUp className="h-5 w-5 text-orange-600 mx-auto mb-1" />
-                  <div className="text-xl font-bold text-gray-900 dark:text-white">
-                    {bestHour.time}
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Best Hour</div>
-                </div>
-              </motion.div>
-            </div>
           </>
         ) : (
           /* No Data State */

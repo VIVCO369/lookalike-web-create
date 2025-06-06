@@ -85,7 +85,7 @@ const Index = () => {
           {/* Date and Time - Right Side */}
           <div className="text-right">
             <p className="text-gray-900 dark:text-white text-sm font-bold">{formatDate(currentDateTime)}</p>
-            <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
+            <p className="text-orange-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
         </motion.header>
 

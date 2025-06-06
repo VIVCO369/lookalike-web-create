@@ -9,110 +9,97 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Sidebar from '../../components/Sidebar';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { 
-  Copy, 
-  Users, 
-  TrendingUp, 
-  TrendingDown, 
-  Star, 
-  DollarSign, 
+import {
+  Copy,
+  Users,
+  TrendingUp,
+  TrendingDown,
+  Star,
+  DollarSign,
   BarChart3,
   Eye,
+  EyeOff,
   UserPlus,
   Settings,
   Shield,
-  AlertCircle
+  AlertCircle,
+  Plus,
+  Trash2,
+  Activity,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import useLocalStorage from '@/hooks/useLocalStorage';
 
-interface Trader {
-  id: string;
-  name: string;
-  avatar: string;
-  winRate: number;
-  totalProfit: number;
-  followers: number;
-  rating: number;
-  riskLevel: 'Low' | 'Medium' | 'High';
-  strategy: string;
-  isFollowing: boolean;
-  copyAmount: number;
+interface MasterAccount {
+  apiToken: string;
+  isConnected: boolean;
+  balance: number;
+  isVisible: boolean;
 }
 
-interface CopyTradeSettings {
-  enabled: boolean;
-  maxCopyAmount: number;
-  stopLossPercentage: number;
-  maxDailyLoss: number;
-  autoStopOnLoss: boolean;
+interface FollowerAccount {
+  id: string;
+  name: string;
+  apiToken: string;
+  copyRatio: number;
+  maxTradeAmount: number;
+  status: 'Active' | 'Inactive';
+  balance: number;
+  lastActivity: string;
+}
+
+interface CopyTradeStats {
+  masterStatus: 'Connected' | 'Disconnected';
+  activeFollowers: number;
+  totalTrades: number;
+  totalProfit: number;
 }
 
 const CopyTradePage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [newFollowerName, setNewFollowerName] = useState('');
+  const [newFollowerToken, setNewFollowerToken] = useState('');
+  const [newFollowerRatio, setNewFollowerRatio] = useState(1);
+  const [newFollowerMaxAmount, setNewFollowerMaxAmount] = useState(100);
 
-  const [copySettings, setCopySettings] = useLocalStorage<CopyTradeSettings>('copyTradeSettings', {
-    enabled: false,
-    maxCopyAmount: 100,
-    stopLossPercentage: 10,
-    maxDailyLoss: 200,
-    autoStopOnLoss: true
+  const [masterAccount, setMasterAccount] = useLocalStorage<MasterAccount>('masterAccount', {
+    apiToken: '••••••••••••',
+    isConnected: false,
+    balance: 0,
+    isVisible: false
   });
 
-  const [traders, setTraders] = useLocalStorage<Trader[]>('availableTraders', [
+  const [followerAccounts, setFollowerAccounts] = useLocalStorage<FollowerAccount[]>('followerAccounts', [
     {
       id: '1',
-      name: 'Alex Thompson',
-      avatar: '/api/placeholder/40/40',
-      winRate: 78.5,
-      totalProfit: 12450,
-      followers: 1250,
-      rating: 4.8,
-      riskLevel: 'Medium',
-      strategy: 'Scalping',
-      isFollowing: false,
-      copyAmount: 50
+      name: 'Semo',
+      apiToken: '••••••••••••',
+      copyRatio: 1,
+      maxTradeAmount: 100,
+      status: 'Inactive',
+      balance: 5009.43,
+      lastActivity: '5:03:25 AM'
     },
     {
       id: '2',
-      name: 'Sarah Chen',
-      avatar: '/api/placeholder/40/40',
-      winRate: 82.3,
-      totalProfit: 18750,
-      followers: 2100,
-      rating: 4.9,
-      riskLevel: 'Low',
-      strategy: 'Swing Trading',
-      isFollowing: true,
-      copyAmount: 75
-    },
-    {
-      id: '3',
-      name: 'Mike Rodriguez',
-      avatar: '/api/placeholder/40/40',
-      winRate: 71.2,
-      totalProfit: 9800,
-      followers: 850,
-      rating: 4.6,
-      riskLevel: 'High',
-      strategy: 'Day Trading',
-      isFollowing: false,
-      copyAmount: 25
-    },
-    {
-      id: '4',
-      name: 'Emma Wilson',
-      avatar: '/api/placeholder/40/40',
-      winRate: 85.1,
-      totalProfit: 22100,
-      followers: 3200,
-      rating: 4.9,
-      riskLevel: 'Medium',
-      strategy: 'Trend Following',
-      isFollowing: true,
-      copyAmount: 100
+      name: 'Demo',
+      apiToken: '••••••••••••',
+      copyRatio: 1,
+      maxTradeAmount: 100,
+      status: 'Inactive',
+      balance: 5330.04,
+      lastActivity: '5:03:25 AM'
     }
   ]);
+
+  const [copyStats] = useLocalStorage<CopyTradeStats>('copyStats', {
+    masterStatus: 'Disconnected',
+    activeFollowers: 0,
+    totalTrades: 0,
+    totalProfit: 0.00
+  });
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -135,36 +122,40 @@ const CopyTradePage: React.FC = () => {
     return date.toLocaleTimeString('en-US', options);
   };
 
-  const updateSettings = (key: keyof CopyTradeSettings, value: any) => {
-    setCopySettings(prev => ({
-      ...prev,
-      [key]: value
-    }));
+  const toggleMasterTokenVisibility = () => {
+    setMasterAccount(prev => ({ ...prev, isVisible: !prev.isVisible }));
   };
 
-  const toggleFollowTrader = (traderId: string) => {
-    setTraders(prev => prev.map(trader => 
-      trader.id === traderId 
-        ? { ...trader, isFollowing: !trader.isFollowing }
-        : trader
-    ));
-  };
-
-  const updateCopyAmount = (traderId: string, amount: number) => {
-    setTraders(prev => prev.map(trader => 
-      trader.id === traderId 
-        ? { ...trader, copyAmount: amount }
-        : trader
-    ));
-  };
-
-  const getRiskColor = (risk: string) => {
-    switch (risk) {
-      case 'Low': return 'text-green-600 bg-green-100';
-      case 'Medium': return 'text-yellow-600 bg-yellow-100';
-      case 'High': return 'text-red-600 bg-red-100';
-      default: return 'text-gray-600 bg-gray-100';
+  const addFollower = () => {
+    if (newFollowerName && newFollowerToken) {
+      const newFollower: FollowerAccount = {
+        id: Date.now().toString(),
+        name: newFollowerName,
+        apiToken: newFollowerToken,
+        copyRatio: newFollowerRatio,
+        maxTradeAmount: newFollowerMaxAmount,
+        status: 'Inactive',
+        balance: 0,
+        lastActivity: 'Never'
+      };
+      setFollowerAccounts(prev => [...prev, newFollower]);
+      setNewFollowerName('');
+      setNewFollowerToken('');
+      setNewFollowerRatio(1);
+      setNewFollowerMaxAmount(100);
     }
+  };
+
+  const removeFollower = (id: string) => {
+    setFollowerAccounts(prev => prev.filter(f => f.id !== id));
+  };
+
+  const toggleCopyTrading = () => {
+    // Toggle copy trading functionality
+  };
+
+  const testRealTrade = () => {
+    // Test real trade functionality
   };
 
   return (
@@ -174,259 +165,289 @@ const CopyTradePage: React.FC = () => {
       <div className={cn("flex-1 flex flex-col overflow-y-auto", sidebarOpen ? "lg:pl-64" : "lg:pl-20")}>
         {/* Header */}
         <motion.header
-          className="bg-white dark:bg-gray-800 border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm"
+          className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-              <Copy className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Copy className="h-6 w-6 text-blue-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Copy Trade</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Follow and copy successful traders</p>
+              <h1 className="text-2xl font-bold text-gray-900">Copy Trading Manager</h1>
+              <p className="text-sm text-gray-600">Manage master account and follower connections</p>
             </div>
           </div>
-          
+
           <div className="text-right">
-            <p className="text-gray-900 dark:text-white text-sm font-bold">{formatDate(currentDateTime)}</p>
-            <p className="text-green-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
+            <p className="text-gray-900 text-sm font-bold">{formatDate(currentDateTime)}</p>
+            <p className="text-orange-500 text-xs font-bold">{formatTime(currentDateTime)}</p>
           </div>
         </motion.header>
 
         {/* Main content */}
         <main className="flex-1 p-6">
           <div className="max-w-6xl mx-auto space-y-6">
-            
-            {/* Copy Trade Settings */}
+
+            {/* Copy Trading Manager Stats */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
+              className="grid grid-cols-1 md:grid-cols-4 gap-4"
             >
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5 text-blue-500" />
-                    Copy Trade Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-base font-medium">Enable Copy Trading</Label>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Allow copying trades from followed traders
-                      </p>
+              <Card className="bg-white border-gray-200 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-red-100 rounded-lg">
+                      <TrendingDown className="h-5 w-5 text-red-600" />
                     </div>
-                    <Switch
-                      checked={copySettings.enabled}
-                      onCheckedChange={(checked) => updateSettings('enabled', checked)}
-                    />
+                    <div>
+                      <p className="text-sm text-gray-600">Master Status</p>
+                      <p className="text-lg font-bold text-red-600">{copyStats.masterStatus}</p>
+                    </div>
                   </div>
+                </CardContent>
+              </Card>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div>
-                      <Label htmlFor="maxCopyAmount">Max Copy Amount ($)</Label>
-                      <Input
-                        id="maxCopyAmount"
-                        type="number"
-                        value={copySettings.maxCopyAmount}
-                        onChange={(e) => updateSettings('maxCopyAmount', parseFloat(e.target.value))}
-                        placeholder="100"
-                      />
+              <Card className="bg-white border-gray-200 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <Users className="h-5 w-5 text-green-600" />
                     </div>
-
                     <div>
-                      <Label htmlFor="stopLoss">Stop Loss (%)</Label>
-                      <Input
-                        id="stopLoss"
-                        type="number"
-                        value={copySettings.stopLossPercentage}
-                        onChange={(e) => updateSettings('stopLossPercentage', parseFloat(e.target.value))}
-                        placeholder="10"
-                      />
+                      <p className="text-sm text-gray-600">Active Followers</p>
+                      <p className="text-lg font-bold text-green-600">{copyStats.activeFollowers}/0</p>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
 
+              <Card className="bg-white border-gray-200 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <TrendingUp className="h-5 w-5 text-blue-600" />
+                    </div>
                     <div>
-                      <Label htmlFor="maxDailyLoss">Max Daily Loss ($)</Label>
-                      <Input
-                        id="maxDailyLoss"
-                        type="number"
-                        value={copySettings.maxDailyLoss}
-                        onChange={(e) => updateSettings('maxDailyLoss', parseFloat(e.target.value))}
-                        placeholder="200"
-                      />
+                      <p className="text-sm text-gray-600">Total Trades</p>
+                      <p className="text-lg font-bold text-blue-600">{copyStats.totalTrades}</p>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-                    <div className="flex items-center space-x-2 pt-6">
-                      <Switch
-                        checked={copySettings.autoStopOnLoss}
-                        onCheckedChange={(checked) => updateSettings('autoStopOnLoss', checked)}
-                      />
-                      <Label className="text-sm">Auto stop on loss</Label>
+              <Card className="bg-white border-gray-200 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <DollarSign className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Total Profit</p>
+                      <p className="text-lg font-bold text-green-600">+${copyStats.totalProfit.toFixed(2)}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
 
-            {/* Top Traders */}
+            {/* Master Account Configuration */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="border-0 shadow-lg">
+              <Card className="bg-white border-gray-200 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-green-500" />
-                    Top Traders
+                  <CardTitle className="flex items-center gap-2 text-gray-900">
+                    <Settings className="h-5 w-5 text-orange-600" />
+                    Master Account Configuration
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {traders.map((trader) => (
-                      <motion.div
-                        key={trader.id}
-                        className="p-4 border rounded-lg hover:shadow-md transition-shadow"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.1 }}
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-gray-700">Master API Token</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Input
+                        type={masterAccount.isVisible ? "text" : "password"}
+                        value={masterAccount.isVisible ? "your-api-token-here" : masterAccount.apiToken}
+                        className="bg-white border-gray-300 text-gray-900 flex-1"
+                        readOnly
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={toggleMasterTokenVisibility}
+                        className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                       >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <Avatar>
-                              <AvatarImage src={trader.avatar} alt={trader.name} />
-                              <AvatarFallback>{trader.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <h4 className="font-semibold">{trader.name}</h4>
-                              <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-1">
-                                  <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                                  <span className="text-xs">{trader.rating}</span>
-                                </div>
-                                <Badge className={`text-xs ${getRiskColor(trader.riskLevel)}`}>
-                                  {trader.riskLevel} Risk
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-                          <Button
-                            variant={trader.isFollowing ? "destructive" : "default"}
-                            size="sm"
-                            onClick={() => toggleFollowTrader(trader.id)}
-                          >
-                            {trader.isFollowing ? 'Unfollow' : 'Follow'}
-                          </Button>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4 mb-3">
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-green-600">{trader.winRate}%</div>
-                            <div className="text-xs text-gray-500">Win Rate</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-blue-600">${trader.totalProfit.toLocaleString()}</div>
-                            <div className="text-xs text-gray-500">Total Profit</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-purple-600">{trader.followers}</div>
-                            <div className="text-xs text-gray-500">Followers</div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Strategy: {trader.strategy}</span>
-                          {trader.isFollowing && (
-                            <div className="flex items-center gap-2">
-                              <Label className="text-xs">Copy Amount:</Label>
-                              <Input
-                                type="number"
-                                value={trader.copyAmount}
-                                onChange={(e) => updateCopyAmount(trader.id, parseFloat(e.target.value))}
-                                className="w-20 h-8 text-xs"
-                                min="1"
-                                max={copySettings.maxCopyAmount}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </motion.div>
-                    ))}
+                        {masterAccount.isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={toggleCopyTrading}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Stop Copy Trading
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={testRealTrade}
+                        className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                      >
+                        Test Real Trade
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
 
-            {/* Active Copies */}
+            {/* Add New Follower */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <Card className="border-0 shadow-lg">
+              <Card className="bg-white border-gray-200 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-orange-500" />
-                    Active Copy Trades
+                  <CardTitle className="flex items-center gap-2 text-gray-900">
+                    <Plus className="h-5 w-5 text-green-600" />
+                    Add New Follower
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {traders.filter(t => t.isFollowing).length > 0 ? (
-                    <div className="space-y-3">
-                      {traders.filter(t => t.isFollowing).map((trader) => (
-                        <div key={trader.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarFallback className="text-xs">{trader.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="font-medium text-sm">{trader.name}</div>
-                              <div className="text-xs text-gray-500">Copy Amount: ${trader.copyAmount}</div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs">
-                              Active
-                            </Badge>
-                            <Button variant="ghost" size="sm">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                      <Label className="text-gray-700">Follower Name</Label>
+                      <Input
+                        placeholder="Enter follower name"
+                        value={newFollowerName}
+                        onChange={(e) => setNewFollowerName(e.target.value)}
+                        className="bg-white border-gray-300 text-gray-900 mt-1"
+                      />
                     </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <Copy className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                      <p>No active copy trades</p>
-                      <p className="text-sm">Follow traders to start copying their trades</p>
+                    <div>
+                      <Label className="text-gray-700">API Token</Label>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Input
+                          placeholder="Enter API token"
+                          value={newFollowerToken}
+                          onChange={(e) => setNewFollowerToken(e.target.value)}
+                          className="bg-white border-gray-300 text-gray-900"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  )}
+                    <div>
+                      <Label className="text-gray-700">Copy Ratio</Label>
+                      <Input
+                        type="number"
+                        value={newFollowerRatio}
+                        onChange={(e) => setNewFollowerRatio(parseFloat(e.target.value))}
+                        className="bg-white border-gray-300 text-gray-900 mt-1"
+                        min="0.1"
+                        step="0.1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-700">Max Trade Amount</Label>
+                      <Input
+                        type="number"
+                        value={newFollowerMaxAmount}
+                        onChange={(e) => setNewFollowerMaxAmount(parseFloat(e.target.value))}
+                        className="bg-white border-gray-300 text-gray-900 mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Button
+                      onClick={addFollower}
+                      className="bg-orange-600 hover:bg-orange-700 text-white"
+                      disabled={!newFollowerName || !newFollowerToken}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Follower
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
 
-            {/* Risk Warning */}
+            {/* Follower Accounts */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
             >
-              <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/20">
-                <CardContent className="pt-6">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5" />
-                    <div>
-                      <h4 className="font-semibold text-orange-800 dark:text-orange-200">Risk Disclosure</h4>
-                      <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
-                        Copy trading involves substantial risk of loss. Past performance does not guarantee future results. 
-                        You should carefully consider whether copy trading is suitable for you in light of your financial situation.
-                      </p>
-                    </div>
+              <Card className="bg-white border-gray-200 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-gray-900">
+                    <Users className="h-5 w-5 text-orange-600" />
+                    Follower Accounts ({followerAccounts.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {followerAccounts.map((follower) => (
+                      <motion.div
+                        key={follower.id}
+                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.1 }}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            {follower.status === 'Active' ? (
+                              <Wifi className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <WifiOff className="h-4 w-4 text-red-600" />
+                            )}
+                            <span className="text-gray-900 font-medium">{follower.name}</span>
+                          </div>
+                          <Badge
+                            variant={follower.status === 'Active' ? 'default' : 'secondary'}
+                            className={follower.status === 'Active' ? 'bg-green-600 text-white' : 'bg-gray-500 text-white'}
+                          >
+                            {follower.status}
+                          </Badge>
+                        </div>
+
+                        <div className="flex items-center gap-6 text-sm">
+                          <div className="text-center">
+                            <p className="text-gray-600">Ratio: 1x</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-gray-600">Max: ${follower.maxTradeAmount}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-gray-600">Balance: ${follower.balance.toFixed(2)}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-gray-600">{follower.lastActivity}</p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeFollower(follower.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>

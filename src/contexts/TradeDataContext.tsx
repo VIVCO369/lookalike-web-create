@@ -26,6 +26,8 @@ interface CalculatedStats {
   worstTrade: number;
   winRate: string;
   totalTrades: number; // Added totalTrades to stats
+  wins: number; // Added wins count
+  losses: number; // Added losses count
   dailyProfitsByDate: { [date: string]: number }; // New: Profit for each day
   bestDayProfit: number; // New: The highest daily profit
   profitableDaysCount: number; // New: Count of days with positive profit
@@ -244,6 +246,7 @@ export const calculateStats = (trades: TradeFormData[]): CalculatedStats => {
   let bestTrade = 0;
   let worstTrade = 0;
   let wins = 0;
+  let losses = 0;
   const dailyProfitsByDate: { [date: string]: number } = {}; // Store profit for each day
 
   const today = new Date();
@@ -265,6 +268,8 @@ export const calculateStats = (trades: TradeFormData[]): CalculatedStats => {
 
       if (trade.winLoss === 'win') {
         wins++;
+      } else if (trade.winLoss === 'loss') {
+        losses++;
       }
 
       // Calculate daily profit for each day
@@ -306,6 +311,8 @@ export const calculateStats = (trades: TradeFormData[]): CalculatedStats => {
     worstTrade,
     winRate: `${winRate}%`,
     totalTrades: trades.length,
+    wins,
+    losses,
     dailyProfitsByDate, // Include daily profits by date
     bestDayProfit, // Include best day profit
     profitableDaysCount, // Include profitable days count

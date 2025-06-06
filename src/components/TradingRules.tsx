@@ -40,6 +40,12 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
   // Use useLocalStorage for persistent storage of rules
   const [rules, setRules] = useLocalStorage<Rule[]>('tradingRules', []);
 
+  // Debug: Log rules whenever they change
+  useEffect(() => {
+    console.log('Rules updated:', rules);
+    console.log('localStorage tradingRules:', localStorage.getItem('tradingRules'));
+  }, [rules]);
+
   const itemsPerPage = 2; // Paginate by 2 strategies per page
 
   // State for selected strategy in dashboard view
@@ -108,16 +114,27 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
 
 
   const handleAddRule = () => {
-    if (newRuleName.trim() === "" || newStrategyName.trim() === "") return;
+    console.log('handleAddRule called', { newRuleName, newStrategyName }); // Debug log
+
+    if (newRuleName.trim() === "" || newStrategyName.trim() === "") {
+      console.log('Validation failed - empty fields'); // Debug log
+      return;
+    }
 
     // Generate a unique ID for the new rule
     const id = Date.now().toString();
+    const newRule = { id, name: newRuleName.trim(), strategy: newStrategyName.trim() };
+
+    console.log('Adding new rule:', newRule); // Debug log
+    console.log('Current rules before adding:', rules); // Debug log
 
     // Update rules using the setter from useLocalStorage
-    setRules([...rules, { id, name: newRuleName.trim(), strategy: newStrategyName.trim() }]);
+    setRules([...rules, newRule]);
     setNewRuleName("");
     setNewStrategyName("");
     setAddingRule(false);
+
+    console.log('Rule added successfully'); // Debug log
   };
 
   const handleRemoveRule = (id: string) => {
@@ -331,13 +348,15 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
             <div className="border rounded-md p-4 mb-6 bg-gray-50 dark:bg-gray-700 dark:border-gray-600"> {/* Added dark mode styles */}
               <h4 className="font-medium mb-4 text-gray-800 dark:text-gray-200">Add New Trading Rule</h4> {/* Added dark mode text color */}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <form onSubmit={(e) => { e.preventDefault(); handleAddRule(); }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Trading Rule Name</p> {/* Added dark mode text color */}
                   <Input
                     placeholder="Enter rule name"
                     value={newRuleName}
                     onChange={(e) => setNewRuleName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddRule()}
                     className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400" // Added dark mode styles
                   />
                 </div>
@@ -347,19 +366,30 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
                     placeholder="Enter strategy name"
                     value={newStrategyName}
                     onChange={(e) => setNewStrategyName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddRule()}
                     className="dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:placeholder-gray-400" // Added dark mode styles
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 mt-4">
-                <Button variant="outline" onClick={() => setAddingRule(false)}>
-                  Cancel
-                </Button>
-                <Button className="bg-green-500 hover:bg-green-600" onClick={handleAddRule}>
-                  Add Rule
-                </Button>
-              </div>
+                <div className="flex justify-end gap-2 mt-4">
+                  <Button type="button" variant="outline" onClick={() => setAddingRule(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-green-500 hover:bg-green-600"
+                    disabled={!newRuleName.trim() || !newStrategyName.trim()}
+                  >
+                    Add Rule
+                  </Button>
+                </div>
+
+                {/* Debug info */}
+                <div className="mt-2 text-xs text-gray-500">
+                  Debug: Rule name: "{newRuleName}" | Strategy: "{newStrategyName}" | Valid: {(newRuleName.trim() && newStrategyName.trim()) ? 'Yes' : 'No'}
+                </div>
+              </form>
             </div>
           </AnimatedContainer>
         )}

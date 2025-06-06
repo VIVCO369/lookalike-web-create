@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import useLocalStorage from '@/hooks/useLocalStorage';
 
@@ -118,16 +117,10 @@ const WeeklySessionActivityChart: React.FC<WeeklySessionActivityChartProps> = ({
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
-                <BarChart3 className="h-6 w-6 text-white" />
-              </div>
               <div>
-                <CardTitle className="text-xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 dark:from-white dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent">
+                <CardTitle className="text-xl font-bold text-black dark:text-white">
                   Weekly Session Activity
                 </CardTitle>
-                <div className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                  7 Days Performance
-                </div>
               </div>
             </div>
 
@@ -138,9 +131,7 @@ const WeeklySessionActivityChart: React.FC<WeeklySessionActivityChartProps> = ({
             </div>
           </div>
 
-          <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-            Real-time trading session analytics with interactive performance tracking
-          </p>
+
         </div>
       </CardHeader>
       <CardContent>
