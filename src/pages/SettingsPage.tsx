@@ -17,7 +17,9 @@ import {
   Check,
   AlertTriangle,
   Info,
-  Zap
+  Zap,
+  ExternalLink,
+  CheckCircle
 } from "lucide-react";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,8 +36,11 @@ import { motion } from "framer-motion";
 
 // Comprehensive Settings Interfaces
 interface GeneralSettings {
-  userName: string;
+  firstName: string;
+  lastName: string;
   email: string;
+  phoneNumber: string;
+  userName: string;
   language: string;
   timezone: string;
   autoSave: boolean;
@@ -50,12 +55,19 @@ interface APISettings {
   autoReconnect: boolean;
   accountInfo: {
     loginid: string;
+    fullname: string;
     currency: string;
     balance: number;
     country: string;
   } | null;
   connectionError: string | null;
   websocket: WebSocket | null;
+  permissions: {
+    readMarketData: boolean;
+    readAccountInfo: boolean;
+    placeTrades: boolean;
+    withdrawFunds: boolean;
+  };
 }
 
 interface VoiceAlertSettings {
@@ -107,22 +119,37 @@ interface AllSettings {
 
 const initialSettings: AllSettings = {
   general: {
-    userName: "",
+    firstName: "",
+    lastName: "",
     email: "",
+    phoneNumber: "",
+    userName: "",
     language: "en",
     timezone: "UTC",
     autoSave: true
   },
   api: {
-    derivAPIToken: "jJEVrQZnSumnrEs",
-    isConnected: false,
-    serverURL: "wss://ws.binaryws.com/websockets/v3",
-    connectionStatus: 'disconnected',
-    lastConnected: null,
+    derivAPIToken: localStorage.getItem('deriv_api_token') || "jJEVrQZnSumnrEs",
+    isConnected: localStorage.getItem('deriv_api_connected') === 'true',
+    serverURL: "wss://ws.derivws.com/websockets/v3?app_id=1089",
+    connectionStatus: localStorage.getItem('deriv_api_connected') === 'true' ? 'connected' : 'disconnected',
+    lastConnected: localStorage.getItem('connection_time') ? new Date(localStorage.getItem('connection_time')!) : null,
     autoReconnect: true,
-    accountInfo: null,
+    accountInfo: localStorage.getItem('account_id') ? {
+      loginid: localStorage.getItem('account_id') || '',
+      fullname: localStorage.getItem('account_holder') || '',
+      currency: localStorage.getItem('account_currency') || 'USD',
+      balance: parseFloat(localStorage.getItem('account_balance') || '0'),
+      country: localStorage.getItem('account_country') || ''
+    } : null,
     connectionError: null,
-    websocket: null
+    websocket: null,
+    permissions: {
+      readMarketData: true,
+      readAccountInfo: true,
+      placeTrades: true,
+      withdrawFunds: false
+    }
   },
   voiceAlert: {
     enabled: false,
@@ -161,6 +188,13 @@ const initialSettings: AllSettings = {
     frequency: 'immediate'
   }
 };
+
+// Declare global socket interface
+declare global {
+  interface Window {
+    derivGlobalSocket?: WebSocket;
+  }
+}
 
 const SettingsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -218,10 +252,36 @@ const SettingsPage = () => {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [settings.appearance.theme]);
 
+  // Check for existing global connection on mount
+  useEffect(() => {
+    if (window.derivGlobalSocket &&
+        window.derivGlobalSocket.readyState === WebSocket.OPEN) {
+      updateSettings('api', 'websocket', window.derivGlobalSocket);
+      updateSettings('api', 'isConnected', true);
+      updateSettings('api', 'connectionStatus', 'connected');
+
+      // Set up message listener for balance updates
+      window.derivGlobalSocket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.balance) {
+            updateSettings('api', 'accountInfo', {
+              ...settings.api.accountInfo!,
+              balance: parseFloat(data.balance.balance)
+            });
+            localStorage.setItem('account_balance', data.balance.balance);
+          }
+        } catch (error) {
+          console.error('Error parsing balance update:', error);
+        }
+      };
+    }
+  }, []);
+
   // Cleanup WebSocket connection on unmount
   useEffect(() => {
     return () => {
-      if (settings.api.websocket) {
+      if (settings.api.websocket && settings.api.websocket !== window.derivGlobalSocket) {
         settings.api.websocket.close();
       }
     };
@@ -293,12 +353,22 @@ const SettingsPage = () => {
       updateSettings('api', 'websocket', null);
     }
 
+    // Clear global socket if exists
+    if (window.derivGlobalSocket) {
+      window.derivGlobalSocket.close();
+      delete window.derivGlobalSocket;
+    }
+
     updateSettings('api', 'connectionStatus', 'connecting');
     updateSettings('api', 'connectionError', null);
 
     try {
-      console.log('Connecting to Deriv API...');
-      const ws = new WebSocket(settings.api.serverURL);
+      console.log('Connecting to Deriv API with app_id=1089...');
+      const wsUrl = settings.api.serverURL.includes('app_id')
+        ? settings.api.serverURL
+        : `${settings.api.serverURL}?app_id=1089`;
+      console.log('WebSocket URL:', wsUrl);
+      const ws = new WebSocket(wsUrl);
 
       // Set up connection timeout
       const connectionTimeout = setTimeout(() => {
@@ -316,12 +386,11 @@ const SettingsPage = () => {
 
       ws.onopen = () => {
         clearTimeout(connectionTimeout);
-        console.log('WebSocket opened, sending authorization...');
+        console.log('WebSocket connected, sending authorization...');
 
         // Send authorization request
         const authMessage = {
-          authorize: settings.api.derivAPIToken,
-          req_id: Date.now()
+          authorize: settings.api.derivAPIToken.trim()
         };
 
         console.log('Sending auth request:', authMessage);
@@ -331,11 +400,11 @@ const SettingsPage = () => {
       ws.onmessage = (event) => {
         try {
           const response = JSON.parse(event.data);
-          console.log('Received message:', response);
+          console.log('Received response:', response);
 
           if (response.msg_type === 'authorize') {
             if (response.error) {
-              console.error('Authorization error:', response.error);
+              console.error('Authorization failed:', response.error);
               updateSettings('api', 'connectionStatus', 'error');
               updateSettings('api', 'isConnected', false);
               updateSettings('api', 'connectionError', response.error.message);
@@ -348,7 +417,20 @@ const SettingsPage = () => {
                 variant: "destructive"
               });
             } else if (response.authorize) {
-              console.log('Authorization successful:', response.authorize);
+              console.log('Authorization successful!');
+
+              const authData = response.authorize;
+              const timestamp = new Date().toISOString();
+
+              // Store in localStorage
+              localStorage.setItem('deriv_api_token', settings.api.derivAPIToken);
+              localStorage.setItem('deriv_api_connected', 'true');
+              localStorage.setItem('account_balance', authData.balance || '0');
+              localStorage.setItem('account_holder', authData.fullname || authData.loginid || 'Unknown');
+              localStorage.setItem('account_id', authData.loginid || 'Unknown');
+              localStorage.setItem('account_currency', authData.currency || 'USD');
+              localStorage.setItem('account_country', authData.country || 'Unknown');
+              localStorage.setItem('connection_time', timestamp);
 
               // Update connection status
               updateSettings('api', 'connectionStatus', 'connected');
@@ -358,22 +440,41 @@ const SettingsPage = () => {
               updateSettings('api', 'websocket', ws);
 
               // Store account information
-              const authData = response.authorize;
               updateSettings('api', 'accountInfo', {
                 loginid: authData.loginid || 'Unknown',
+                fullname: authData.fullname || authData.loginid || 'Unknown',
                 currency: authData.currency || 'USD',
                 balance: parseFloat(authData.balance) || 0,
                 country: authData.country || 'Unknown'
               });
 
+              // Store as global socket for app-wide access
+              window.derivGlobalSocket = ws;
+
+              // Subscribe to real-time balance updates
+              ws.send(JSON.stringify({
+                balance: 1,
+                subscribe: 1,
+                req_id: Date.now()
+              }));
+
               toast({
-                title: "Connected successfully",
-                description: `Welcome ${authData.loginid}! Balance: ${authData.balance} ${authData.currency}`,
+                title: "Connected successfully!",
+                description: `Welcome ${authData.fullname || authData.loginid}! Balance: ${authData.balance} ${authData.currency}`,
               });
             }
+          } else if (response.balance) {
+            // Handle real-time balance updates
+            const newBalance = parseFloat(response.balance.balance);
+            updateSettings('api', 'accountInfo', {
+              ...settings.api.accountInfo!,
+              balance: newBalance
+            });
+            localStorage.setItem('account_balance', response.balance.balance);
+            console.log('Balance updated:', newBalance);
           }
         } catch (error) {
-          console.error('Error parsing message:', error);
+          console.error('Error parsing response:', error);
           updateSettings('api', 'connectionError', 'Invalid server response');
         }
       };
@@ -386,6 +487,9 @@ const SettingsPage = () => {
         updateSettings('api', 'isConnected', false);
         updateSettings('api', 'connectionError', 'WebSocket connection failed');
         updateSettings('api', 'websocket', null);
+
+        // Clear localStorage on error
+        localStorage.setItem('deriv_api_connected', 'false');
 
         toast({
           title: "Connection failed",
@@ -402,6 +506,14 @@ const SettingsPage = () => {
           updateSettings('api', 'connectionStatus', 'disconnected');
           updateSettings('api', 'isConnected', false);
           updateSettings('api', 'websocket', null);
+
+          // Clear localStorage
+          localStorage.setItem('deriv_api_connected', 'false');
+
+          // Clear global socket
+          if (window.derivGlobalSocket === ws) {
+            delete window.derivGlobalSocket;
+          }
 
           toast({
             title: "Disconnected",
@@ -433,14 +545,31 @@ const SettingsPage = () => {
   };
 
   const disconnectFromDerivAPI = () => {
+    // Close WebSocket connection
     if (settings.api.websocket) {
       settings.api.websocket.close();
     }
 
+    // Clear global socket
+    if (window.derivGlobalSocket) {
+      window.derivGlobalSocket.close();
+      delete window.derivGlobalSocket;
+    }
+
+    // Update state
     updateSettings('api', 'connectionStatus', 'disconnected');
     updateSettings('api', 'isConnected', false);
     updateSettings('api', 'websocket', null);
     updateSettings('api', 'accountInfo', null);
+
+    // Clear localStorage
+    localStorage.setItem('deriv_api_connected', 'false');
+    localStorage.removeItem('account_balance');
+    localStorage.removeItem('account_holder');
+    localStorage.removeItem('account_id');
+    localStorage.removeItem('account_currency');
+    localStorage.removeItem('account_country');
+    localStorage.removeItem('connection_time');
 
     toast({
       title: "Disconnected",
@@ -448,7 +577,73 @@ const SettingsPage = () => {
     });
   };
 
-  const testAPIConnection = connectToDerivAPI;
+  const testNetworkConnectivity = async () => {
+    console.log('Running connection diagnostics...');
+
+    // Test WebSocket support
+    if (typeof WebSocket === 'undefined') {
+      toast({
+        title: "Browser Error",
+        description: "WebSocket not supported in this browser",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    // Test basic WebSocket connection to Deriv
+    try {
+      const testWs = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
+
+      const testPromise = new Promise<boolean>((resolve) => {
+        const timeout = setTimeout(() => {
+          testWs.close();
+          resolve(false);
+        }, 5000);
+
+        testWs.onopen = () => {
+          clearTimeout(timeout);
+          testWs.close();
+          resolve(true);
+        };
+
+        testWs.onerror = () => {
+          clearTimeout(timeout);
+          resolve(false);
+        };
+      });
+
+      const canConnect = await testPromise;
+
+      if (canConnect) {
+        toast({
+          title: "Connection Test Passed",
+          description: "WebSocket connection to Deriv servers is working",
+        });
+        return true;
+      } else {
+        toast({
+          title: "Connection Test Failed",
+          description: "Cannot reach Deriv servers. Check your network or firewall settings.",
+          variant: "destructive"
+        });
+        return false;
+      }
+    } catch (error) {
+      toast({
+        title: "Connection Test Failed",
+        description: "WebSocket connection blocked or failed",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
+  const testAPIConnection = async () => {
+    const networkOK = await testNetworkConnectivity();
+    if (networkOK) {
+      connectToDerivAPI();
+    }
+  };
 
   const getConnectionStatusColor = () => {
     switch (settings.api.connectionStatus) {
@@ -564,84 +759,131 @@ const SettingsPage = () => {
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                           <User className="h-5 w-5 text-orange-500" />
-                          Personal Information
+                          Profile Information
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="userName">Username</Label>
-                            <Input
-                              id="userName"
-                              value={settings.general.userName}
-                              onChange={(e) => updateSettings('general', 'userName', e.target.value)}
-                              placeholder="Your username"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                              id="email"
-                              type="email"
-                              value={settings.general.email}
-                              onChange={(e) => updateSettings('general', 'email', e.target.value)}
-                              placeholder="your.email@example.com"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="language">Language</Label>
-                            <Select
-                              value={settings.general.language}
-                              onValueChange={(value) => updateSettings('general', 'language', value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="en">English</SelectItem>
-                                <SelectItem value="es">Spanish</SelectItem>
-                                <SelectItem value="fr">French</SelectItem>
-                                <SelectItem value="de">German</SelectItem>
-                                <SelectItem value="zh">Chinese</SelectItem>
-                                <SelectItem value="ja">Japanese</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="timezone">Timezone</Label>
-                            <Select
-                              value={settings.general.timezone}
-                              onValueChange={(value) => updateSettings('general', 'timezone', value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="UTC">UTC</SelectItem>
-                                <SelectItem value="EST">Eastern Time</SelectItem>
-                                <SelectItem value="PST">Pacific Time</SelectItem>
-                                <SelectItem value="GMT">Greenwich Mean Time</SelectItem>
-                                <SelectItem value="JST">Japan Standard Time</SelectItem>
-                                <SelectItem value="AEST">Australian Eastern Time</SelectItem>
-                              </SelectContent>
-                            </Select>
+                      <CardContent className="space-y-6">
+                        {/* Personal Details */}
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-gray-900 dark:text-white">Personal Details</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="firstName">First Name</Label>
+                              <Input
+                                id="firstName"
+                                value={settings.general.firstName}
+                                onChange={(e) => updateSettings('general', 'firstName', e.target.value)}
+                                placeholder="Enter your first name"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="lastName">Last Name</Label>
+                              <Input
+                                id="lastName"
+                                value={settings.general.lastName}
+                                onChange={(e) => updateSettings('general', 'lastName', e.target.value)}
+                                placeholder="Enter your last name"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="email">Email Address</Label>
+                              <Input
+                                id="email"
+                                type="email"
+                                value={settings.general.email}
+                                onChange={(e) => updateSettings('general', 'email', e.target.value)}
+                                placeholder="your.email@example.com"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="phoneNumber">Phone Number</Label>
+                              <Input
+                                id="phoneNumber"
+                                type="tel"
+                                value={settings.general.phoneNumber}
+                                onChange={(e) => updateSettings('general', 'phoneNumber', e.target.value)}
+                                placeholder="+1 (555) 123-4567"
+                              />
+                            </div>
                           </div>
                         </div>
 
                         <Separator />
 
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-0.5">
-                            <Label htmlFor="autoSave">Auto Save</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              Automatically save changes as you make them
-                            </p>
+                        {/* Account Settings */}
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-gray-900 dark:text-white">Account Settings</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="userName">Username</Label>
+                              <Input
+                                id="userName"
+                                value={settings.general.userName}
+                                onChange={(e) => updateSettings('general', 'userName', e.target.value)}
+                                placeholder="Choose a username"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="language">Language</Label>
+                              <Select
+                                value={settings.general.language}
+                                onValueChange={(value) => updateSettings('general', 'language', value)}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="en">English</SelectItem>
+                                  <SelectItem value="es">Spanish</SelectItem>
+                                  <SelectItem value="fr">French</SelectItem>
+                                  <SelectItem value="de">German</SelectItem>
+                                  <SelectItem value="zh">Chinese</SelectItem>
+                                  <SelectItem value="ja">Japanese</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="timezone">Timezone</Label>
+                              <Select
+                                value={settings.general.timezone}
+                                onValueChange={(value) => updateSettings('general', 'timezone', value)}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="UTC">UTC</SelectItem>
+                                  <SelectItem value="EST">Eastern Time (EST)</SelectItem>
+                                  <SelectItem value="PST">Pacific Time (PST)</SelectItem>
+                                  <SelectItem value="GMT">Greenwich Mean Time (GMT)</SelectItem>
+                                  <SelectItem value="JST">Japan Standard Time (JST)</SelectItem>
+                                  <SelectItem value="AEST">Australian Eastern Time (AEST)</SelectItem>
+                                  <SelectItem value="CET">Central European Time (CET)</SelectItem>
+                                  <SelectItem value="IST">India Standard Time (IST)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
-                          <Switch
-                            id="autoSave"
-                            checked={settings.general.autoSave}
-                            onCheckedChange={(checked) => updateSettings('general', 'autoSave', checked)}
-                          />
+                        </div>
+
+                        <Separator />
+
+                        {/* Preferences */}
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-gray-900 dark:text-white">Preferences</h4>
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                              <Label htmlFor="autoSave">Auto Save</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Automatically save changes as you make them
+                              </p>
+                            </div>
+                            <Switch
+                              id="autoSave"
+                              checked={settings.general.autoSave}
+                              onCheckedChange={(checked) => updateSettings('general', 'autoSave', checked)}
+                            />
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -692,33 +934,47 @@ const SettingsPage = () => {
                                 placeholder="Enter your Deriv API token"
                                 className="flex-1"
                               />
-                              <Button
-                                onClick={settings.api.isConnected ? disconnectFromDerivAPI : connectToDerivAPI}
-                                disabled={settings.api.connectionStatus === 'connecting'}
-                                className={cn(
-                                  "text-white",
-                                  settings.api.isConnected
-                                    ? "bg-red-500 hover:bg-red-600"
-                                    : "bg-orange-500 hover:bg-orange-600"
+                              <div className="flex gap-2">
+                                <Button
+                                  onClick={settings.api.isConnected ? disconnectFromDerivAPI : connectToDerivAPI}
+                                  disabled={settings.api.connectionStatus === 'connecting'}
+                                  className={cn(
+                                    "text-white flex-1",
+                                    settings.api.isConnected
+                                      ? "bg-red-500 hover:bg-red-600"
+                                      : "bg-orange-500 hover:bg-orange-600"
+                                  )}
+                                >
+                                  {settings.api.connectionStatus === 'connecting' ? (
+                                    <>
+                                      <Zap className="h-4 w-4 mr-2 animate-spin" />
+                                      Connecting...
+                                    </>
+                                  ) : settings.api.isConnected ? (
+                                    <>
+                                      <Wifi className="h-4 w-4 mr-2" />
+                                      Disconnect
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Zap className="h-4 w-4 mr-2" />
+                                      Connect
+                                    </>
+                                  )}
+                                </Button>
+
+                                {!settings.api.isConnected && (
+                                  <Button
+                                    onClick={testNetworkConnectivity}
+                                    variant="outline"
+                                    size="sm"
+                                    className="px-3"
+                                    disabled={settings.api.connectionStatus === 'connecting'}
+                                  >
+                                    Test
+                                  </Button>
                                 )}
-                              >
-                                {settings.api.connectionStatus === 'connecting' ? (
-                                  <>
-                                    <Zap className="h-4 w-4 mr-2 animate-spin" />
-                                    Connecting...
-                                  </>
-                                ) : settings.api.isConnected ? (
-                                  <>
-                                    <Wifi className="h-4 w-4 mr-2" />
-                                    Disconnect
-                                  </>
-                                ) : (
-                                  <>
-                                    <Zap className="h-4 w-4 mr-2" />
-                                    Connect
-                                  </>
-                                )}
-                              </Button>
+                              </div>
                             </div>
                             <p className="text-sm text-gray-500 dark:text-gray-400">
                               Get your API token from{" "}
@@ -733,13 +989,58 @@ const SettingsPage = () => {
                             </p>
                           </div>
 
+                          {/* Account Details Information */}
+                          {settings.api.isConnected && settings.api.accountInfo && (
+                            <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                                  <h4 className="font-semibold text-green-800 dark:text-green-200">API Connected</h4>
+                                </div>
+                                <div className="text-xs text-green-600 dark:text-green-400 font-medium">
+                                  Online since: {new Date().toLocaleTimeString()}
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-green-100 dark:border-green-800">
+                                  <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Account Holder</div>
+                                  <div className="font-bold text-green-700 dark:text-green-300 text-lg">
+                                    {settings.api.accountInfo.fullname || settings.api.accountInfo.loginid}
+                                  </div>
+                                </div>
+
+                                <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-green-100 dark:border-green-800">
+                                  <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Account ID</div>
+                                  <div className="font-bold text-green-700 dark:text-green-300 text-lg">
+                                    {settings.api.accountInfo.loginid}
+                                  </div>
+                                </div>
+
+                                <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-green-100 dark:border-green-800">
+                                  <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Account Balance</div>
+                                  <div className="font-bold text-green-700 dark:text-green-300 text-xl">
+                                    ${settings.api.accountInfo.balance.toFixed(2)}
+                                  </div>
+                                </div>
+
+                                <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-green-100 dark:border-green-800">
+                                  <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Currency</div>
+                                  <div className="font-bold text-green-700 dark:text-green-300 text-lg">
+                                    {settings.api.accountInfo.currency}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
                           <div className="space-y-2">
                             <Label htmlFor="serverURL">Server URL</Label>
                             <Input
                               id="serverURL"
                               value={settings.api.serverURL}
                               onChange={(e) => updateSettings('api', 'serverURL', e.target.value)}
-                              placeholder="wss://ws.binaryws.com/websockets/v3"
+                              placeholder="wss://ws.derivws.com/websockets/v3?app_id=1089"
                             />
                           </div>
                         </div>
@@ -803,11 +1104,23 @@ const SettingsPage = () => {
                           <>
                             <Separator />
                             <div className="space-y-4">
-                              <h4 className="font-semibold text-gray-900 dark:text-white">Account Information</h4>
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-semibold text-gray-900 dark:text-white">Account Information</h4>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                  <span className="text-sm text-green-600 font-medium">
+                                    Online since: {settings.api.lastConnected?.toLocaleString()}
+                                  </span>
+                                </div>
+                              </div>
                               <div className="grid grid-cols-2 gap-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
                                 <div className="space-y-2">
                                   <div className="flex justify-between">
-                                    <span className="text-gray-600 dark:text-gray-400">Login ID:</span>
+                                    <span className="text-gray-600 dark:text-gray-400">Account:</span>
+                                    <span className="font-semibold">{settings.api.accountInfo.fullname}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-600 dark:text-gray-400">ID:</span>
                                     <span className="font-semibold">{settings.api.accountInfo.loginid}</span>
                                   </div>
                                   <div className="flex justify-between">
@@ -818,8 +1131,8 @@ const SettingsPage = () => {
                                 <div className="space-y-2">
                                   <div className="flex justify-between">
                                     <span className="text-gray-600 dark:text-gray-400">Balance:</span>
-                                    <span className="font-semibold text-green-600">
-                                      {settings.api.accountInfo.balance.toFixed(2)} {settings.api.accountInfo.currency}
+                                    <span className="font-semibold text-green-600 text-lg">
+                                      ${settings.api.accountInfo.balance.toFixed(2)}
                                     </span>
                                   </div>
                                   <div className="flex justify-between">
@@ -831,6 +1144,91 @@ const SettingsPage = () => {
                             </div>
                           </>
                         )}
+
+                        {/* API Key Permissions */}
+                        <Separator />
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-gray-900 dark:text-white">API Key Permissions</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-green-500" />
+                                <span className="text-sm font-medium">Read Market Data</span>
+                              </div>
+                              <Badge variant="secondary" className="bg-green-100 text-green-700">Enabled</Badge>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-green-500" />
+                                <span className="text-sm font-medium">Read Account Info</span>
+                              </div>
+                              <Badge variant="secondary" className="bg-green-100 text-green-700">Enabled</Badge>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-green-500" />
+                                <span className="text-sm font-medium">Place Trades</span>
+                              </div>
+                              <Badge variant="secondary" className="bg-green-100 text-green-700">Enabled</Badge>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <AlertTriangle className="h-4 w-4 text-red-500" />
+                                <span className="text-sm font-medium">Withdraw Funds</span>
+                              </div>
+                              <Badge variant="secondary" className="bg-red-100 text-red-700">Disabled</Badge>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* How to Get API Key */}
+                        <Separator />
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-gray-900 dark:text-white">How to Get Your Deriv API Key</h4>
+                          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+                            <div className="space-y-3">
+                              <div className="flex items-start gap-3">
+                                <div className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                                <div>
+                                  <p className="font-medium">Log in to deriv.com</p>
+                                  <p className="text-sm text-gray-600 dark:text-gray-400">Visit deriv.com and sign in to your account</p>
+                                </div>
+                              </div>
+                              <div className="flex items-start gap-3">
+                                <div className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                                <div>
+                                  <p className="font-medium">Navigate to account settings</p>
+                                  <p className="text-sm text-gray-600 dark:text-gray-400">Go to Account Settings → API Token</p>
+                                </div>
+                              </div>
+                              <div className="flex items-start gap-3">
+                                <div className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                                <div>
+                                  <p className="font-medium">Create new token</p>
+                                  <p className="text-sm text-gray-600 dark:text-gray-400">Click "Create" and select required permissions</p>
+                                </div>
+                              </div>
+                              <div className="flex items-start gap-3">
+                                <div className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
+                                <div>
+                                  <p className="font-medium">Copy and paste token</p>
+                                  <p className="text-sm text-gray-600 dark:text-gray-400">Copy the generated token and paste it above</p>
+                                </div>
+                              </div>
+                              <div className="mt-4 pt-3 border-t border-blue-200 dark:border-blue-700">
+                                <a
+                                  href="https://app.deriv.com/account/api-token"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-2 text-orange-500 hover:text-orange-600 font-medium"
+                                >
+                                  <ExternalLink className="h-4 w-4" />
+                                  Get API Token from Deriv
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
 
                         {/* Connection Error */}
                         {settings.api.connectionStatus === 'error' && (
