@@ -61,9 +61,26 @@ const TradeManageGoalsPage = () => {
   // Base goals with static values (will be updated with real data)
   const [baseGoals, setBaseGoals] = useLocalStorage("tradeGoals", defaultGoals);
 
-  // Update ALL goals with real-time data from Today's P&L
+  // Function to sort goals in the specified order
+  const sortGoalsByOrder = (goals: any[]) => {
+    const orderMap = {
+      "Daily Profit Target": 1,
+      "Weekly Profit Target": 2,
+      "Monthly Profit Target": 3,
+      "Quarterly Profit Target": 4,
+      "Yearly Profit Target": 5
+    };
+
+    return goals.sort((a, b) => {
+      const orderA = orderMap[a.title as keyof typeof orderMap] || 999;
+      const orderB = orderMap[b.title as keyof typeof orderMap] || 999;
+      return orderA - orderB;
+    });
+  };
+
+  // Update ALL goals with real-time data from Today's P&L and sort them
   const goals = useMemo(() => {
-    return baseGoals.map(goal => {
+    const updatedGoals = baseGoals.map(goal => {
       // ALL goals get the same current value from Start Trade "Today's P&L"
       const targetValue = parseFloat(goal.target.replace(/[$,]/g, '')) || 1;
       const currentValue = currentProfit || 0;
@@ -75,6 +92,9 @@ const TradeManageGoalsPage = () => {
         progress: Math.round(Math.max(0, progress))
       };
     });
+
+    // Sort goals in the specified order
+    return sortGoalsByOrder(updatedGoals);
   }, [baseGoals, currentProfit]);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);

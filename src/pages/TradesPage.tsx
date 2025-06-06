@@ -1,4 +1,4 @@
-import { Eye, Trash2, Edit, Plus, Clock, DollarSign, TrendingUp, TrendingDown, Percent, Scale, Banknote, Target, Award, BarChart3 } from "lucide-react";
+import { Eye, Trash2, Edit, Plus, Clock, DollarSign, TrendingUp, TrendingDown, Percent, Scale, Banknote, Target, Award, BarChart3, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Sidebar from "../components/Sidebar";
@@ -244,6 +244,29 @@ const TradesPage = () => {
     toast({
       title: "Trades Deleted",
       description: `${selectedTrades.length} trade(s) have been removed.`,
+    });
+  };
+
+  // Handle copying a trade
+  const handleCopyTrade = (trade: TradeFormData) => {
+    // Create a copy of the trade with a new ID and reset some fields
+    const copiedTrade = {
+      ...trade,
+      id: undefined, // Will be assigned a new ID by the context
+      openTime: new Date().toISOString().split('T')[0], // Set to today's date
+      tradeTime: new Date().toTimeString().split(' ')[0].substring(0, 5), // Set to current time
+      netProfit: "0.00", // Reset profit
+      balance: balance.toString(), // Use current balance
+      winLoss: "win" // Reset to default
+    };
+
+    // Add the copied trade
+    addTrade(copiedTrade as TradeFormData, 'backtesting');
+
+    toast({
+      title: "Trade Copied",
+      description: `Trade #${trade.id} has been copied successfully. You can now edit the new trade.`,
+      duration: 5000,
     });
   };
 
@@ -560,13 +583,13 @@ const TradesPage = () => {
               {showInlineForm && (
                 <AnimatedContainer delay={0.1}>
                   <motion.div
-                    className="p-6 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-b-2 border-blue-200 dark:border-blue-700 shadow-lg"
+                    className="p-6 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 shadow-sm"
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                   >
                     <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-xl font-bold text-blue-800 dark:text-blue-200 flex items-center gap-2">
+                      <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                         <Edit className="h-5 w-5" />
                         {editingTradeId !== null ? `Edit Start Trade #${editingTradeId}` : "Add New Start Trade"}
                       </h3>
@@ -582,22 +605,22 @@ const TradesPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {/* First Row */}
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-blue-700 dark:text-blue-300">Strategy *</label>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Strategy *</label>
                         <Input
                           placeholder="Enter strategy name"
                           value={tradeFormData.strategy}
                           onChange={(e) => handleTradeFormInputChange("strategy", e.target.value)}
-                          className="border-blue-200 dark:border-blue-600 focus:border-blue-400 dark:focus:border-blue-400 dark:bg-gray-600 dark:text-white"
+                          className="border-gray-200 dark:border-gray-600 focus:border-gray-400 dark:focus:border-gray-400 dark:bg-gray-600 dark:text-white"
                           required
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-blue-700 dark:text-blue-300">Trading Pair *</label>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Trading Pair *</label>
                         <Select
                           value={tradeFormData.pair}
                           onValueChange={(value) => handleTradeFormInputChange("pair", value)}
                         >
-                          <SelectTrigger className="border-blue-200 dark:border-blue-600 focus:border-blue-400 dark:bg-gray-600 dark:text-white">
+                          <SelectTrigger className="border-gray-200 dark:border-gray-600 focus:border-gray-400 dark:bg-gray-600 dark:text-white">
                             <SelectValue placeholder="Select Trading Pair" />
                           </SelectTrigger>
                           <SelectContent className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
@@ -614,12 +637,12 @@ const TradesPage = () => {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-blue-700 dark:text-blue-300">Position Type *</label>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Position Type *</label>
                         <Select
                           value={tradeFormData.type}
                           onValueChange={(value) => handleTradeFormInputChange("type", value)}
                         >
-                          <SelectTrigger className="border-blue-200 dark:border-blue-600 focus:border-blue-400 dark:bg-gray-600 dark:text-white">
+                          <SelectTrigger className="border-gray-200 dark:border-gray-600 focus:border-gray-400 dark:bg-gray-600 dark:text-white">
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                           <SelectContent className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
@@ -631,32 +654,32 @@ const TradesPage = () => {
 
                       {/* Second Row */}
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-blue-700 dark:text-blue-300">Date *</label>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Date *</label>
                         <Input
                           type="date"
                           value={tradeFormData.openTime}
                           onChange={(e) => handleTradeFormInputChange("openTime", e.target.value)}
-                          className="border-blue-200 dark:border-blue-600 focus:border-blue-400 dark:focus:border-blue-400 dark:bg-gray-600 dark:text-white"
+                          className="border-gray-200 dark:border-gray-600 focus:border-gray-400 dark:focus:border-gray-400 dark:bg-gray-600 dark:text-white"
                           required
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-blue-700 dark:text-blue-300">Trade Time *</label>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Trade Time *</label>
                         <Input
                           type="time"
                           value={tradeFormData.tradeTime}
                           onChange={(e) => handleTradeFormInputChange("tradeTime", e.target.value)}
-                          className="border-blue-200 dark:border-blue-600 focus:border-blue-400 dark:focus:border-blue-400 dark:bg-gray-600 dark:text-white"
+                          className="border-gray-200 dark:border-gray-600 focus:border-gray-400 dark:focus:border-gray-400 dark:bg-gray-600 dark:text-white"
                           required
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-blue-700 dark:text-blue-300">Timeframe *</label>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Timeframe *</label>
                         <Select
                           value={tradeFormData.timeframe}
                           onValueChange={(value) => handleTradeFormInputChange("timeframe", value)}
                         >
-                          <SelectTrigger className="border-blue-200 dark:border-blue-600 focus:border-blue-400 dark:bg-gray-600 dark:text-white">
+                          <SelectTrigger className="border-gray-200 dark:border-gray-600 focus:border-gray-400 dark:bg-gray-600 dark:text-white">
                             <SelectValue placeholder="Select timeframe" />
                           </SelectTrigger>
                           <SelectContent className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
@@ -757,7 +780,7 @@ const TradesPage = () => {
                         </Select>
                       </div>
                     </div>
-                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-blue-200 dark:border-blue-700">
+                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                       <Button
                         variant="outline"
                         onClick={handleCancelInlineForm}
@@ -767,7 +790,7 @@ const TradesPage = () => {
                       </Button>
                       <Button
                         onClick={handleSaveTrade}
-                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+                        className="bg-gray-800 hover:bg-gray-900 text-white shadow-lg"
                         disabled={!tradeFormData.strategy || !tradeFormData.pair || !tradeFormData.type || !tradeFormData.openTime || !tradeFormData.tradeTime || !tradeFormData.timeframe}
                       >
                         {editingTradeId !== null ? "💾 Save Changes" : "➕ Add Trade"}
@@ -815,7 +838,7 @@ const TradesPage = () => {
                           type="checkbox"
                           checked={selectedTrades.includes(trade.id || 0)} // Use trade.id for selection
                           onChange={() => handleSelectTrade(trade.id || 0)} // Use trade.id for selection
-                          className="form-checkbox h-4 w-4 text-blue-600 rounded dark:bg-gray-700 dark:border-gray-600"
+                          className="form-checkbox h-4 w-4 text-gray-600 rounded dark:bg-gray-700 dark:border-gray-600"
                         />
                       </TableCell>
                       <TableCell className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">{trade.id}</TableCell> {/* Added dark mode text color and border */}
@@ -859,7 +882,16 @@ const TradesPage = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                            className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400 transition-all duration-200 hover:scale-105"
+                            onClick={() => handleCopyTrade(trade)}
+                            title="Copy trade"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 hover:scale-105 hover:shadow-md"
                             onClick={() => handleOpenEditTradeForm(trade)}
                             title="Edit start trade"
                           >
