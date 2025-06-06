@@ -49,26 +49,26 @@ const TradeToolsPage = () => {
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const { toast } = useToast();
 
-  // Use the trade data context for Trade Tools trades
+  // Use the trade data context for Playbook trades
   const { tradeToolsTrades, clearTradeToolsTrades, addTrade, updateTrade, deleteTrade } = useTradeData(); // Import addTrade, updateTrade, deleteTrade
 
-  // Calculate stats for Trade Tools trades
+  // Calculate stats for Playbook trades
   const stats = useMemo(() => calculateStats(tradeToolsTrades), [tradeToolsTrades]);
 
-  // Pagination state for Trade Tools trades
+  // Pagination state for Playbook trades
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 5; // Show 5 trades per page
 
-  // State for managing the inline add/edit trade form for Trade Tools trades
+  // State for managing the inline add/edit trade form for Playbook trades
   const [showInlineForm, setShowInlineForm] = useState(false); // State to control inline form visibility
   const [tradeFormData, setTradeFormData] = useState<Omit<TradeFormData, 'id'>>(initialTradeFormData);
   const [editingTradeId, setEditingTradeId] = useState<number | null>(null); // State to track which trade is being edited
 
 
-  // Calculate total pages for Trade Tools trades
+  // Calculate total pages for Playbook trades
   const totalPages = Math.ceil(tradeToolsTrades.length / itemsPerPage);
 
-  // Get paginated Trade Tools trades for current page
+  // Get paginated Playbook trades for current page
   const paginatedTrades = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return tradeToolsTrades.slice(startIndex, startIndex + itemsPerPage);
@@ -121,7 +121,7 @@ const TradeToolsPage = () => {
     clearTradeToolsTrades();
     toast({
       title: "Day Reset",
-      description: "All Trade Tools trades have been cleared.",
+      description: "All Playbook trades have been cleared.",
     });
   };
 
@@ -144,7 +144,7 @@ const TradeToolsPage = () => {
       addTrade(tradeFormData as TradeFormData, 'trade-tools'); // Add trade-tools trade
       toast({
         title: "Trade Added",
-        description: "Your trade tools trade has been successfully saved",
+        description: "Your playbook trade has been successfully saved",
       });
     }
 
@@ -185,37 +185,37 @@ const TradeToolsPage = () => {
     });
   };
 
-  // Handle clicking the View icon - Enhanced trade tools version
+  // Handle clicking the View icon - Enhanced playbook version
   const handleViewTrade = (trade: TradeFormData) => {
-    console.log("🔧 Viewing Trade Tools Trade Details:", trade);
+    console.log("📖 Viewing Playbook Trade Details:", trade);
 
     // Calculate trade performance metrics
     const profit = parseFloat(trade.netProfit);
     const isWin = trade.winLoss === "win";
     const profitEmoji = profit > 0 ? "💰" : profit < 0 ? "📉" : "➖";
     const resultEmoji = isWin ? "✅" : "❌";
-    const toolsEmoji = "🔧";
+    const playbookEmoji = "📖";
 
-    // Calculate performance metrics for trade tools analysis
+    // Calculate performance metrics for playbook analysis
     const performanceLevel = Math.abs(profit) > 75 ? "Outstanding" : Math.abs(profit) > 50 ? "Excellent" : Math.abs(profit) > 25 ? "Good" : "Standard";
     const performanceEmoji = performanceLevel === "Outstanding" ? "🌟" : performanceLevel === "Excellent" ? "🚀" : performanceLevel === "Good" ? "👍" : "📊";
 
-    // Calculate tool effectiveness
-    const toolEffectiveness = isWin ? "Effective" : "Needs Review";
+    // Calculate strategy effectiveness
+    const strategyEffectiveness = isWin ? "Effective" : "Needs Review";
     const effectivenessEmoji = isWin ? "✨" : "🔍";
 
-    // Create an engaging and detailed trade tools analysis
+    // Create an engaging and detailed playbook analysis
     const tradeDetails = `
-🔧 TRADE TOOLS ANALYSIS
+📖 PLAYBOOK ANALYSIS
 ═══════════════════════════════════
 
-⚙️ Tool Performance Overview:
+📋 Strategy Performance Overview:
    • Trade ID: #${trade.id}
    • Strategy: ${trade.strategy}
    • Trading Pair: ${trade.pair}
    • Position Type: ${trade.type.toUpperCase()}
    • Performance Level: ${performanceLevel} ${performanceEmoji}
-   • Tool Effectiveness: ${toolEffectiveness} ${effectivenessEmoji}
+   • Strategy Effectiveness: ${strategyEffectiveness} ${effectivenessEmoji}
 
 📅 Execution Details:
    • Date: ${trade.openTime}
@@ -223,42 +223,42 @@ const TradeToolsPage = () => {
    • Timeframe: ${trade.timeframe}
    • Market Trend: ${trade.trend}
 
-🛠️ Tool Configuration:
+📊 Strategy Configuration:
    • Lot Size: ${trade.lotSize}
    • Candles Analyzed: ${trade.candles}
-   • Entry Method: Trade Tools
+   • Entry Method: Playbook
 
 📈 Performance Results:
    • Outcome: ${trade.winLoss.toUpperCase()} ${resultEmoji}
    • Net Profit: ${formatCurrency(profit)} ${profitEmoji}
    • Account Balance: ${formatCurrency(parseFloat(trade.balance))}
 
-🎯 Tool Analysis:
+🎯 Strategy Analysis:
    ${isWin ?
-     "🎉 Excellent tool performance! This configuration shows strong potential for consistent results." :
-     "🔍 Tool review needed. Analyze this setup to optimize future trade tool configurations."}
+     "🎉 Excellent strategy performance! This playbook setup shows strong potential for consistent results." :
+     "🔍 Strategy review needed. Analyze this setup to optimize future playbook configurations."}
 
-💡 Trade Tools Insights:
-   • This trade was executed using advanced trade tools
-   • Performance metrics indicate tool effectiveness
-   • Use this data to refine tool configurations
+💡 Playbook Insights:
+   • This trade was executed using proven playbook strategies
+   • Performance metrics indicate strategy effectiveness
+   • Use this data to refine playbook configurations
    • Consider this setup for future trading strategies
 
-🔧 Tool Optimization Notes:
-   • Monitor tool performance across different market conditions
+📖 Strategy Optimization Notes:
+   • Monitor strategy performance across different market conditions
    • Adjust parameters based on historical results
-   • Maintain consistent tool usage for best results
+   • Maintain consistent playbook usage for best results
    • Document successful configurations for replication
     `.trim();
 
-    // Show engaging trade tools toast notification
+    // Show engaging playbook toast notification
     toast({
-      title: `${toolsEmoji} Trade Tools #${trade.id} ${resultEmoji}`,
-      description: `${isWin ? "Successful" : "Review needed"} tool execution on ${trade.pair} • ${formatCurrency(profit)} • ${performanceLevel} performance`,
+      title: `${playbookEmoji} Playbook #${trade.id} ${resultEmoji}`,
+      description: `${isWin ? "Successful" : "Review needed"} strategy execution on ${trade.pair} • ${formatCurrency(profit)} • ${performanceLevel} performance`,
       duration: 9000,
     });
 
-    // Show detailed alert with formatted trade tools information
+    // Show detailed alert with formatted playbook information
     alert(`${tradeDetails}`);
   };
 
@@ -277,7 +277,7 @@ const TradeToolsPage = () => {
         >
           <div className="flex items-center gap-2">
             <Wrench className="h-5 w-5 text-gray-500 dark:text-gray-400" /> {/* Added dark mode text color */}
-            <h1 className="text-xl font-medium text-gray-700 dark:text-gray-200">Trade Tools</h1> {/* Added dark mode text color */}
+            <h1 className="text-xl font-medium text-gray-700 dark:text-gray-200">Playbook</h1> {/* Added dark mode text color */}
           </div>
           {/* Display current date and time */}
           <div>
@@ -585,7 +585,7 @@ const TradeToolsPage = () => {
                                       size="sm"
                                       className="text-gray-600 dark:text-gray-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-600 dark:hover:text-yellow-400 transition-all duration-200 hover:scale-105 hover:shadow-md"
                                       onClick={() => handleViewTrade(trade)}
-                                      title="View trade tools analysis"
+                                      title="View playbook analysis"
                                     >
                                       <Eye className="h-4 w-4" />
                                     </Button>

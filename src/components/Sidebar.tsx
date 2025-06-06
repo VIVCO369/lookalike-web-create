@@ -333,7 +333,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
           )}
         </div>
 
-        {/* Trade Tools Link - Moved here */}
+        {/* Playbook Link - Moved here */}
         <Link
           to="/trade-tools"
           className={cn(
@@ -343,7 +343,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
           )}
         >
           <Wrench className={cn("h-5 w-5", !isOpen && "h-6 w-6")} />
-          {isOpen && <span className={cn("ml-4 transition-opacity", isOpen ? "opacity-100" : "opacity-0")}>Trade Tools</span>}
+          {isOpen && <span className={cn("ml-4 transition-opacity", isOpen ? "opacity-100" : "opacity-0")}>Playbook</span>}
         </Link>
 
 

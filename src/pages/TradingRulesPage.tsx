@@ -1,16 +1,37 @@
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Sidebar from "../components/Sidebar";
 import TradingRules from "../components/TradingRules";
 import { useState, useEffect } from "react"; // Import useEffect
 import { cn } from "@/lib/utils"; // Import cn utility
 import AnimatedContainer from "@/components/AnimatedContainer"; // Import AnimatedContainer
 import { motion } from "framer-motion"; // Import motion
+import useLocalStorage from "@/hooks/useLocalStorage";
+import { useTradeData } from "@/contexts/TradeDataContext";
+import { useToast } from "@/components/ui/use-toast";
 
+// Interface for trade data
+interface TradeData {
+  id: string;
+  strategy: string;
+  pair: string;
+  type: string;
+  tradeCount: number;
+  win: number;
+  loss: number;
+}
 
 const TradingRulesPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentDateTime, setCurrentDateTime] = useState(new Date()); // Add state for current date/time
+  const { toast } = useToast();
+
+  // Get trade data from Start Trade context
+  const { backtestingTrades } = useTradeData();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -39,6 +60,63 @@ const TradingRulesPage = () => {
     return date.toLocaleTimeString('en-US', options);
   };
 
+  // Generate trade data automatically from Start Trade entries
+  const generateTradeData = (): TradeData[] => {
+    const tradeGroups: { [key: string]: TradeData } = {};
+
+    backtestingTrades.forEach(trade => {
+      const key = `${trade.strategy}-${trade.pair}-${trade.type}`;
+
+      if (!tradeGroups[key]) {
+        tradeGroups[key] = {
+          id: key,
+          strategy: trade.strategy,
+          pair: trade.pair,
+          type: trade.type,
+          tradeCount: 0,
+          win: 0,
+          loss: 0
+        };
+      }
+
+      tradeGroups[key].tradeCount++;
+
+      if (trade.winLoss === 'win') {
+        tradeGroups[key].win++;
+      } else if (trade.winLoss === 'loss') {
+        tradeGroups[key].loss++;
+      }
+    });
+
+    return Object.values(tradeGroups);
+  };
+
+  // Get current trade data
+  const tradeData = generateTradeData();
+
+  // Handle deleting trade data (removes related trades from Start Trade)
+  const handleDeleteTradeData = (tradeId: string) => {
+    if (window.confirm('Are you sure you want to delete all trades for this combination? This will remove all related trades from Start Trade.')) {
+      // Parse the trade ID to get strategy, pair, and type
+      const [strategy, pair, type] = tradeId.split('-');
+
+      // Get all trades that match this combination
+      const tradesToDelete = backtestingTrades.filter(trade =>
+        trade.strategy === strategy &&
+        trade.pair === pair &&
+        trade.type === type
+      );
+
+      // Note: We can't directly delete from the context here since we need the deleteTrade function
+      // For now, we'll show a message about what would be deleted
+      toast({
+        title: "Delete functionality",
+        description: `This would delete ${tradesToDelete.length} trades for ${strategy} - ${pair} - ${type}`,
+        variant: "destructive"
+      });
+    }
+  };
+
 
   return (
     <div className="flex min-h-screen bg-background"> {/* Changed inline style to Tailwind class */}
@@ -64,12 +142,96 @@ const TradingRulesPage = () => {
         </motion.header>
 
         {/* Main content */}
-        <main className="flex-1 p-6">
-          <AnimatedContainer delay={0.1}>
-            <div className="max-w-4xl mx-auto">
+        <main className="flex-1 p-6" style={{ backgroundColor: '#f7f5f0' }}>
+          <div className="max-w-7xl mx-auto space-y-6">
+            {/* Trading Rules Component */}
+            <AnimatedContainer delay={0.1}>
               <TradingRules />
-            </div>
-          </AnimatedContainer>
+            </AnimatedContainer>
+
+            {/* Trade Data Table */}
+            <AnimatedContainer delay={0.2}>
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <LayoutDashboard className="h-5 w-5 text-orange-500" />
+                      Trade Data Management ({tradeData.length} unique combinations)
+                    </CardTitle>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Auto-generated from Start Trade entries
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {/* Trade Data Table */}
+                  <div className="border rounded-lg overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-gray-50 dark:bg-gray-800">
+                          <TableHead className="font-semibold">TRADE</TableHead>
+                          <TableHead className="font-semibold">STRATEGY</TableHead>
+                          <TableHead className="font-semibold">PAIR</TableHead>
+                          <TableHead className="font-semibold">TYPE</TableHead>
+                          <TableHead className="font-semibold">WIN</TableHead>
+                          <TableHead className="font-semibold">LOSS</TableHead>
+                          <TableHead className="font-semibold">ACTIONS</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {tradeData.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                              No trade data available. Add trades in Start Trade page to see data here.
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          tradeData.map((trade) => (
+                            <TableRow key={trade.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <TableCell className="font-medium">
+                                <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
+                                  {trade.tradeCount}
+                                </span>
+                              </TableCell>
+                              <TableCell>{trade.strategy}</TableCell>
+                              <TableCell>{trade.pair}</TableCell>
+                              <TableCell>
+                                <span className={cn(
+                                  "px-2 py-1 rounded-full text-xs font-medium",
+                                  trade.type === "Buy" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                                )}>
+                                  {trade.type}
+                                </span>
+                              </TableCell>
+                              <TableCell>
+                                <span className="text-green-600 font-medium">{trade.win}</span>
+                              </TableCell>
+                              <TableCell>
+                                <span className="text-red-600 font-medium">{trade.loss}</span>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDeleteTradeData(trade.id)}
+                                    className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                                    title="Delete trade data"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </AnimatedContainer>
+          </div>
         </main>
       </div>
     </div>

@@ -250,7 +250,7 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
                           <Button variant="outline" size="sm" onClick={handleCancelEdit}>
                             Cancel
                           </Button>
-                          <Button size="sm" className="bg-green-500 hover:bg-green-600" onClick={handleSaveEditedRule}>
+                          <Button size="sm" className="bg-orange-500 hover:bg-orange-600" onClick={handleSaveEditedRule}>
                             Save
                           </Button>
                         </div>
@@ -315,7 +315,7 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
             <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">Trading Rules</h3> {/* Added dark mode text color */}
           </div>
           {!hideAddButton && !dashboardView && ( // Hide add button in dashboard view
-            <Button className="bg-green-500 hover:bg-green-600" onClick={() => setAddingRule(true)}>
+            <Button className="bg-orange-500 hover:bg-orange-600" onClick={() => setAddingRule(true)}>
               <Plus className="h-4 w-4 mr-1" /> Add Strategy
             </Button>
           )}
@@ -378,17 +378,14 @@ const TradingRules = ({ hideAddButton = false, showLastEntryOnly = false, onProg
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-green-500 hover:bg-green-600"
+                    className="bg-orange-500 hover:bg-orange-600"
                     disabled={!newRuleName.trim() || !newStrategyName.trim()}
                   >
                     Add Rule
                   </Button>
                 </div>
 
-                {/* Debug info */}
-                <div className="mt-2 text-xs text-gray-500">
-                  Debug: Rule name: "{newRuleName}" | Strategy: "{newStrategyName}" | Valid: {(newRuleName.trim() && newStrategyName.trim()) ? 'Yes' : 'No'}
-                </div>
+
               </form>
             </div>
           </AnimatedContainer>
