@@ -510,7 +510,7 @@ const TradesPage = () => {
                     <h3 className="text-lg font-medium text-center mb-6 text-gray-800 dark:text-gray-200">Signal Progress</h3>
                     <div className="flex justify-center mb-4">
                       <div className="relative h-32 w-32">
-                        <Progress value={tradingRulesProgress} className="h-full w-full rounded-full [&>div]:!bg-orange-500" />
+                        <Progress value={tradingRulesProgress} className="h-full w-full rounded-full [&>div]:!bg-green-500" />
                         <div className="absolute inset-0 flex items-center justify-center">
                           <span className="text-2xl font-bold text-gray-800 dark:text-gray-100">{tradingRulesProgress.toFixed(0)}%</span>
                         </div>
@@ -520,7 +520,7 @@ const TradesPage = () => {
                     <div className="flex justify-center">
                       <Button
                         variant={tradingRulesProgress === 100 ? "default" : "destructive"}
-                        className={tradingRulesProgress === 100 ? "bg-orange-500 hover:bg-orange-600 text-white" : ""}
+                        className={tradingRulesProgress === 100 ? "bg-green-500 hover:bg-green-600 text-white" : ""}
                       >
                         {tradingRulesProgress === 100 ? "Take The Trade" : "Ready To Trade"}
                       </Button>
