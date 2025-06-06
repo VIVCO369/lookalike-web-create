@@ -1,4 +1,4 @@
-import { LayoutDashboard, Trash2 } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -94,28 +94,7 @@ const TradingRulesPage = () => {
   // Get current trade data
   const tradeData = generateTradeData();
 
-  // Handle deleting trade data (removes related trades from Start Trade)
-  const handleDeleteTradeData = (tradeId: string) => {
-    if (window.confirm('Are you sure you want to delete all trades for this combination? This will remove all related trades from Start Trade.')) {
-      // Parse the trade ID to get strategy, pair, and type
-      const [strategy, pair, type] = tradeId.split('-');
 
-      // Get all trades that match this combination
-      const tradesToDelete = backtestingTrades.filter(trade =>
-        trade.strategy === strategy &&
-        trade.pair === pair &&
-        trade.type === type
-      );
-
-      // Note: We can't directly delete from the context here since we need the deleteTrade function
-      // For now, we'll show a message about what would be deleted
-      toast({
-        title: "Delete functionality",
-        description: `This would delete ${tradesToDelete.length} trades for ${strategy} - ${pair} - ${type}`,
-        variant: "destructive"
-      });
-    }
-  };
 
 
   return (
@@ -175,13 +154,12 @@ const TradingRulesPage = () => {
                           <TableHead className="font-semibold">TYPE</TableHead>
                           <TableHead className="font-semibold">WIN</TableHead>
                           <TableHead className="font-semibold">LOSS</TableHead>
-                          <TableHead className="font-semibold">ACTIONS</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {tradeData.length === 0 ? (
                           <TableRow>
-                            <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                            <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                               No trade data available. Add trades in Start Trade page to see data here.
                             </TableCell>
                           </TableRow>
@@ -208,19 +186,6 @@ const TradingRulesPage = () => {
                               </TableCell>
                               <TableCell>
                                 <span className="text-red-600 font-medium">{trade.loss}</span>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-1">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleDeleteTradeData(trade.id)}
-                                    className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                                    title="Delete trade data"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
                               </TableCell>
                             </TableRow>
                           ))

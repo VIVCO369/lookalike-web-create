@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Sidebar from "../components/Sidebar";
 import { cn } from "@/lib/utils";
 import { TrendingUp, DollarSign, Calendar, Target } from "lucide-react";
@@ -6,51 +6,126 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"; // Import Table components
 import AnimatedContainer from "@/components/AnimatedContainer"; // Import AnimatedContainer
 import { motion } from "framer-motion"; // Import motion
+import { useTradeData, calculateStats } from "@/contexts/TradeDataContext";
 
 
 const TradeSummaryPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  // Get trade data from Start Trade context
+  const { backtestingTrades } = useTradeData();
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  // Calculate real statistics from Start Trade data
+  const stats = useMemo(() => calculateStats(backtestingTrades), [backtestingTrades]);
+
+  // Calculate daily summary data from Start Trade entries
+  const dailySummaryData = useMemo(() => {
+    const dailyData: { [key: string]: { trades: any[], totalProfit: number } } = {};
+
+    // Group trades by date
+    backtestingTrades.forEach(trade => {
+      const date = trade.openTime; // Use openTime as the date
+      if (!dailyData[date]) {
+        dailyData[date] = { trades: [], totalProfit: 0 };
+      }
+      dailyData[date].trades.push(trade);
+      dailyData[date].totalProfit += parseFloat(trade.netProfit) || 0;
+    });
+
+    // Convert to array format for table
+    return Object.entries(dailyData)
+      .map(([date, data]) => {
+        const wins = data.trades.filter(t => t.winLoss === 'win').length;
+        const totalTrades = data.trades.length;
+        const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '0.0';
+
+        return {
+          date,
+          profitLoss: data.totalProfit,
+          totalTrades,
+          winRate: `${winRate}%`
+        };
+      })
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) // Sort by date descending
+      .slice(0, 10); // Show last 10 days
+  }, [backtestingTrades]);
+
+  // Calculate monthly performance from Start Trade data
+  const monthlyPerformance = useMemo(() => {
+    const monthlyData: { [key: string]: number } = {};
+
+    backtestingTrades.forEach(trade => {
+      const date = new Date(trade.openTime);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = 0;
+      }
+      monthlyData[monthKey] += parseFloat(trade.netProfit) || 0;
+    });
+
+    return Object.entries(monthlyData)
+      .map(([month, profit]) => ({ month, profit }))
+      .sort((a, b) => b.month.localeCompare(a.month))
+      .slice(0, 6); // Show last 6 months
+  }, [backtestingTrades]);
+
+  // Calculate best performing pairs from Start Trade data
+  const bestPerformingPairs = useMemo(() => {
+    const pairData: { [key: string]: number } = {};
+
+    backtestingTrades.forEach(trade => {
+      if (!pairData[trade.pair]) {
+        pairData[trade.pair] = 0;
+      }
+      pairData[trade.pair] += parseFloat(trade.netProfit) || 0;
+    });
+
+    return Object.entries(pairData)
+      .map(([pair, profit]) => ({ pair, profit }))
+      .sort((a, b) => b.profit - a.profit)
+      .slice(0, 6); // Show top 6 pairs
+  }, [backtestingTrades]);
+
+  // Calculate active days
+  const activeDays = useMemo(() => {
+    const uniqueDates = new Set(backtestingTrades.map(trade => trade.openTime));
+    return uniqueDates.size;
+  }, [backtestingTrades]);
+
   const summaryStats = [
     {
       title: "Total Trades",
-      value: "247",
-      change: "+12%",
+      value: stats.totalTrades.toString(),
+      change: `${stats.totalTrades > 0 ? '+' : ''}${stats.totalTrades}`,
       icon: Target,
       color: "text-blue-600"
     },
     {
       title: "Win Rate",
-      value: "68.4%",
-      change: "+2.1%",
+      value: stats.winRate,
+      change: `${stats.wins}W / ${stats.losses}L`,
       icon: TrendingUp,
-      color: "text-green-600"
+      color: parseFloat(stats.winRate) >= 50 ? "text-green-600" : "text-red-600"
     },
     {
       title: "Total P&L",
-      value: "$12,450",
-      change: "+18.5%",
+      value: `$${stats.netProfit.toFixed(2)}`,
+      change: stats.netProfit >= 0 ? `+$${stats.netProfit.toFixed(2)}` : `-$${Math.abs(stats.netProfit).toFixed(2)}`,
       icon: DollarSign,
-      color: "text-green-600"
+      color: stats.netProfit >= 0 ? "text-green-600" : "text-red-600"
     },
     {
       title: "Active Days",
-      value: "89",
-      change: "+5 days",
+      value: activeDays.toString(),
+      change: `${activeDays} trading days`,
       icon: Calendar,
       color: "text-purple-600"
     }
-  ];
-
-  // Sample data for the Daily Trade Summary table
-  const dailySummaryData = [
-    { date: "2023-10-27", profitLoss: 15.50, totalTrades: 5, winRate: "80%" },
-    { date: "2023-10-28", profitLoss: -5.20, totalTrades: 3, winRate: "33%" },
-    // Add more sample data as needed
   ];
 
   return (
@@ -96,31 +171,36 @@ const TradeSummaryPage = () => {
               </div>
             </AnimatedContainer>
 
-            {/* Monthly Performance and Best Performing Assets - Restored */}
+            {/* Monthly Performance and Best Performing Assets - Using Real Data */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <AnimatedContainer delay={0.2}>
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-gray-900 dark:text-gray-100">Monthly Performance</CardTitle> {/* Added dark mode text color */}
+                    <CardTitle className="text-gray-900 dark:text-gray-100">Monthly Performance</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-300">January 2024</span> {/* Added dark mode text color */}
-                        <span className="font-medium text-green-600">+$2,150</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-300">February 2024</span> {/* Added dark mode text color */}
-                        <span className="font-medium text-green-600">+$3,280</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-300">March 2024</span> {/* Added dark mode text color */}
-                        <span className="font-medium text-red-600">-$850</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-300">April 2024</span> {/* Added dark mode text color */}
-                        <span className="font-medium text-green-600">+$4,120</span>
-                      </div>
+                      {monthlyPerformance.length > 0 ? (
+                        monthlyPerformance.map((month, index) => {
+                          const date = new Date(month.month + '-01');
+                          const monthName = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+                          return (
+                            <div key={index} className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600 dark:text-gray-300">{monthName}</span>
+                              <span className={cn(
+                                "font-medium",
+                                month.profit >= 0 ? "text-green-600" : "text-red-600"
+                              )}>
+                                {month.profit >= 0 ? '+' : ''}${month.profit.toFixed(2)}
+                              </span>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="text-center text-gray-500 dark:text-gray-400 py-4">
+                          No trading data available. Add trades in Start Trade to see monthly performance.
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -129,26 +209,27 @@ const TradeSummaryPage = () => {
               <AnimatedContainer delay={0.3}>
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-gray-900 dark:text-gray-100">Best Performing Assets</CardTitle> {/* Added dark mode text color */}
+                    <CardTitle className="text-gray-900 dark:text-gray-100">Best Performing Pairs</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-300">EUR/USD</span> {/* Added dark mode text color */}
-                        <span className="font-medium text-green-600">+$1,850</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-300">GBP/USD</span> {/* Added dark mode text color */}
-                        <span className="font-medium text-green-600">+$1,420</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-300">USD/JPY</span> {/* Added dark mode text color */}
-                        <span className="font-medium text-green-600">+$980</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-300">AUD/USD</span> {/* Added dark mode text color */}
-                        <span className="font-medium text-red-600">-$320</span>
-                      </div>
+                      {bestPerformingPairs.length > 0 ? (
+                        bestPerformingPairs.map((pair, index) => (
+                          <div key={index} className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600 dark:text-gray-300">{pair.pair}</span>
+                            <span className={cn(
+                              "font-medium",
+                              pair.profit >= 0 ? "text-green-600" : "text-red-600"
+                            )}>
+                              {pair.profit >= 0 ? '+' : ''}${pair.profit.toFixed(2)}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center text-gray-500 dark:text-gray-400 py-4">
+                          No trading data available. Add trades in Start Trade to see pair performance.
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -174,16 +255,24 @@ const TradeSummaryPage = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {dailySummaryData.map((day, index) => (
-                          <TableRow key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700"> {/* Added dark mode hover style */}
-                            <TableCell className="font-medium text-gray-900 dark:text-gray-100">{day.date}</TableCell> {/* Added dark mode text color */}
-                            <TableCell className={day.profitLoss >= 0 ? "text-green-600" : "text-red-600"}>
-                              {day.profitLoss >= 0 ? `+${day.profitLoss.toFixed(2)}` : day.profitLoss.toFixed(2)}
+                        {dailySummaryData.length > 0 ? (
+                          dailySummaryData.map((day, index) => (
+                            <TableRow key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                              <TableCell className="font-medium text-gray-900 dark:text-gray-100">{day.date}</TableCell>
+                              <TableCell className={day.profitLoss >= 0 ? "text-green-600" : "text-red-600"}>
+                                ${day.profitLoss >= 0 ? `+${day.profitLoss.toFixed(2)}` : day.profitLoss.toFixed(2)}
+                              </TableCell>
+                              <TableCell className="text-gray-900 dark:text-gray-100">{day.totalTrades}</TableCell>
+                              <TableCell className="text-gray-900 dark:text-gray-100">{day.winRate}</TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={4} className="text-center py-8 text-gray-500 dark:text-gray-400">
+                              No trading data available. Add trades in Start Trade to see daily summary.
                             </TableCell>
-                            <TableCell className="text-gray-900 dark:text-gray-100">{day.totalTrades}</TableCell> {/* Added dark mode text color */}
-                            <TableCell className="text-gray-900 dark:text-gray-100">{day.winRate}</TableCell> {/* Added dark mode text color */}
                           </TableRow>
-                        ))}
+                        )}
                       </TableBody>
                     </Table>
                   </div>
