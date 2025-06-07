@@ -26,12 +26,12 @@ const TimePLChart: React.FC = () => {
 
     // Process actual trades
     backtestingTrades.forEach(trade => {
-      if (trade.entryTime) {
-        const timeParts = trade.entryTime.split(':');
+      if (trade.tradeTime) {
+        const timeParts = trade.tradeTime.split(':');
         if (timeParts.length >= 2) {
           const hour = parseInt(timeParts[0]);
           const timeKey = `${hour.toString().padStart(2, '0')}:00`;
-          
+
           if (timeSlots[timeKey] !== undefined) {
             const profit = parseFloat(trade.netProfit || '0');
             timeSlots[timeKey] += profit;
@@ -112,7 +112,7 @@ const TimePLChart: React.FC = () => {
           </CardTitle>
         </div>
         <p className="text-gray-600 dark:text-gray-400 text-sm">
-          Hourly profit/loss analysis with cumulative trend
+          Hourly profit/loss analysis with cumulative trend • Data from Start Trade
         </p>
       </CardHeader>
       <CardContent>
@@ -315,7 +315,7 @@ const TimePLChart: React.FC = () => {
               No P/L Data Available
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
-              Start adding trades to see your time-based P/L analysis
+              Add trades in <span className="font-medium text-orange-500">Start Trade</span> page to see your time-based P/L analysis
             </p>
           </div>
         )}

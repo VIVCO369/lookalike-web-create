@@ -20,10 +20,10 @@ const TimeTradesChart: React.FC = () => {
 
     // Process trades
     backtestingTrades.forEach(trade => {
-      if (trade.entryTime) {
-        const hour = trade.entryTime.split(':')[0] + ':00';
-        const pl = parseFloat(trade.profitLoss?.toString() || '0');
-        
+      if (trade.tradeTime) {
+        const hour = trade.tradeTime.split(':')[0] + ':00';
+        const pl = parseFloat(trade.netProfit || '0');
+
         hourlyData[hour].total += 1;
         if (pl > 0) {
           hourlyData[hour].wins += 1;
@@ -33,26 +33,7 @@ const TimeTradesChart: React.FC = () => {
       }
     });
 
-    // Add demo data if no real trades exist
-    if (backtestingTrades.length === 0) {
-      const demoData = [
-        { hour: 8, total: 5, wins: 3, losses: 2 },
-        { hour: 9, total: 3, wins: 1, losses: 2 },
-        { hour: 10, total: 7, wins: 5, losses: 2 },
-        { hour: 11, total: 4, wins: 3, losses: 1 },
-        { hour: 13, total: 2, wins: 1, losses: 1 },
-        { hour: 14, total: 6, wins: 4, losses: 2 },
-        { hour: 15, total: 4, wins: 3, losses: 1 },
-        { hour: 16, total: 3, wins: 1, losses: 2 },
-        { hour: 20, total: 5, wins: 4, losses: 1 },
-        { hour: 21, total: 3, wins: 2, losses: 1 },
-      ];
-
-      demoData.forEach(({ hour, total, wins, losses }) => {
-        const timeKey = `${hour.toString().padStart(2, '0')}:00`;
-        hourlyData[timeKey] = { total, wins, losses };
-      });
-    }
+    // Only show real trade data from Start Trade page
 
     return Object.entries(hourlyData)
       .filter(([_, data]) => data.total > 0)
@@ -116,7 +97,7 @@ const TimeTradesChart: React.FC = () => {
                 Time Trading Activity
               </CardTitle>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Number of trades by trading hours
+                Number of trades by trading hours • Data from Start Trade
               </p>
             </div>
           </div>
@@ -255,7 +236,7 @@ const TimeTradesChart: React.FC = () => {
               No Trading Data Available
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
-              Start adding trades to see your hourly trading activity
+              Add trades in <span className="font-medium text-orange-500">Start Trade</span> page to see your hourly trading activity
             </p>
           </div>
         )}
