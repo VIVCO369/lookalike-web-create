@@ -449,28 +449,28 @@ const TradesPage = () => {
                 <StatsCard
                   title="Deposit"
                   value={`$${balance.toFixed(2)}`}
-                  color="text-gray-900 dark:text-white"
+                  color="text-orange-500"
                   leftBorderColor="border-l-orange-500"
                   icon={DollarSign}
                 />
                 <StatsCard
                   title="Today's P&L"
                   value={stats.netProfit >= 0 ? `+${formatCurrency(stats.netProfit)}` : formatCurrency(stats.netProfit)}
-                  color="text-gray-900 dark:text-white"
+                  color="text-green-500"
                   leftBorderColor="border-l-green-500"
                   icon={Scale}
                 />
                 <StatsCard
                   title="Win Rate"
                   value={stats.winRate}
-                  color="text-gray-900 dark:text-white"
+                  color="text-blue-500"
                   leftBorderColor="border-l-blue-500"
                   icon={Percent}
                 />
                 <StatsCard
                   title="Account Balance"
                   value={formatCurrency(balance + stats.netProfit)}
-                  color="text-gray-900 dark:text-white"
+                  color="text-green-500"
                   leftBorderColor="border-l-green-500"
                   icon={TrendingUp}
                 />
@@ -481,7 +481,7 @@ const TradesPage = () => {
                   title="Total Trades"
                   value={`${stats.totalTrades} Trades`}
                   labelPosition="below"
-                  color="text-gray-900 dark:text-white"
+                  color="text-black dark:text-white"
                   leftBorderColor="border-l-black"
                   icon={BarChart3}
                 />
@@ -489,7 +489,7 @@ const TradesPage = () => {
                   title="Wins"
                   value={`${stats.wins} Wins`}
                   labelPosition="below"
-                  color="text-gray-900 dark:text-white"
+                  color="text-green-500"
                   leftBorderColor="border-l-green-500"
                   icon={TrendingUp}
                 />
@@ -497,7 +497,7 @@ const TradesPage = () => {
                   title="Losses"
                   value={`${stats.losses} Losses`}
                   labelPosition="below"
-                  color="text-gray-900 dark:text-white"
+                  color="text-red-500"
                   leftBorderColor="border-l-red-500"
                   icon={TrendingDown}
                 />
@@ -505,7 +505,7 @@ const TradesPage = () => {
                   title="Best Trade"
                   value={stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
                   labelPosition="below"
-                  color="text-gray-900 dark:text-white"
+                  color="text-green-500"
                   leftBorderColor="border-l-green-500"
                   icon={Award}
                 />
@@ -513,7 +513,7 @@ const TradesPage = () => {
                   title="Worst Trade"
                   value={formatCurrency(stats.worstTrade)}
                   labelPosition="below"
-                  color="text-gray-900 dark:text-white"
+                  color="text-red-500"
                   leftBorderColor="border-l-red-500"
                   icon={TrendingDown}
                 />
