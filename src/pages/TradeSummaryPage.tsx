@@ -189,6 +189,20 @@ const TradeSummaryPage = () => {
       color: stats.netProfit >= 0 ? "text-green-600" : "text-red-600"
     },
     {
+      title: "Profit Wins",
+      value: stats.profitWins.toString(),
+      change: `${stats.profitWins} profitable trades`,
+      icon: TrendingUp,
+      color: "text-green-600"
+    },
+    {
+      title: "Profit Losses",
+      value: stats.profitLosses.toString(),
+      change: `${stats.profitLosses} losing trades`,
+      icon: TrendingUp,
+      color: "text-red-600"
+    },
+    {
       title: "Active Days",
       value: activeDays.toString(),
       change: `${activeDays} trading days`,
@@ -220,19 +234,19 @@ const TradeSummaryPage = () => {
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Summary Stats */}
             <AnimatedContainer delay={0.1}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {summaryStats.map((stat, index) => (
                   <Card key={index}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300"> {/* Added dark mode text color */}
+                      <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         {stat.title}
                       </CardTitle>
                       <stat.icon className={cn("h-4 w-4", stat.color)} />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stat.value}</div> {/* Added dark mode text color */}
-                      <p className="text-xs text-green-600">
-                        {stat.change} from last month
+                      <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stat.value}</div>
+                      <p className={cn("text-xs", stat.color)}>
+                        {stat.change}
                       </p>
                     </CardContent>
                   </Card>

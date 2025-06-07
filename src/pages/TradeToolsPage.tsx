@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Sidebar from "../components/Sidebar";
 import { cn } from "@/lib/utils";
-import { Wrench, Clock, Eye, Edit, Trash2, Plus } from "lucide-react"; // Import Plus icon
+import { Wrench, Clock, Eye, Edit, Trash2, Plus, Copy } from "lucide-react"; // Import Plus and Copy icons
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useTradeData, calculateStats, TradeFormData } from "@/contexts/TradeDataContext"; // Import TradeFormData
@@ -185,6 +185,29 @@ const TradeToolsPage = () => {
     });
   };
 
+  // Handle copying a trade
+  const handleCopyTrade = (trade: TradeFormData) => {
+    // Create a copy of the trade with a new ID and reset some fields
+    const copiedTrade = {
+      ...trade,
+      id: undefined, // Will be assigned a new ID by the context
+      openTime: new Date().toISOString().split('T')[0], // Set to today's date
+      tradeTime: new Date().toTimeString().split(' ')[0].substring(0, 5), // Set to current time
+      netProfit: "0.00", // Reset profit
+      balance: "0.00", // Reset balance
+      winLoss: "win" // Reset to default
+    };
+
+    // Add the copied trade
+    addTrade(copiedTrade as TradeFormData, 'trade-tools');
+
+    toast({
+      title: "Trade Copied",
+      description: `Trade has been copied successfully. You can now edit the new trade.`,
+      duration: 5000,
+    });
+  };
+
   // Handle clicking the View icon - Enhanced playbook version
   const handleViewTrade = (trade: TradeFormData) => {
     console.log("📖 Viewing Playbook Trade Details:", trade);
@@ -294,6 +317,10 @@ const TradeToolsPage = () => {
               <DailyPerformanceTracker
                 accountType="trade-tools"
                 onResetDay={handleResetDay}
+                customLabels={{
+                  bestTrade: "Profit Win",
+                  worstTrade: "Profit Loss"
+                }}
               />
             </AnimatedContainer>
 
@@ -317,7 +344,7 @@ const TradeToolsPage = () => {
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">Trade History</h3> {/* Added dark mode text color */}
                     {/* New Trade Button */}
-                    <Button className="bg-green-500 hover:bg-green-600 text-white" onClick={handleOpenAddTradeForm}> {/* Updated onClick */}
+                    <Button className="bg-orange-500 hover:bg-orange-600 text-white" onClick={handleOpenAddTradeForm}> {/* Updated onClick */}
                       <Plus className="mr-2 h-4 w-4" /> New Trade
                     </Button>
                   </div>
@@ -541,7 +568,7 @@ const TradeToolsPage = () => {
                               <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">LOT SIZE</TableHead> {/* Added dark mode text color and border */}
                               <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">CANDLES</TableHead> {/* Added dark mode text color and border */}
                               <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">W/L</TableHead> {/* Added dark mode text color and border */}
-                              <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">NET PROFIT</TableHead> {/* Added dark mode text color and border */}
+                              <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">PROFIT</TableHead> {/* Added dark mode text color and border */}
                               <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">BALANCE</TableHead> {/* Added dark mode text color and border */}
                               <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">ACTIONS</TableHead> {/* Added dark mode text color and border */}
                             </TableRow>
@@ -591,6 +618,16 @@ const TradeToolsPage = () => {
                                     </Button>
                                     <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => handleOpenEditTradeForm(trade)}> {/* Updated onClick */}
                                       <Edit className="h-4 w-4" />
+                                    </Button>
+                                    {/* Copy Button */}
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                                      onClick={() => handleCopyTrade(trade)}
+                                      title="Copy trade"
+                                    >
+                                      <Copy className="h-4 w-4" />
                                     </Button>
                                     {/* Delete Button with AlertDialog */}
                                     <AlertDialog>

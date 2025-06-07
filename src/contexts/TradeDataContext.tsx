@@ -22,8 +22,12 @@ export interface TradeFormData {
 interface CalculatedStats {
   netProfit: number;
   dailyProfit: number; // Profit for the current day
-  bestTrade: number;
-  worstTrade: number;
+  profitWins: number; // Count of profitable trades
+  profitLosses: number; // Count of losing trades
+  totalWinProfit: number; // Total profit from winning trades
+  totalLossProfit: number; // Total loss from losing trades
+  bestTrade: number; // Keep for backward compatibility
+  worstTrade: number; // Keep for backward compatibility
   winRate: string;
   totalTrades: number; // Added totalTrades to stats
   wins: number; // Added wins count
@@ -243,8 +247,12 @@ export const TradeDataProvider = ({ children }: { children: ReactNode }) => {
 export const calculateStats = (trades: TradeFormData[]): CalculatedStats => {
   let totalProfit = 0;
   let dailyProfit = 0; // Profit for the current day
-  let bestTrade = 0;
-  let worstTrade = 0;
+  let profitWins = 0; // Count of profitable trades
+  let profitLosses = 0; // Count of losing trades
+  let totalWinProfit = 0; // Total profit from winning trades
+  let totalLossProfit = 0; // Total loss from losing trades
+  let bestTrade = 0; // Keep for backward compatibility
+  let worstTrade = 0; // Keep for backward compatibility
   let wins = 0;
   let losses = 0;
   const dailyProfitsByDate: { [date: string]: number } = {}; // Store profit for each day
@@ -258,14 +266,24 @@ export const calculateStats = (trades: TradeFormData[]): CalculatedStats => {
 
       totalProfit += profit;
 
+      // Track best and worst trades
       if (profit > bestTrade) {
         bestTrade = profit;
       }
-
       if (profit < worstTrade) {
         worstTrade = profit;
       }
 
+      // Count profitable and losing trades based on actual profit amount
+      if (profit > 0) {
+        profitWins++;
+        totalWinProfit += profit; // Add to total win profit
+      } else if (profit < 0) {
+        profitLosses++;
+        totalLossProfit += profit; // Add to total loss profit (will be negative)
+      }
+
+      // Count wins and losses based on winLoss field
       if (trade.winLoss === 'win') {
         wins++;
       } else if (trade.winLoss === 'loss') {
@@ -307,6 +325,10 @@ export const calculateStats = (trades: TradeFormData[]): CalculatedStats => {
   return {
     netProfit: totalProfit,
     dailyProfit,
+    profitWins,
+    profitLosses,
+    totalWinProfit,
+    totalLossProfit,
     bestTrade,
     worstTrade,
     winRate: `${winRate}%`,

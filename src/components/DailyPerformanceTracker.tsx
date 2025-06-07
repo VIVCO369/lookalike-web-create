@@ -9,9 +9,13 @@ import StatsCard from "./StatsCard"; // Import StatsCard
 interface DailyPerformanceTrackerProps {
   accountType: 'real' | 'demo' | 'trade-tools'; // Add accountType prop
   onResetDay?: () => void; // Add prop for reset function
+  customLabels?: {
+    bestTrade?: string;
+    worstTrade?: string;
+  };
 }
 
-const DailyPerformanceTracker = ({ accountType, onResetDay }: DailyPerformanceTrackerProps) => {
+const DailyPerformanceTracker = ({ accountType, onResetDay, customLabels }: DailyPerformanceTrackerProps) => {
   const { dashboardRealTrades, demoTrades, tradeToolsTrades } = useTradeData(); // Get all trade lists
 
   // Select the correct trade list based on accountType
@@ -65,17 +69,23 @@ const DailyPerformanceTracker = ({ accountType, onResetDay }: DailyPerformanceTr
             value={stats.winRate}
           />
 
-          {/* Best Trade Card */}
+          {/* Best Trade / Profit Win Card */}
           <StatsCard
-            title="Best Trade"
-            value={stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade)}
+            title={customLabels?.bestTrade || "Best Trade"}
+            value={customLabels?.bestTrade ?
+              (stats.totalWinProfit > 0 ? `+${formatCurrency(stats.totalWinProfit)}` : formatCurrency(stats.totalWinProfit)) :
+              (stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade))
+            }
             color="text-green-500"
           />
 
-          {/* Worst Trade Card - Added */}
+          {/* Worst Trade / Profit Loss Card */}
           <StatsCard
-            title="Worst Trade"
-            value={formatCurrency(stats.worstTrade)}
+            title={customLabels?.worstTrade || "Worst Trade"}
+            value={customLabels?.worstTrade ?
+              formatCurrency(stats.totalLossProfit) :
+              formatCurrency(stats.worstTrade)
+            }
             color="text-red-500"
           />
         </div>
