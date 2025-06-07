@@ -79,7 +79,7 @@ const TradesPage = () => {
 
   // Pagination state for demo trades
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 5; // Show 5 trades per page
+  const itemsPerPage = 10; // Show 10 trades per page
 
   // State for managing the inline add/edit trade form
   const [showInlineForm, setShowInlineForm] = useState(false); // State to control inline form visibility
@@ -818,7 +818,7 @@ const TradesPage = () => {
                     <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">LOT SIZE</TableHead> {/* Changed text color and added border */}
                     <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">CANDLES</TableHead> {/* Changed text color and added border */}
                     <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">W/L</TableHead> {/* Changed text color and added border */}
-                    <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">NET PROFIT</TableHead> {/* Changed text color and added border */}
+                    <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">PROFIT</TableHead> {/* Changed text color and added border */}
                     <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">BALANCE</TableHead> {/* Changed text color and added border */}
                     <TableHead className="text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">ACTIONS</TableHead> {/* Actions column - Changed text color and added border */}
                   </TableRow>
@@ -909,7 +909,7 @@ const TradesPage = () => {
               {totalPages > 1 && (
                 <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200 dark:border-gray-700"> {/* Added dark mode border */}
                   <div className="text-sm text-gray-500 dark:text-gray-400"> {/* Added dark mode text color */}
-                    Showing {paginatedTrades.length > 0 ? ((currentPage - 1) * 5) + 1 : 0} to {Math.min(currentPage * 5, backtestingTrades.length)} of {backtestingTrades.length} results
+                    Showing {paginatedTrades.length > 0 ? ((currentPage - 1) * 10) + 1 : 0} to {Math.min(currentPage * 10, backtestingTrades.length)} of {backtestingTrades.length} results
                   </div>
                   <Pagination>
                     <PaginationContent>
