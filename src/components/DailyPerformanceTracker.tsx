@@ -55,18 +55,21 @@ const DailyPerformanceTracker = ({ accountType, onResetDay, customLabels }: Dail
             title="Today's P&L"
             value={stats.dailyProfit >= 0 ? `+${formatCurrency(stats.dailyProfit)}` : formatCurrency(stats.dailyProfit)}
             color={stats.dailyProfit >= 0 ? "text-green-500" : "text-red-500"}
+            leftBorderColor={stats.dailyProfit >= 0 ? "border-l-green-500" : "border-l-red-500"}
           />
 
           {/* Trades Today Card */}
           <StatsCard
             title="Trades Today"
             value={stats.totalTrades.toString()}
+            leftBorderColor="border-l-black"
           />
 
           {/* Win Rate Card */}
           <StatsCard
             title="Win Rate"
             value={stats.winRate}
+            leftBorderColor="border-l-black"
           />
 
           {/* Best Trade / Profit Win Card */}
@@ -77,6 +80,7 @@ const DailyPerformanceTracker = ({ accountType, onResetDay, customLabels }: Dail
               (stats.bestTrade > 0 ? `+${formatCurrency(stats.bestTrade)}` : formatCurrency(stats.bestTrade))
             }
             color="text-green-500"
+            leftBorderColor="border-l-green-500"
           />
 
           {/* Worst Trade / Profit Loss Card */}
@@ -87,6 +91,7 @@ const DailyPerformanceTracker = ({ accountType, onResetDay, customLabels }: Dail
               formatCurrency(stats.worstTrade)
             }
             color="text-red-500"
+            leftBorderColor="border-l-red-500"
           />
         </div>
 
